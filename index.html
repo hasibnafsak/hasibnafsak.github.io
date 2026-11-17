@@ -95,6 +95,7 @@ async function updateAccount(){let u=await user();document.getElementById('accou
 function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db={...blank(),...JSON.parse(r.result)};save();alert('تم استيراد النسخة')}catch{alert('الملف غير صالح')}};r.readAsText(f)}
 render();updateAccount();if(sb)sb.auth.onAuthStateChange(()=>updateAccount());
+ if(sb){sb.rpc('record_app_visit').then(({error})=>{if(error)console.error('Visit tracking:',error)})}
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 </body></html>
