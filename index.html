@@ -76,7 +76,7 @@ header{position:relative;padding-top:48px!important}
 <div class="brand">حاسب نفسك</div>
 <div class="tag">حاسب نفسك قبل أن تحاسب</div>
 <div class="date" id="today"></div>
-<button type="button" id="headerAccountButton" class="header-account" onclick="go('account')" aria-label="فتح الحساب">الحساب</button>
+<button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج" style="display:none">تسجيل الخروج</button>
 </header>
 <main>
 <section id="home" class="view active">
@@ -247,21 +247,17 @@ header{position:relative;padding-top:48px!important}
 </section>
 <section id="account" class="view">
 <div class="panel">
-  <h2>الحساب والمزامنة</h2>
-  <p class="muted">سجّل الدخول لحفظ إنجازاتك ومزامنتها بين أجهزتك.</p>
+  <h2>حسابك في حاسب نفسك</h2>
+  <p class="muted">أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.</p>
   <div id="accountStatus" class="notice">جارٍ التحقق من حالة الحساب...</div>
   <div id="loggedOutArea">
-    <input id="nickname" placeholder="اسم مستعار">
+    <input id="nickname" placeholder="اسمك أو اسم مستعار (اختياري)" autocomplete="nickname">
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-    <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password">
-    <div class="row">
-      <button type="button" onclick="signUp()">إنشاء حساب</button>
-      <button type="button" class="secondary" onclick="signIn()">تسجيل الدخول</button>
-    </div>
+    <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password">
+    <button type="button" id="accountContinueButton" class="block" onclick="signInOrCreate()">دخول / إنشاء حساب</button>
   </div>
   <div id="loggedInArea" style="display:none">
-    <div class="notice" style="margin-top:10px">أنت مسجل الدخول بالفعل. حسابك محفوظ على هذا الجهاز.</div>
-    <button type="button" class="light" style="margin-top:10px" onclick="signOut()">تسجيل الخروج</button>
+    <div class="notice" style="margin-top:10px">تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.</div>
   </div>
   <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
   <p id="authMessage" class="muted" role="status" aria-live="polite"></p>
@@ -559,40 +555,72 @@ async function syncLeaderboard(){
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
 async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
-async function signUp(){if(!sb)return msg('خدمة الحساب غير متاحة');const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6)return msg('أدخل بريدك وكلمة مرور من 6 أحرف على الأقل');const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.href}});if(error)return msg(error.message);if(data.session){msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');await updateAccount()}else msg('تم إنشاء الحساب. افتح رسالة التأكيد في بريدك ثم سجّل الدخول');}
-async function signIn(){
-  if(!sb)return msg('خدمة الحساب غير متاحة');
-  const email=$('email').value.trim(),password=$('password').value;
+async function signInOrCreate(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim(),password=$('password').value,nick=$('nickname').value.trim();
   if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error)return msg(error.message);
-  const nick=$('nickname').value.trim();
-  if(nick)await sb.from('profiles').upsert({id:data.user.id,nickname:nick});
-  const r=await sb.from('user_data').select('data').eq('user_id',data.user.id).maybeSingle();
-  if(r.error){console.warn('Could not load user data:',r.error.message);msg('تم تسجيل الدخول، لكن تعذر تحميل النسخة السحابية: '+r.error.message)}
-  else{
-    if(r.data?.data){db=Object.assign(blank(),r.data.data);persist();renderAll()}
-    msg('تم تسجيل الدخول بنجاح');
+  if(password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  const button=$('accountContinueButton');button.disabled=true;button.textContent='جارٍ التحقق...';
+  try{
+    const login=await sb.auth.signInWithPassword({email,password});
+    if(!login.error){
+      await finishAccountLogin(login.data.user);
+      msg('تم تسجيل الدخول بنجاح');
+      return;
+    }
+    const loginMessage=String(login.error.message||'').toLowerCase();
+    if(!loginMessage.includes('invalid login credentials')&&!loginMessage.includes('email not confirmed')){
+      msg(login.error.message);return;
+    }
+    if(loginMessage.includes('email not confirmed')){
+      msg('حسابك موجود، لكن البريد غير مؤكد. راجع إعدادات تأكيد البريد أو اطلب رسالة تأكيد جديدة.');
+      return;
+    }
+    const created=await sb.auth.signUp({email,password,options:{data:nick?{nickname:nick}:{}}});
+    if(created.error){
+      msg('تعذر إنشاء الحساب: '+created.error.message);
+      return;
+    }
+    if(created.data.session&&created.data.user){
+      await finishAccountLogin(created.data.user);
+      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');
+    }else{
+      msg('تم إرسال طلب إنشاء الحساب. إذا لم تصلك رسالة، فقد يكون تأكيد البريد مفعّلًا في Supabase؛ عطّل Confirm email من إعدادات Authentication للسماح بالدخول مباشرة.');
+    }
+  }catch(error){
+    console.error('Account flow:',error);msg('حدث خطأ غير متوقع. حاول مرة أخرى.');
+  }finally{
+    button.disabled=false;button.textContent='دخول / إنشاء حساب';
   }
+}
+async function finishAccountLogin(user){
+  if(!user)return;
+  const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname;
+  if(nick){
+    const profile=await sb.from('profiles').upsert({id:user.id,nickname:nick});
+    if(profile.error)console.warn('Profile update:',profile.error.message);
+  }
+  const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
+  if(saved.error){console.warn('Could not load user data:',saved.error.message)}
+  else if(saved.data?.data){db=Object.assign(blank(),saved.data.data);persist();renderAll()}
   await updateAccount();
 }
 async function signOut(){
   if(!sb)return;
   const {error}=await sb.auth.signOut();
-  if(error)return msg('تعذر تسجيل الخروج: '+error.message);
+  if(error){msg('تعذر تسجيل الخروج: '+error.message);return}
   msg('تم تسجيل الخروج');
   await updateAccount();
 }
 async function updateAccount(){
   if(!sb)return;
-  const u=await currentUser();
-  const loggedIn=!!u;
+  const u=await currentUser(),loggedIn=!!u;
   $('accountStatus').textContent=loggedIn?'تم تسجيل الدخول: '+u.email:'غير مسجل الدخول';
   $('loggedOutArea').style.display=loggedIn?'none':'block';
   $('loggedInArea').style.display=loggedIn?'block':'none';
   $('syncButton').style.display=loggedIn?'inline-flex':'none';
   const top=$('headerAccountButton');
-  if(top)top.textContent=loggedIn?'حسابي':'تسجيل الدخول';
+  if(top){top.style.display=loggedIn?'inline-flex':'none';top.textContent='تسجيل الخروج';top.setAttribute('aria-label','تسجيل الخروج')}
 }
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
