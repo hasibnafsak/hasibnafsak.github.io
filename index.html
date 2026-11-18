@@ -29,6 +29,22 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 .hero h2{color:#fff;font-size:22px}.hero p{color:#f3ead5;line-height:1.8}
 .dhikr-card{border:1px solid var(--line);border-radius:13px;padding:12px;margin:9px 0;background:#fffefa}.dhikr-text{font-family:serif;font-size:19px;line-height:2.0}.dhikr-count{font-weight:800;color:var(--g);min-width:60px;text-align:center}.dhikr-actions{display:flex;align-items:center;gap:8px;margin-top:8px}.dhikr-actions button{padding:8px 12px}.mini-progress{height:7px;background:#e9e4d8;border-radius:10px;overflow:hidden}.mini-progress span{height:100%;display:block;background:var(--gold)}
 .dhikr-card{padding:15px}.dhikr-text{white-space:pre-line}.dhikr-actions button:first-child{min-width:125px}.dhikr-actions button:disabled{background:#e5efe8;color:#0d5b48;opacity:1}.beads{display:inline-block;padding:25px;border-radius:50%;background:#edf3ee;color:var(--g);font-size:25px;line-height:2.2;box-shadow:inset 0 0 0 8px #d8e7dc;cursor:pointer;min-width:210px}
+
+.challenge-card{position:relative;overflow:hidden;border:1px solid #d9c58e;background:linear-gradient(145deg,#fffdf6,#f3ead5)}
+.challenge-card:before{content:"✦";position:absolute;left:15px;top:8px;font-size:42px;color:#d8bd7c;opacity:.35}
+.challenge-kicker{color:#98722f;font-size:12px;font-weight:800;letter-spacing:.4px}
+.challenge-title{font-size:20px;color:var(--g);font-weight:900;margin:7px 0}
+.challenge-copy{font-size:16px;line-height:1.9;font-weight:700;max-width:92%}
+.challenge-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.challenge-done{background:#e7f2e9!important;color:#17613f!important}
+.manual-device{width:250px;height:250px;margin:18px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(circle,#fffdf7 48%,#e7d6ad 49%,#c5a45e 54%,#f6edd8 58%,#d4bd88 62%,#f7f1e4 68%);box-shadow:0 12px 28px #1e3c2c20,inset 0 0 0 8px #fff9e9}
+.manual-device:before{content:"";position:absolute;inset:17px;border:2px dashed #b99a58;border-radius:50%}
+.manual-device button{width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#267c60,#0d5b48 68%);box-shadow:0 7px 0 #073d32,0 12px 20px #163c2c35;border:5px solid #e6d5ad;color:#fff;font-size:17px;line-height:1.7;z-index:1}
+.manual-device button:active{transform:translateY(4px);box-shadow:0 3px 0 #073d32}
+.leader-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.leader-rank{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#f1ead9;color:#805f24;font-weight:900}
+.leader-name{font-weight:800;flex:1}.leader-points{color:var(--g);font-weight:900}
+
 </style></head>
 <body>
 
@@ -42,12 +58,23 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <header><div class="brand">حاسب نفسك</div><div class="tag">حاسب نفسك قبل أن تحاسب</div><div class="date" id="today"></div></header>
 <main>
 <section id="home" class="view active">
+<div class="panel challenge-card" id="dailyChallengePanel">
+  <div class="challenge-kicker">✦ تحدّي اليوم</div>
+  <div class="challenge-title">تحدّى نفسك بخطوة صالحة</div>
+  <div class="challenge-copy" id="dailyChallengeText">...</div>
+  <div class="row between" style="margin-top:10px"><span class="pill" id="challengeStatus">تحدٍّ جديد ينتظرك</span><span class="muted">كل يوم بداية جديدة</span></div>
+  <div class="challenge-actions">
+    <button id="challengeDoneBtn" onclick="completeDailyChallenge()">أنجزت التحدي ✓</button>
+    <button class="secondary" onclick="nextDailyChallenge()">تحدٍّ آخر</button>
+  </div>
+</div>
+
 <div class="hero"><div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div><h2>ابدأ يومك بخطوة 🌿</h2><p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p></div>
 <div class="panel"><div class="row between"><div><h2>أهلاً بك 🌿</h2><div class="muted">خطوات صغيرة وثابتة تقرّبك من الله</div></div><span class="pill">بداية جديدة</span></div>
 <div class="ayah" id="welcomeVerse" style="margin-top:12px">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div><div class="muted" id="verseSource" style="text-align:center;margin-top:5px">سورة الشرح، آية ٦</div>
 <div class="grid" style="margin-top:14px"><div class="tile">الصلوات اليوم<strong id="prayerStat">0 / 5</strong></div><div class="tile">ورد القرآن<strong id="quranStat">0 صفحة</strong></div><div class="tile">الأذكار المكتملة<strong id="dhikrStat">0</strong></div><div class="tile">التسبيح<strong id="tasbeehStat">0</strong></div></div></div>
 <div class="panel"><div class="row between"><h2>رحلتك اليوم</h2><strong id="dailyPercent" style="font-size:25px;color:var(--g)">0%</strong></div><div class="progress"><span id="dailyProgress"></span></div><div class="grid"><div class="tile">الصلاة<strong id="weightPrayer">0%</strong></div><div class="tile">القرآن<strong id="weightQuran">0%</strong></div><div class="tile">الأذكار<strong id="weightDhikr">0%</strong></div><div class="tile">التسبيح<strong id="weightTasbeeh">0%</strong></div><div class="tile">محاسبة النفس<strong id="weightReflection">0%</strong></div></div></div>
-<div class="panel" id="dailyChallengePanel" style="display:none"><h2>🌟 تحدّي النفس اليوم</h2><div id="dailyChallengeText" style="line-height:1.9;font-weight:700"></div></div><div class="panel"><h2>محاسبة اليوم</h2><p class="muted">ما العمل الصالح الذي وفّقني الله له؟ وما الذي أريد تحسينه؟</p><textarea id="reflection" placeholder="اكتب محاسبتك هنا..."></textarea><button onclick="saveReflection()">حفظ المحاسبة</button></div>
+
 <div class="panel"><h2>أهدافي</h2><div class="row"><input id="goalInput" placeholder="مثال: قراءة 5 صفحات" style="flex:1"><button onclick="addGoal()">إضافة</button></div><div id="goals"></div></div>
 </section>
 <section id="prayers" class="view"><div class="panel"><h2>متابعة الصلوات</h2><div class="notice">النقاط: الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط (5 إضافية للمسجد)، والمنفرد 0.</div><p class="muted">علّم الصلاة بعد أدائها وحدد مكانها وطريقة أدائها.</p><div id="prayerList"></div><div class="notice" id="prayerEncouragement" style="margin-top:12px">اختر طريقة أداء الصلاة لعرض رسالة التشجيع والنقاط.</div><div class="tile" style="margin-top:10px">نقاط الصلاة اليوم<strong id="prayerPoints">0 / 50</strong></div></div><div class="panel"><h2>إنجاز اليوم</h2><div class="progress"><span id="prayerProgress"></span></div><div id="prayerProgressText" class="muted"></div></div></section>
@@ -60,13 +87,23 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <div id="surahText" style="font-family:serif;font-size:23px;line-height:2.2;text-align:justify;white-space:normal"></div>
 <div class="row between" style="margin-top:12px"><button class="gold" onclick="saveQuranBookmark()">حفظ موضع القراءة</button><button class="secondary" onclick="resumeQuran()">متابعة آخر موضع</button></div>
 </div>
-<div class="panel"><h2>ورد القرآن الكريم</h2><p class="muted">سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.</p><label>اختر وردك اليومي</label><select id="quranGoal" onchange="setQuranGoal(this.value)"><option value="3">3 صفحات</option><option value="5">5 صفحات</option><option value="10">10 صفحات</option><option value="20">20 صفحة</option><option value="custom">عدد آخر…</option></select><input id="quranGoalCustom" type="number" min="1" max="604" placeholder="اكتب عدد الصفحات" style="display:none" onchange="setQuranGoal(this.value)"><div class="notice" id="quranGoalProgress">اختر عدد الصفحات المناسب لك.</div><label>صفحات اليوم</label><div class="row"><button class="secondary" onclick="changePages(-1)">−</button><div class="counter" id="pagesToday" style="flex:1">0</div><button class="secondary" onclick="changePages(1)">+</button></div><label>إجمالي صفحات الختمة من 604</label><div class="progress"><span id="quranProgress"></span></div><div class="muted" id="quranProgressText"></div><label>رقم الصفحة الحالية</label><input id="currentPage" type="number" min="1" max="604" onchange="saveCurrentPage()"><button class="light" onclick="resetQuran()">بدء ختمة جديدة</button></div>
+<div class="panel"><h2>ورد القرآن الكريم</h2><p class="muted">سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.</p><label>اختر وردك اليومي</label><select id="quranGoal" onchange="setQuranGoal(this.value)"><option value="3">3 صفحات</option><option value="5">5 صفحات</option><option value="10">10 صفحات</option><option value="20">20 صفحة</option><option value="custom">عدد آخر…</option></select><input id="quranGoalCustom" type="number" min="1" max="604" placeholder="اكتب عدد الصفحات" style="display:none" onchange="setQuranGoal(this.value)"><div class="notice" id="quranGoalProgress">اختر عدد الصفحات المناسب لك.</div><div class="row" style="margin:10px 0"><button onclick="changePages(1)">+ سجّل صفحة قرأتها</button><button class="secondary" onclick="changePages(-1)">تراجع</button><span id="pagesToday" class="pill">0</span></div><label>إجمالي صفحات الختمة من 604</label><div class="progress"><span id="quranProgress"></span></div><div class="muted" id="quranProgressText"></div><label>رقم الصفحة الحالية</label><input id="currentPage" type="number" min="1" max="604" onchange="saveCurrentPage()"><button class="light" onclick="resetQuran()">بدء ختمة جديدة</button></div>
 </section>
 <section id="adhkar" class="view"><div class="panel"><h2>الأذكار 🌿</h2><p class="muted">اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».</p><div class="notice">كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.</div><div class="row" style="margin-top:10px"><button type="button" class="dhikr-tab active" data-dhikr="morning" onclick="showDhikr('morning')">الصباح</button><button type="button" class="secondary dhikr-tab" data-dhikr="evening" onclick="showDhikr('evening')">المساء</button><button type="button" class="secondary dhikr-tab" data-dhikr="sleep" onclick="showDhikr('sleep')">النوم</button><button type="button" class="secondary dhikr-tab" data-dhikr="afterPrayer" onclick="showDhikr('afterPrayer')">بعد الصلاة</button><button type="button" class="secondary dhikr-tab" data-dhikr="wake" onclick="showDhikr('wake')">الاستيقاظ</button><button type="button" class="secondary dhikr-tab" data-dhikr="misc" onclick="showDhikr('misc')">متنوعة</button></div><div class="row between" style="margin-top:13px"><strong id="dhikrTitle">أذكار الصباح</strong><span class="pill" id="dhikrScore">0 نقطة</span></div><div class="mini-progress" style="margin:9px 0"><span id="dhikrProgress" style="width:0%"></span></div><div id="dhikrItems"></div><p class="muted">تنبيه: روعي اختيار أذكار مشهورة من كتب الأذكار المأثورة، ومنها حصن المسلم. يُرجى مراجعة النصوص والأعداد في المصادر المعتمدة.</p></div></section>
-<section id="tasbeeh" class="view"><div class="panel"><h2>السبحة</h2><div class="row"><button type="button" class="dhikr-tab active" id="digitalMode" onclick="setTasbeehMode('digital')">السبحة الإلكترونية</button><button type="button" class="secondary dhikr-tab" id="manualMode" onclick="setTasbeehMode('manual')">المسبحة اليدوية</button></div><div class="counter" id="tasbeehCount">0</div><div id="digitalTasbeeh"><button class="gold" style="display:block;width:100%;padding:22px;font-size:20px" onclick="tapTasbeeh()">اضغط للتسبيح</button></div><div id="manualTasbeeh" style="display:none;text-align:center"><div class="beads" id="beads" onclick="tapTasbeeh()">●　●　●<br>●　●　●<br>اضغط هنا للتسبيح</div></div><div class="row" style="justify-content:center;margin-top:10px"><button class="secondary" onclick="resetTasbeeh()">تصفير العداد</button><button class="light" onclick="setPhrase('سبحان الله')">سبحان الله</button><button class="light" onclick="setPhrase('الحمد لله')">الحمد لله</button><button class="light" onclick="setPhrase('الله أكبر')">الله أكبر</button></div><p id="tasbeehPhrase" class="muted" style="text-align:center"></p></div></section>
+<section id="tasbeeh" class="view"><div class="panel"><h2>السبحة</h2><div class="row"><button type="button" class="dhikr-tab active" id="digitalMode" onclick="setTasbeehMode('digital')">السبحة الإلكترونية</button><button type="button" class="secondary dhikr-tab" id="manualMode" onclick="setTasbeehMode('manual')">المسبحة اليدوية</button></div><div class="counter" id="tasbeehCount">0</div><div id="digitalTasbeeh"><button class="gold" style="display:block;width:100%;padding:22px;font-size:20px" onclick="tapTasbeeh()">اضغط للتسبيح</button></div><div id="manualTasbeeh" style="display:none;text-align:center"><div class="manual-device"><button type="button" onclick="tapTasbeeh()">اضغط<br>للتسبيح</button></div><div class="muted">اضغط على قلب المسبحة مع كل تسبيحة</div></div><div class="row" style="justify-content:center;margin-top:10px"><button class="secondary" onclick="resetTasbeeh()">تصفير العداد</button><button class="light" onclick="setPhrase('سبحان الله')">سبحان الله</button><button class="light" onclick="setPhrase('الحمد لله')">الحمد لله</button><button class="light" onclick="setPhrase('الله أكبر')">الله أكبر</button></div><p id="tasbeehPhrase" class="muted" style="text-align:center"></p></div></section>
 <section id="quiz" class="view"><div class="panel"><h2>🏆 مسابقة سؤال اليوم</h2><p class="muted">أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.</p><span class="pill">ثقافة إسلامية</span><h3 id="question" style="margin-top:13px"></h3><div id="answers"></div><p id="quizResult" class="muted"></p><div class="tile">نقاطك في المسابقة<strong id="points">0</strong></div><div class="panel" style="margin-top:14px"><h3>منافسة الأصدقاء</h3><p class="muted">تبغى تتحدى صديقك في سؤال اليوم؟ سجّل الدخول، وأنشئ رمز دعوة وشاركه معه.</p><div id="friendStatus" class="notice">سجّل الدخول من قسم «حسابي» لتجهيز دعوة المنافسة.</div><button class="gold" onclick="createFriendInvite()">إنشاء رمز دعوة</button><div id="friendInvite" class="muted" style="margin-top:9px"></div></div></div></section>
 <section id="stats" class="view"><div class="panel"><h2>إحصائياتي الشخصية</h2><p class="muted">هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.</p><div class="grid"><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div><div class="tile">التسبيحات<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المحددة<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة<strong id="sGoals">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div></div></div>
 <div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div></div></section>
+<section id="leaderboard" class="view">
+<div class="panel">
+  <div class="challenge-kicker">🏆 مجتمع حاسب نفسك</div>
+  <h2 style="margin-top:7px">لوحة الصدارة</h2>
+  <p class="muted">نافس بالخير، واجمع نقاطك من أعمالك اليومية وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.</p>
+  <div id="leaderboardStatus" class="notice">سجّل الدخول أولًا للمشاركة في لوحة الصدارة.</div>
+  <button id="joinLeaderboardBtn" onclick="joinLeaderboard()">اشترك في لوحة الصدارة</button>
+</div>
+<div class="panel"><h2>أفضل المشاركين</h2><div id="leaderboardList" class="muted">جارٍ تحميل لوحة الصدارة...</div><button class="secondary" onclick="renderLeaderboard()">تحديث القائمة</button></div>
+</section>
 <section id="account" class="view"><div class="panel"><h2>الحساب والمزامنة</h2><p class="muted">يمكنك استخدام التطبيق دون حساب. الحساب مطلوب للمزامنة السحابية.</p><div id="accountStatus" class="notice">غير مسجل الدخول</div><input id="nickname" placeholder="اسم مستعار"><input id="email" type="email" placeholder="البريد الإلكتروني"><input id="password" type="password" placeholder="كلمة المرور"><div class="row"><button onclick="signUp()">إنشاء حساب</button><button class="secondary" onclick="signIn()">دخول</button><button class="light" onclick="signOut()">خروج</button></div><button class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button><p id="authMessage" class="muted"></p></div><div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div></section>
 </main>
 <nav class="tabs" id="tabs">
@@ -77,6 +114,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <button type="button" data-view="tasbeeh"><span class="tabicon">◉</span>السبحة</button>
 <button type="button" data-view="quiz"><span class="tabicon">؟</span>السؤال</button>
 <button type="button" data-view="stats"><span class="tabicon">▥</span>إحصائياتي</button>
+<button type="button" data-view="leaderboard"><span class="tabicon">🏆</span>التصدر</button>
 <button type="button" data-view="account"><span class="tabicon">♙</span>حسابي</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -88,7 +126,7 @@ const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'
 let db=Object.assign(blank(),safeLoad()||{});
 const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo(0,0);if(id==='stats')renderStats();if(id==='quran')initQuran()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo(0,0);if(id==='stats')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard()}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
   b.addEventListener('click',function(ev){
@@ -101,7 +139,7 @@ const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textCo
 $('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
-function save(){persist();renderAll()}
+function save(){persist();renderAll();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard()}
 function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
 function markPrayer(p,v){const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
 function changePages(n){day().pages=Math.max(0,day().pages+n);db.quranTotal=Math.max(0,(+db.quranTotal||0)+n);if(n>0)for(let i=0;i<n;i++)trackAppEvent('quran_page_added');save()}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
@@ -139,14 +177,56 @@ const dhikrFullText={
 'evening:2':'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ',
 'evening:3':'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ'
 };
-function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);$('dhikrTitle').textContent=dhikrNames[dhikrType];$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;$('dhikrProgress').style.width=(completed/list.length*100)+'%';$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} onclick="incrementDhikr(${i})">${done?'تمت القراءة ✓':'تمت القراءة'}</button><button class="secondary" onclick="resetDhikrItem(${i})">إلغاء التحديد</button></div></div>`}).join('');$('dhikrStat').textContent=countDhikrToday()}
-function incrementDhikr(i){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const wasDone=(+d.adhkar[dhikrType][i]||0)>=+dhikr[dhikrType][i][1];d.adhkar[dhikrType][i]=+dhikr[dhikrType][i][1];if(!wasDone)trackAppEvent('dhikr_completed');save()}
+function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);$('dhikrTitle').textContent=dhikrNames[dhikrType];$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;$('dhikrProgress').style.width=(completed/list.length*100)+'%';$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} style="flex:1;min-height:48px" onclick="incrementDhikr(${i})">${done?'اكتمل الذكر ✓':`اضغط بعد القراءة (${c}/${x[1]})`}</button><button class="secondary" onclick="resetDhikrItem(${i})">إعادة</button></div></div>`}).join('');$('dhikrStat').textContent=countDhikrToday()}
+function incrementDhikr(i){
+  const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};
+  const target=+dhikr[dhikrType][i][1],before=+d.adhkar[dhikrType][i]||0;
+  if(before>=target)return;
+  d.adhkar[dhikrType][i]=Math.min(target,before+1);
+  if(before+1>=target)trackAppEvent('dhikr_completed');
+  save();
+}
 function resetDhikrItem(i){day().adhkar[dhikrType]??={};day().adhkar[dhikrType][i]=0;save()}
 function countDhikrToday(){return Object.values(day().adhkar||{}).reduce((a,o)=>a+Object.values(o||{}).filter(v=>+v>0).length,0)}
 function adhkarPointsForDay(d){let total=0;for(const key of Object.keys(d.adhkar||{})){const list=dhikr[key]||[];let completed=0;list.forEach((x,i)=>{if((+d.adhkar[key][i]||0)>=+x[1])completed++});total+=completed*2;if(list.length&&completed===list.length)total+=5}return total}
 
-function tapTasbeeh(){db.tasbeeh=(+db.tasbeeh||0)+1;trackAppEvent('tasbeeh_tap');save()}function resetTasbeeh(){db.tasbeeh=0;save()}function setPhrase(p){db.phrase=p;save()}
-function saveReflection(){const value=$('reflection').value.trim();if(!value){alert('اكتب هدفك أو التحدي أولاً');return}db.reflections[todayKey]=value;day().reflectionDone=true;trackAppEvent('reflection_saved');persist();renderAll();$('dailyChallengePanel').style.display='block';$('dailyChallengeText').textContent=value;alert('تم حفظ تحدّي النفس وظهر في أعلى الصفحة')}
+function tapTasbeeh(){db.tasbeeh=(+db.tasbeeh||0)+1;trackAppEvent('tasbeeh_tap');if(navigator.vibrate)navigator.vibrate(12);save()}function resetTasbeeh(){db.tasbeeh=0;save()}function setPhrase(p){db.phrase=p;save()}
+const dailyChallenges=[
+'اترك معصية اعتدت عليها اليوم، واحتسب تركها لله.',
+'قدّم عملًا خيريًا ولو بسيطًا، دون انتظار مقابل.',
+'حافظ على الصلاة في وقتها، واجتهد في أدائها جماعة.',
+'تصدّق بما تستطيع، ولو بالقليل.',
+'أحسن إلى والديك أو صِل رحمك بكلمة طيبة.',
+'امسك لسانك عن الغيبة، واستبدلها بذكر الله.',
+'اقرأ وردك من القرآن بتدبّر وهدوء.',
+'سامح شخصًا أو بادر بالاعتذار إن أخطأت.',
+'أدخل السرور على قلب شخص بكلمة أو مساعدة.',
+'أكثر من الاستغفار والصلاة على النبي ﷺ اليوم.'
+];
+function ensureDailyChallenge(){
+  if(db.challengeDate!==todayKey){
+    const idx=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyChallenges.length;
+    db.challengeDate=todayKey;db.challengeText=dailyChallenges[idx];db.challengeDone=false;persist();
+  }
+}
+function renderDailyChallenge(){
+  ensureDailyChallenge();
+  $('dailyChallengeText').textContent=db.challengeText;
+  $('challengeStatus').textContent=db.challengeDone?'أحسنت! أنجزت تحدي اليوم':'تحدٍّ جديد ينتظرك';
+  $('challengeDoneBtn').textContent=db.challengeDone?'تم إنجاز تحدي اليوم ✓':'أنجزت التحدي ✓';
+  $('challengeDoneBtn').disabled=!!db.challengeDone;
+  $('challengeDoneBtn').classList.toggle('challenge-done',!!db.challengeDone);
+}
+function completeDailyChallenge(){
+  ensureDailyChallenge();if(db.challengeDone)return;
+  db.challengeDone=true;day().challengeDone=true;trackAppEvent('reflection_saved');save();
+}
+function nextDailyChallenge(){
+  ensureDailyChallenge();
+  const current=dailyChallenges.indexOf(db.challengeText);
+  db.challengeText=dailyChallenges[(current+1)%dailyChallenges.length];
+  db.challengeDone=false;day().challengeDone=false;save();
+}
 function addGoal(){const x=$('goalInput').value.trim();if(!x)return;db.goals.push({text:x,done:false});trackAppEvent('goal_added');$('goalInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;save()}function removeGoal(i){db.goals.splice(i,1);save()}
 const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
 function renderQuiz(){const q=questions[qi];$('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})">${a}</button>`).join('');$('quizResult').textContent=db.answers[todayKey]!==undefined?'تم تسجيل إجابتك اليوم.':'';$('points').textContent=db.points||0}
@@ -161,9 +241,9 @@ function setTasbeehMode(mode){$('digitalTasbeeh').style.display=mode==='digital'
 function createFriendInvite(){const invite='HN-'+Math.random().toString(36).slice(2,8).toUpperCase();$('friendInvite').textContent='رمز الدعوة: '+invite+' — شاركه مع صديقك.';if(navigator.clipboard?.writeText)navigator.clipboard.writeText('انضم لتحدي سؤال اليوم في حاسب نفسك. رمز الدعوة: '+invite).catch(()=>{});}
 function totalPoints(){let total=0;for(const d of Object.values(db.days||{})){total+=prayers.reduce((a,p)=>a+(d.prayers?.[p]?.done&&d.prayers?.[p]?.mode==='group'?(d.prayers?.[p]?.place==='المسجد'?10:5):0),0);total+=adhkarPointsForDay(d)}return total+(+db.points||0)}
 function todayPoints(){const d=day();return prayers.reduce((a,p)=>a+(d.prayers?.[p]?.done&&d.prayers?.[p]?.mode==='group'?(d.prayers?.[p]?.place==='المسجد'?10:5):0),0)+adhkarPointsForDay(d)+(+db.points||0)}
-function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const prayer=prayers.filter(p=>d.prayers?.[p]?.done).length/5;const quran=Math.min(1,(+d.pages||0)/goal);const allDhikr=Object.keys(dhikr).reduce((a,k)=>a+dhikr[k].length,0);let doneDhikr=0;Object.keys(dhikr).forEach(k=>dhikr[k].forEach((x,i)=>{if((+d.adhkar?.[k]?.[i]||0)>=+x[1])doneDhikr++}));const dh=doneDhikr/allDhikr;const tas=Math.min(1,(+db.tasbeeh||0)/100);const ref=d.reflectionDone?1:0;const vals={prayer:prayer*30,quran:quran*25,dhikr:dh*20,tasbeeh:tas*10,reflection:ref*15};const total=Object.values(vals).reduce((a,b)=>a+b,0);$('dailyPercent').textContent=Math.round(total)+'%';$('dailyProgress').style.width=total+'%';$('weightPrayer').textContent=Math.round(vals.prayer)+' / 30';$('weightQuran').textContent=Math.round(vals.quran)+' / 25';$('weightDhikr').textContent=Math.round(vals.dhikr)+' / 20';$('weightTasbeeh').textContent=Math.round(vals.tasbeeh)+' / 10';$('weightReflection').textContent=Math.round(vals.reflection)+' / 15';if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();if($('quranGoal')){$('quranGoal').value=[3,5,10,20].includes(goal)?String(goal):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(goal)?'none':'block';$('quranGoalCustom').value=goal}if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${d.pages||0} من ${goal} صفحة اليوم.`}
+function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const prayer=prayers.filter(p=>d.prayers?.[p]?.done).length/5;const quran=Math.min(1,(+d.pages||0)/goal);const allDhikr=Object.keys(dhikr).reduce((a,k)=>a+dhikr[k].length,0);let doneDhikr=0;Object.keys(dhikr).forEach(k=>dhikr[k].forEach((x,i)=>{if((+d.adhkar?.[k]?.[i]||0)>=+x[1])doneDhikr++}));const dh=doneDhikr/allDhikr;const tas=Math.min(1,(+db.tasbeeh||0)/100);const ref=d.challengeDone?1:0;const vals={prayer:prayer*30,quran:quran*25,dhikr:dh*20,tasbeeh:tas*10,reflection:ref*15};const total=Object.values(vals).reduce((a,b)=>a+b,0);$('dailyPercent').textContent=Math.round(total)+'%';$('dailyProgress').style.width=total+'%';$('weightPrayer').textContent=Math.round(vals.prayer)+' / 30';$('weightQuran').textContent=Math.round(vals.quran)+' / 25';$('weightDhikr').textContent=Math.round(vals.dhikr)+' / 20';$('weightTasbeeh').textContent=Math.round(vals.tasbeeh)+' / 10';$('weightReflection').textContent=Math.round(vals.reflection)+' / 15';if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();if($('quranGoal')){$('quranGoal').value=[3,5,10,20].includes(goal)?String(goal):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(goal)?'none':'block';$('quranGoalCustom').value=goal}if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${d.pages||0} من ${goal} صفحة اليوم.`}
 
-function renderAll(){renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=db.tasbeeh||0;$('tasbeehStat').textContent=db.tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';$('reflection').value=db.reflections[todayKey]||'';$('dailyChallengePanel').style.display=db.reflections[todayKey]?'block':'none';$('dailyChallengeText').textContent=db.reflections[todayKey]||'';$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
+function renderAll(){renderDailyChallenge();renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=db.tasbeeh||0;$('tasbeehStat').textContent=db.tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';renderDailyChallenge();$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
 
 // ===== إحصائيات حاسب نفسك =====
@@ -206,6 +286,33 @@ async function trackVisit(){
   }catch(e){console.warn('تعذر تسجيل الزيارة:',e);}
 }
 
+async function renderLeaderboard(){
+  const box=$('leaderboardList');if(!box)return;
+  if(!sb){box.textContent='تعذر الاتصال بالخدمة.';return}
+  box.textContent='جارٍ تحميل القائمة...';
+  try{
+    const {data,error}=await sb.from('leaderboard').select('user_id,nickname,total_points').order('total_points',{ascending:false}).limit(20);
+    if(error)throw error;
+    if(!data||!data.length){box.textContent='لا يوجد مشاركون حتى الآن. كن أول من يتصدر!';return}
+    box.innerHTML=data.map((u,i)=>`<div class="leader-row"><span class="leader-rank">${i+1}</span><span class="leader-name">${escapeQuranText(u.nickname||'مشارك')}</span><span class="leader-points">${Number(u.total_points)||0} نقطة</span></div>`).join('');
+  }catch(e){box.textContent='تعذر تحميل الصدارة. تأكد من إعداد جدول leaderboard في Supabase.';console.warn(e)}
+}
+async function joinLeaderboard(){
+  const u=await currentUser();
+  if(!u){$('leaderboardStatus').textContent='للمشاركة، سجّل الدخول أولًا من قسم حسابي.';return}
+  const nickname=$('nickname').value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
+  const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة: '+error.message;return}
+  localStorage.setItem('hasibLeaderboardJoined','yes');
+  $('leaderboardStatus').textContent='تم تفعيل مشاركتك! سيتم تحديث نقاطك مع أنشطتك القادمة.';
+  renderLeaderboard();
+}
+async function syncLeaderboard(){
+  const u=await currentUser();if(!u)return;
+  const nickname=$('nickname')?.value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
+  const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error)console.warn('Leaderboard sync failed:',error.message);
+}
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
 async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
