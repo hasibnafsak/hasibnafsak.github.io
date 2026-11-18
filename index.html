@@ -54,6 +54,11 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 
 .worship-card{min-height:126px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:13px 7px;background:var(--soft,#f5f1e8);color:var(--ink,#234);border:1px solid rgba(20,90,70,.16);border-radius:15px}
 .worship-card strong{font-size:14px}.worship-card small{font-size:11px;line-height:1.5;color:var(--muted,#777);font-weight:400}
+
+.next-prayer-home{cursor:pointer;background:linear-gradient(135deg,#f5f1e7,#e8efe7);border:1px solid rgba(20,90,70,.2);transition:transform .15s ease}
+.next-prayer-home:active{transform:scale(.99)}
+.next-prayer-home:focus-visible{outline:3px solid #4b8b69;outline-offset:3px}
+.next-prayer-icon{width:62px;height:62px;flex:0 0 62px;border-radius:18px;background:#ffffffa8;display:grid;place-items:center;font-size:30px}
 </style></head>
 <body>
 
@@ -67,6 +72,22 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <header><div class="brand">حاسب نفسك</div><div class="tag">حاسب نفسك قبل أن تحاسب</div><div class="date" id="today"></div></header>
 <main>
 <section id="home" class="view active">
+<div class="panel next-prayer-home" role="button" tabindex="0" onclick="go('prayers')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
+  <div class="row between" style="align-items:center;gap:10px">
+    <div>
+      <div class="muted" style="font-size:12px">الصلاة القادمة <span id="homePrayerCity"></span></div>
+      <h2 id="homeNextPrayerName" style="margin:5px 0">جارٍ تحديد الصلاة القادمة...</h2>
+      <div class="muted" style="font-size:12px">الوقت المتبقي</div>
+      <strong id="homeNextPrayerCountdown" style="font-size:25px;letter-spacing:1px">--:--:--</strong>
+    </div>
+    <div class="next-prayer-icon" aria-hidden="true">🕌</div>
+  </div>
+  <div class="row between" style="margin-top:10px;align-items:center">
+    <span class="muted" style="font-size:12px">اضغط لعرض مواقيت الصلاة ومتابعتها</span>
+    <span style="font-weight:800">←</span>
+  </div>
+</div>
+
 <div class="panel challenge-card" id="dailyChallengePanel">
   <div class="challenge-kicker">✦ تحدّي اليوم</div>
   <div class="challenge-title">تحدّى نفسك بخطوة صالحة</div>
@@ -242,7 +263,7 @@ async function loadPrayerTimes(force=false){
     const result=await response.json();if(result.code!==200||!result.data?.timings)throw new Error('Invalid prayer times response');
     prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
     localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));renderPrayerTimes();
-  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.'}
+  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.';if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل الصلاة القادمة';if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';if($('homePrayerCity'))$('homePrayerCity').textContent='· '+(prayerCityNames[saved]||saved)}
 }
 function renderPrayerTimes(){
   if(!prayerTimesData)return;
@@ -259,8 +280,13 @@ function updateNextPrayer(){
   if(!upcoming.length){const tomorrow=new Date(Date.UTC(parts.year,parts.month-1,parts.day+1));const p={year:tomorrow.getUTCFullYear(),month:tomorrow.getUTCMonth()+1,day:tomorrow.getUTCDate()};const fajr=timeMinutes(timings.Fajr);if(fajr!==null)upcoming.push({key:'Fajr',label:'الفجر',at:saudiDateTime(p,fajr)})}
   upcoming.sort((a,b)=>a.at-b.at);const next=upcoming[0];if(!next)return;
   const diff=Math.max(0,next.at.getTime()-now),hours=Math.floor(diff/3600000),minutes=Math.floor(diff%3600000/60000),seconds=Math.floor(diff%60000/1000);
+  const countdown=[hours,minutes,seconds].map(n=>String(n).padStart(2,'0')).join(':');
   $('nextPrayerName').textContent=next.label;
-  $('nextPrayerCountdown').textContent=[hours,minutes,seconds].map(n=>String(n).padStart(2,'0')).join(':');
+  $('nextPrayerCountdown').textContent=countdown;
+  const homeName=$('homeNextPrayerName'),homeCountdown=$('homeNextPrayerCountdown'),homeCity=$('homePrayerCity');
+  if(homeName)homeName.textContent='صلاة '+next.label;
+  if(homeCountdown)homeCountdown.textContent=countdown;
+  if(homeCity)homeCity.textContent='· '+(prayerCityNames[prayerTimesData.city]||prayerTimesData.city);
 }
 
 function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
