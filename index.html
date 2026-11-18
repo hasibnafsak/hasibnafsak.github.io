@@ -103,8 +103,8 @@ const prayers=['الفجر','الظهر','العصر','المغرب','العشا
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
 function save(){persist();renderAll()}
 function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
-function markPrayer(p,v){day().prayers[p]={...(day().prayers[p]||{}),done:v};save()}function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
-function changePages(n){day().pages=Math.max(0,day().pages+n);db.quranTotal=Math.max(0,(+db.quranTotal||0)+n);save()}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
+function markPrayer(p,v){const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
+function changePages(n){day().pages=Math.max(0,day().pages+n);db.quranTotal=Math.max(0,(+db.quranTotal||0)+n);if(n>0)for(let i=0;i<n;i++)trackAppEvent('quran_page_added');save()}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
 const QURAN_APIS=['https://api.alquran.cloud/v1','https://alquran.api.islamic.network/v1'];
 let surahIndex=[],activeSurah=0,quranIndexLoaded=false,quranLoading=false;
 function cachedSurah(n){try{return JSON.parse(localStorage.getItem('hasibQuranSurah'+n)||'null')}catch(e){return null}}
@@ -140,17 +140,17 @@ const dhikrFullText={
 'evening:3':'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ'
 };
 function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);$('dhikrTitle').textContent=dhikrNames[dhikrType];$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;$('dhikrProgress').style.width=(completed/list.length*100)+'%';$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} onclick="incrementDhikr(${i})">${done?'تمت القراءة ✓':'تمت القراءة'}</button><button class="secondary" onclick="resetDhikrItem(${i})">إلغاء التحديد</button></div></div>`}).join('');$('dhikrStat').textContent=countDhikrToday()}
-function incrementDhikr(i){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};d.adhkar[dhikrType][i]=+dhikr[dhikrType][i][1];save()}
+function incrementDhikr(i){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const wasDone=(+d.adhkar[dhikrType][i]||0)>=+dhikr[dhikrType][i][1];d.adhkar[dhikrType][i]=+dhikr[dhikrType][i][1];if(!wasDone)trackAppEvent('dhikr_completed');save()}
 function resetDhikrItem(i){day().adhkar[dhikrType]??={};day().adhkar[dhikrType][i]=0;save()}
 function countDhikrToday(){return Object.values(day().adhkar||{}).reduce((a,o)=>a+Object.values(o||{}).filter(v=>+v>0).length,0)}
 function adhkarPointsForDay(d){let total=0;for(const key of Object.keys(d.adhkar||{})){const list=dhikr[key]||[];let completed=0;list.forEach((x,i)=>{if((+d.adhkar[key][i]||0)>=+x[1])completed++});total+=completed*2;if(list.length&&completed===list.length)total+=5}return total}
 
-function tapTasbeeh(){db.tasbeeh=(+db.tasbeeh||0)+1;save()}function resetTasbeeh(){db.tasbeeh=0;save()}function setPhrase(p){db.phrase=p;save()}
-function saveReflection(){const value=$('reflection').value.trim();if(!value){alert('اكتب هدفك أو التحدي أولاً');return}db.reflections[todayKey]=value;day().reflectionDone=true;persist();renderAll();$('dailyChallengePanel').style.display='block';$('dailyChallengeText').textContent=value;alert('تم حفظ تحدّي النفس وظهر في أعلى الصفحة')}
-function addGoal(){const x=$('goalInput').value.trim();if(!x)return;db.goals.push({text:x,done:false});$('goalInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;save()}function removeGoal(i){db.goals.splice(i,1);save()}
+function tapTasbeeh(){db.tasbeeh=(+db.tasbeeh||0)+1;trackAppEvent('tasbeeh_tap');save()}function resetTasbeeh(){db.tasbeeh=0;save()}function setPhrase(p){db.phrase=p;save()}
+function saveReflection(){const value=$('reflection').value.trim();if(!value){alert('اكتب هدفك أو التحدي أولاً');return}db.reflections[todayKey]=value;day().reflectionDone=true;trackAppEvent('reflection_saved');persist();renderAll();$('dailyChallengePanel').style.display='block';$('dailyChallengeText').textContent=value;alert('تم حفظ تحدّي النفس وظهر في أعلى الصفحة')}
+function addGoal(){const x=$('goalInput').value.trim();if(!x)return;db.goals.push({text:x,done:false});trackAppEvent('goal_added');$('goalInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;save()}function removeGoal(i){db.goals.splice(i,1);save()}
 const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
 function renderQuiz(){const q=questions[qi];$('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})">${a}</button>`).join('');$('quizResult').textContent=db.answers[todayKey]!==undefined?'تم تسجيل إجابتك اليوم.':'';$('points').textContent=db.points||0}
-function answerQuiz(i){if(db.answers[todayKey]!==undefined)return;const ok=i===questions[qi].c;db.answers[todayKey]=i;if(ok)db.points=(db.points||0)+10;save();$('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غداً.';$('answers').querySelectorAll('button').forEach(b=>b.disabled=true)}
+function answerQuiz(i){if(db.answers[todayKey]!==undefined)return;trackAppEvent('quiz_answered');const ok=i===questions[qi].c;db.answers[todayKey]=i;if(ok)db.points=(db.points||0)+10;save();$('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غداً.';$('answers').querySelectorAll('button').forEach(b=>b.disabled=true)}
 function renderStats(){const d=day(),n=prayers.filter(p=>d.prayers[p]?.done).length;$('sPrayerToday').textContent=n+' / 5';$('sPagesToday').textContent=d.pages||0;$('sPagesTotal').textContent=db.quranTotal||0;$('sTasbeeh').textContent=db.tasbeeh||0;$('sDhikr').textContent=countDhikrToday();$('sGoals').textContent=db.goals.filter(g=>g.done).length;if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();let prayerSum=0,pageSum=0,dhikrSum=0;for(let i=0;i<7;i++){const dt=new Date();dt.setDate(dt.getDate()-i);const k=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');const x=db.days[k]||{prayers:{},pages:0,adhkar:{}};prayerSum+=prayers.filter(p=>x.prayers?.[p]?.done).length;pageSum+=x.pages||0;dhikrSum+=Object.values(x.adhkar||{}).reduce((a,o)=>a+Object.values(o).filter(Boolean).length,0)}$('weeklyStats').textContent=`الصلوات: ${prayerSum} من 35 — صفحات القرآن: ${pageSum} — الأذكار المنجزة: ${dhikrSum}`;const now=new Date(),prefix=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0')].join('-');let mp=0,mq=0;Object.entries(db.days).forEach(([k,x])=>{if(k.startsWith(prefix)){mp+=prayers.filter(p=>x.prayers?.[p]?.done).length;mq+=x.pages||0}});$('monthlyStats').textContent=`الصلوات: ${mp} — صفحات القرآن: ${mq}`}
 
 const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
@@ -165,17 +165,45 @@ function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const 
 
 function renderAll(){renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=db.tasbeeh||0;$('tasbeehStat').textContent=db.tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';$('reflection').value=db.reflections[todayKey]||'';$('dailyChallengePanel').style.display=db.reflections[todayKey]?'block':'none';$('dailyChallengeText').textContent=db.reflections[todayKey]||'';$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
-// تسجيل كل دخول للموقع في جدول app_visits (يشمل الزوار بدون حساب)
+
+// ===== إحصائيات حاسب نفسك =====
+function getAnalyticsId(key){
+  try{
+    let value=localStorage.getItem(key);
+    if(!value){
+      value=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+        'hn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+      localStorage.setItem(key,value);
+    }
+    return value;
+  }catch(e){return 'temporary-'+Math.random().toString(36).slice(2);}
+}
+const analyticsVisitorId=getAnalyticsId('hasibAnalyticsVisitorId');
+const analyticsSessionId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+  'session-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+
+async function trackAppEvent(eventType){
+  if(!sb)return;
+  try{
+    const user=await currentUser();
+    const {error}=await sb.from('app_events').insert({
+      event_type:eventType,
+      visitor_id:analyticsVisitorId,
+      user_id:user?user.id:null
+    });
+    if(error)console.warn('تعذر تسجيل النشاط '+eventType+':',error.message);
+  }catch(e){console.warn('تعذر تسجيل النشاط:',e);}
+}
 async function trackVisit(){
-  if(!sb) return;
+  if(!sb)return;
   try{
     const {error}=await sb.from('app_visits').insert({
-      visited_at:new Date().toISOString()
+      visited_at:new Date().toISOString(),
+      visitor_id:analyticsVisitorId,
+      session_id:analyticsSessionId
     });
-    if(error) console.warn('تعذر تسجيل الزيارة:',error.message);
-  }catch(e){
-    console.warn('تعذر تسجيل الزيارة:',e);
-  }
+    if(error)console.warn('تعذر تسجيل الزيارة:',error.message);
+  }catch(e){console.warn('تعذر تسجيل الزيارة:',e);}
 }
 
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
