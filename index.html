@@ -1134,7 +1134,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true,characterData:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange(async(event,session)=>{
     await updateAccount();
