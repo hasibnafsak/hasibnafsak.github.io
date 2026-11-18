@@ -61,7 +61,15 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 .next-prayer-icon{width:64px;height:64px;flex:0 0 64px;border-radius:18px;background:#ffffffa8;display:grid;place-items:center;font-size:31px}
 
 .header-account{position:absolute;left:14px;top:12px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;cursor:pointer}
-header{position:relative;padding-top:48px!important}
+header{position:relative;padding-top:76px!important}
+.language-switch{position:absolute;top:10px;right:14px;display:flex;gap:4px;padding:3px;border-radius:999px;background:#ffffff20;border:1px solid #ffffff45;z-index:6}
+.language-switch button{background:transparent;color:#fff;padding:6px 10px;font-size:11px;border-radius:999px}
+.language-switch button.active{background:#fff;color:var(--g)}
+.profile-preview{cursor:pointer}
+.profile-preview img{width:76px;height:76px;border-radius:50%;object-fit:cover}
+[dir="ltr"] .header-profile{left:auto;right:12px}
+[dir="ltr"] .language-switch{right:auto;left:14px}
+[dir="ltr"] .header-account{left:auto;right:12px}
 
 .auth-actions{display:flex;flex-direction:row-reverse;gap:10px;margin-top:10px}
 .auth-actions button{flex:1;min-width:0}
@@ -90,7 +98,11 @@ header{position:relative;padding-top:48px!important}
 </div></div>
 
 <header>
-<div class="brand">حاسب نفسك</div>
+<div class="language-switch" aria-label="Language">
+  <button type="button" id="langAr" class="active" onclick="setLanguage('ar')">العربية</button>
+  <button type="button" id="langEn" onclick="setLanguage('en')">English</button>
+</div>
+<div class="brand" id="brandTitle">حاسب نفسك</div>
 <div class="tag">حاسب نفسك قبل أن تحاسب</div>
 <div class="date" id="today"></div>
 <div id="headerProfile" class="header-profile" style="display:none">
@@ -269,6 +281,31 @@ header{position:relative;padding-top:48px!important}
 </div>
 <div class="panel"><h2>أفضل المشاركين</h2><div id="leaderboardList" class="muted">جارٍ تحميل لوحة الصدارة...</div><button class="secondary" onclick="renderLeaderboard()">تحديث القائمة</button></div>
 </section>
+
+<section id="support" class="view">
+  <div class="panel" style="text-align:center;padding:22px 16px">
+    <div style="font-size:42px;margin-bottom:8px">🤍</div>
+    <div class="challenge-kicker">دعم ومساندة</div>
+    <h2 style="font-size:22px;margin:9px 0">ادعم المطوّر أبو سعد</h2>
+    <p style="line-height:2;margin:8px auto;max-width:520px">
+      أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛
+      لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.
+    </p>
+    <div class="tile" style="margin:16px 0;text-align:center">
+      <div style="font-size:28px">📲</div>
+      <strong style="font-size:17px">ساهم في نشر الخير</strong>
+      <p class="muted" style="line-height:1.8;margin:7px 0 12px">
+        شارك التطبيق مع أهلك وأصدقائك، وعرّفهم على الصلاة والقرآن والأذكار ومحاسبة النفس.
+      </p>
+      <button type="button" class="gold" onclick="shareApp()">شارك التطبيق</button>
+      <p id="supportShareMessage" class="muted" role="status" aria-live="polite" style="margin:10px 0 0"></p>
+    </div>
+    <p class="muted" style="font-size:12px;line-height:1.8">
+      دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍
+    </p>
+  </div>
+</section>
+
 <section id="account" class="view">
 <div class="panel">
   <h2>حسابك في حاسب نفسك</h2>
@@ -284,11 +321,13 @@ header{position:relative;padding-top:48px!important}
     </div>
   </div>
   <div id="loggedInArea" style="display:none">
+    <button type="button" id="editProfileButton" class="secondary" style="margin-bottom:10px;display:none" onclick="showProfileEditor()">تعديل الملف الشخصي</button>
+    <div id="profileEditArea">
     <div class="profile-editor">
-      <div class="profile-preview">
+      <label class="profile-preview" for="avatarFile" title="اضغط لتغيير الصورة">
         <img id="accountAvatarPreview" alt="صورة الحساب" style="display:none">
         <span id="accountAvatarFallback" class="avatar-fallback large">👤</span>
-      </div>
+      </label>
       <div style="flex:1;min-width:0">
         <label for="profileNickname">الاسم المستعار</label>
         <input id="profileNickname" placeholder="اكتب الاسم الذي سيظهر للآخرين" maxlength="30">
@@ -299,6 +338,7 @@ header{position:relative;padding-top:48px!important}
       </div>
     </div>
     <button type="button" class="gold" style="margin-top:10px" onclick="saveProfile()">حفظ الملف الشخصي</button>
+    </div>
     <div class="notice" style="margin-top:10px">تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.</div>
   </div>
   <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
@@ -313,12 +353,33 @@ header{position:relative;padding-top:48px!important}
 <button type="button" data-view="worship"><span class="tabicon">📖</span>العبادات</button>
 <button type="button" data-view="stats"><span class="tabicon">🏆</span>إنجازاتي</button>
 <button type="button" data-view="quiz"><span class="tabicon">؟</span>السؤال</button>
+<button type="button" data-view="support"><span class="tabicon">🤍</span>الدعم</button>
 <button type="button" data-view="account"><span class="tabicon">♙</span>الحساب</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
+
+async function shareApp(){
+  const shareUrl=window.location.origin+window.location.pathname;
+  const shareData={title:'حاسب نفسك',text:'جرّب تطبيق حاسب نفسك — رفيقك اليومي للصلاة والقرآن والأذكار ومحاسبة النفس.',url:shareUrl};
+  const status=$('supportShareMessage');
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+      if(status)status.textContent='شكرًا لك، بارك الله فيك 🤍';
+    }else if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(shareUrl);
+      if(status)status.textContent='تم نسخ رابط التطبيق، أرسله لمن تحب 🤍';
+    }else{
+      window.prompt('انسخ رابط التطبيق وشاركه:',shareUrl);
+    }
+  }catch(error){
+    if(error?.name!=='AbortError' && status)status.textContent='تعذرت المشاركة تلقائيًا. يمكنك نسخ رابط التطبيق من شريط العنوان.';
+  }
+}
+
 function safeLoad(){try{const v=JSON.parse(localStorage.getItem('hasibNafsakData')||'null');return v&&typeof v==='object'?v:null}catch(e){console.warn('Local data could not be read',e);return null}}
 const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'سبحان الله',points:0,answers:{},reflections:{}});
 let db=Object.assign(blank(),safeLoad()||{});
@@ -632,6 +693,63 @@ function handleAvatarChange(event){
   reader.readAsDataURL(file);
 }
 function removeAvatar(){pendingAvatarData='';paintAvatar('');msg('تمت إزالة الصورة مؤقتًا. اضغط حفظ الملف الشخصي للتأكيد.')}
+
+function showProfileEditor(){
+  $('profileEditArea').style.display='block';
+  $('editProfileButton').style.display='none';
+}
+const translations = {
+  'حاسب نفسك':'Accountability',
+  'حاسب نفسك قبل أن تحاسب':'Hold yourself accountable before you are held accountable',
+  'الرئيسية':'Home','الصلاة':'Prayer','العبادات':'Worship','إنجازاتي':'My progress','السؤال':'Daily question','الدعم':'Support','الحساب':'Account',
+  'حسابك في حاسب نفسك':'Your Hasib Nafsaka account',
+  'أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.':'Enter your email and password. Sign in if you already have an account, or create a new one.',
+  'جارٍ التحقق من حالة الحساب...':'Checking account status...',
+  'اسمك أو اسم مستعار (عند إنشاء الحساب)':'Your name or nickname (when creating an account)',
+  'البريد الإلكتروني':'Email address','كلمة المرور (6 أحرف على الأقل)':'Password (at least 6 characters)',
+  'تسجيل الدخول':'Sign in','إنشاء حساب':'Create account','الاسم المستعار':'Nickname',
+  'اكتب الاسم الذي سيظهر للآخرين':'Enter the name others will see',
+  'تغيير صورة الحساب':'Change profile picture','إزالة الصورة':'Remove picture',
+  'حفظ الملف الشخصي':'Save profile','تعديل الملف الشخصي':'Edit profile',
+  'تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.':'Signed in successfully. Your data is linked to your account.',
+  'مزامنة الآن':'Sync now','نسخة احتياطية':'Backup','تصدير بياناتي':'Export my data','استيراد نسخة':'Import backup',
+  'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad',
+  'دعم ومساندة':'Support','أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛ لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.':'The best way to support us is to share Hasib Nafsaka. Someone may benefit from it, and you may share in the reward.',
+  'ساهم في نشر الخير':'Help spread the good','شارك التطبيق':'Share the app',
+  'شارك التطبيق مع أهلك وأصدقائك، وعرّفهم على الصلاة والقرآن والأذكار ومحاسبة النفس.':'Share the app with family and friends, and introduce them to prayer, Quran, remembrance, and self-accountability.',
+  'دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍':'Sharing the app is a wonderful support. Thank you for helping spread goodness 🤍',
+  'ابدأ يومك بخطوة 🌿':'Start your day with one step 🌿',
+  'رحلتك الإيمانية':'Your spiritual journey',
+  'القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.':'A small consistent deed is better than a large interrupted one. Choose a good deed, seek Allah’s help, and begin again.',
+  'غير مسجل الدخول':'Not signed in','خروج':'Sign out','حسابي':'My account'
+};
+function setLanguage(lang){
+  const root=document.documentElement;
+  const isEn=lang==='en';
+  root.lang=isEn?'en':'ar';root.dir=isEn?'ltr':'rtl';
+  document.querySelectorAll('.language-switch button').forEach(b=>b.classList.toggle('active',b.id===(isEn?'langEn':'langAr')));
+  document.querySelectorAll('[data-original-ar]').forEach(el=>{
+    const original=el.getAttribute('data-original-ar');
+    el.textContent=isEn?(translations[original]||original):original;
+  });
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    const t=node.nodeValue.trim();
+    if(!t)return;
+    if(!node.parentElement.closest('script,style,textarea')) {
+      if(!node.__arOriginal)node.__arOriginal=t;
+      const translated=isEn?(translations[node.__arOriginal]||node.__arOriginal):node.__arOriginal;
+      if(node.nodeValue.trim()!==translated)node.nodeValue=node.nodeValue.replace(t,translated);
+    }
+  });
+  document.querySelectorAll('input[placeholder]').forEach(el=>{
+    if(!el.dataset.arPlaceholder)el.dataset.arPlaceholder=el.placeholder;
+    el.placeholder=isEn?(translations[el.dataset.arPlaceholder]||el.dataset.arPlaceholder):el.dataset.arPlaceholder;
+  });
+  localStorage.setItem('hasibLanguage',lang);
+}
+
 async function saveProfile(){
   const user=await currentUser();if(!user)return msg('سجّل الدخول أولًا');
   const nickname=$('profileNickname').value.trim();
@@ -646,6 +764,8 @@ async function saveProfile(){
   if(profileError)console.warn('Profile table update:',profileError.message);
   pendingAvatarData=null;
   await updateAccount();
+  $('profileEditArea').style.display='none';
+  $('editProfileButton').style.display='inline-flex';
   msg('تم حفظ الملف الشخصي بنجاح');
 }
 
@@ -729,11 +849,15 @@ async function updateAccount(){
     $('profileNickname').value=nickname;
     const avatar=u.user_metadata?.avatar_data||'';
     paintAvatar(avatar);
+    if($('profileEditArea') && $('editProfileButton')){
+      $('profileEditArea').style.display='none';
+      $('editProfileButton').style.display='inline-flex';
+    }
   }
 }
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange(async(event,session)=>{
     await updateAccount();
