@@ -72,6 +72,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <header><div class="brand">حاسب نفسك</div><div class="tag">حاسب نفسك قبل أن تحاسب</div><div class="date" id="today"></div></header>
 <main>
 <section id="home" class="view active">
+<div class="hero"><div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div>
 <div class="panel next-prayer-home" role="button" tabindex="0" onclick="go('prayers')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
   <div class="row between" style="align-items:center;gap:10px">
     <div>
@@ -82,12 +83,6 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
     </div>
     <div class="next-prayer-icon" aria-hidden="true">🕌</div>
   </div>
-  <div class="row between" style="margin-top:10px;align-items:center">
-    <span class="muted" style="font-size:12px">اضغط لعرض مواقيت الصلاة ومتابعتها</span>
-    <span style="font-weight:800">←</span>
-  </div>
-</div>
-
 <div class="panel challenge-card" id="dailyChallengePanel">
   <div class="challenge-kicker">✦ تحدّي اليوم</div>
   <div class="challenge-title">تحدّى نفسك بخطوة صالحة</div>
@@ -98,14 +93,25 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
     <button class="secondary" onclick="nextDailyChallenge()">تحدٍّ آخر</button>
   </div>
 </div>
-
-<div class="hero"><div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div><h2>ابدأ يومك بخطوة 🌿</h2><p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p></div>
 <div class="panel"><div class="row between"><div><h2>أهلاً بك 🌿</h2><div class="muted">خطوات صغيرة وثابتة تقرّبك من الله</div></div><span class="pill">بداية جديدة</span></div>
 <div class="ayah" id="welcomeVerse" style="margin-top:12px">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div><div class="muted" id="verseSource" style="text-align:center;margin-top:5px">سورة الشرح، آية ٦</div>
 <div class="grid" style="margin-top:14px"><div class="tile">الصلوات اليوم<strong id="prayerStat">0 / 5</strong></div><div class="tile">ورد القرآن<strong id="quranStat">0 صفحة</strong></div><div class="tile">الأذكار المكتملة<strong id="dhikrStat">0</strong></div><div class="tile">التسبيح<strong id="tasbeehStat">0</strong></div></div></div>
+
+<section id="home" class="view active">
+
+  <div class="row between" style="margin-top:10px;align-items:center">
+    <span class="muted" style="font-size:12px">اضغط لعرض مواقيت الصلاة ومتابعتها</span>
+    <span style="font-weight:800">←</span>
+  </div>
+</div>
+
+
+
+<h2>ابدأ يومك بخطوة 🌿</h2><p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p></div>
 <div class="panel"><div class="row between"><h2>رحلتك اليوم</h2><strong id="dailyPercent" style="font-size:25px;color:var(--g)">0%</strong></div><div class="progress"><span id="dailyProgress"></span></div><div class="grid"><div class="tile">الصلاة<strong id="weightPrayer">0%</strong></div><div class="tile">القرآن<strong id="weightQuran">0%</strong></div><div class="tile">الأذكار<strong id="weightDhikr">0%</strong></div><div class="tile">التسبيح<strong id="weightTasbeeh">0%</strong></div><div class="tile">محاسبة النفس<strong id="weightReflection">0%</strong></div></div></div>
 
 <div class="panel"><h2>أهدافي</h2><div class="row"><input id="goalInput" placeholder="مثال: قراءة 5 صفحات" style="flex:1"><button onclick="addGoal()">إضافة</button></div><div id="goals"></div></div>
+</section>
 </section>
 <section id="prayers" class="view">
 <div class="panel" id="prayerTimesPanel">
