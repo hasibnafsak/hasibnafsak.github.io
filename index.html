@@ -297,7 +297,7 @@ header{position:relative;padding-top:76px!important}
 <div class="panel">
   <h2>حسابك في حاسب نفسك</h2>
   <p class="muted">أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.</p>
-  <div id="accountStatus" class="notice">جارٍ التحقق من حالة الحساب...</div>
+  <div id="accountStatus" class="notice" style="display:none"></div>
   <div id="loggedOutArea">
     <input id="nickname" placeholder="اسمك أو اسم مستعار (عند إنشاء الحساب)" autocomplete="nickname">
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
@@ -316,9 +316,16 @@ header{position:relative;padding-top:76px!important}
         <span id="accountAvatarFallback" class="avatar-fallback large">👤</span>
       </label>
       <div style="flex:1;min-width:0">
-        <label for="profileNickname">الاسم المستعار</label>
-        <input id="profileNickname" placeholder="اكتب الاسم الذي سيظهر للآخرين" maxlength="30">
-        <button type="button" class="light" onclick="clearProfileNickname()">حذف الاسم</button>
+        <div id="nicknameDisplay" style="font-weight:800;margin:8px 0"></div>
+        <button type="button" class="secondary" onclick="showNicknameEditor()">تعديل الاسم</button>
+        <div id="nicknameEditArea" style="display:none;margin-top:8px">
+          <label for="profileNickname">الاسم المستعار</label>
+          <input id="profileNickname" placeholder="اكتب الاسم الذي سيظهر للآخرين" maxlength="30">
+          <div class="row">
+            <button type="button" class="gold" onclick="confirmNickname()">موافق</button>
+            <button type="button" class="light" onclick="deleteNickname()">حذف الاسم</button>
+          </div>
+        </div>
         <label class="btn secondary avatar-upload-label">تغيير صورة الحساب
           <input id="avatarFile" type="file" accept="image/*" hidden onchange="handleAvatarChange(event)">
         </label>
@@ -327,12 +334,12 @@ header{position:relative;padding-top:76px!important}
     </div>
     <button type="button" class="gold" style="margin-top:10px" onclick="saveProfile()">حفظ الملف الشخصي</button>
     </div>
-    <div class="notice" style="margin-top:10px">تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.</div>
+    
   </div>
   <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
   <p id="authMessage" class="muted" role="status" aria-live="polite"></p>
 </div>
-<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
+
 
 <div class="panel" id="supportPanel" style="margin-top:16px">
 
@@ -364,6 +371,7 @@ header{position:relative;padding-top:76px!important}
     </div>
   </div>
 </div>
+<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
 </section>
 </main>
 
@@ -758,6 +766,30 @@ function clearProfileNickname(){
   $('profileNickname').focus();
 }
 
+
+let pendingNicknameDelete=false;
+function showNicknameEditor(){
+  $('nicknameEditArea').style.display='block';
+  $('profileNickname').focus();
+}
+async function confirmNickname(){
+  const value=$('profileNickname').value.trim();
+  if(!value){msg('اكتب الاسم أولًا');return;}
+  $('nicknameDisplay').textContent=value;
+  $('nicknameEditArea').style.display='none';
+  $('headerNickname').textContent=value;
+  pendingNicknameDelete=false;
+  await saveProfile();
+}
+async function deleteNickname(){
+  $('profileNickname').value='';
+  $('nicknameDisplay').textContent='مشارك';
+  $('headerNickname').textContent='مشارك';
+  $('nicknameEditArea').style.display='none';
+  pendingNicknameDelete=true;
+  await saveProfile();
+}
+
 function showProfileEditor(){
   $('profileEditArea').style.display='block';
   $('editProfileButton').style.display='none';
@@ -805,31 +837,176 @@ const translations = {
 'تم اختيار الصورة. اضغط حفظ الملف الشخصي لتثبيتها.':'Image selected. Press Save Profile to apply it.',
 'تعذر قراءة الصورة':'Could not read the image','تمت إزالة الصورة مؤقتًا. اضغط حفظ الملف الشخصي للتأكيد.':'Image removed temporarily. Press Save Profile to confirm.',
 'اكتب تعليقك أولًا':'Please write a comment first','تم حفظ تعليقك على هذا الجهاز، شكرًا لك 🤍':'Your comment was saved on this device. Thank you 🤍'
+,
+'العربية':'Arabic',
+'English':'English',
+'حسابي':'My Account',
+'خروج':'Sign out',
+'الصلاة القادمة':'Next prayer',
+'جارٍ تحديد الصلاة القادمة...':'Finding the next prayer...',
+'الوقت المتبقي':'Time remaining',
+'اضغط لعرض مواقيت الصلاة ومتابعتها':'Tap to view and follow prayer times',
+'✦ تحدّي اليوم':'✦ Daily challenge',
+'تحدّى نفسك بخطوة صالحة':'Challenge yourself with a good deed',
+'تحدٍّ جديد ينتظرك':'A new challenge awaits',
+'كل يوم بداية جديدة':'Every day is a new beginning',
+'أنجزت التحدي ✓':'Challenge completed ✓',
+'تحدٍّ آخر':'Another challenge',
+'أهلاً بك 🌿':'Welcome 🌿',
+'خطوات صغيرة وثابتة تقرّبك من الله':'Small, steady steps bring you closer to Allah',
+'بداية جديدة':'A fresh start',
+'سورة الشرح، آية ٦':'Surah Ash-Sharh, verse 6',
+'الصلوات اليوم':'Today’s prayers',
+'ورد القرآن':'Quran reading',
+'0 صفحة':'0 pages',
+'الأذكار المكتملة':'Completed adhkar',
+'رحلتك اليوم':'Your day',
+'محاسبة النفس':'Self-accountability',
+'أهدافي':'My goals',
+'إضافة':'Add',
+'مواقيت الصلاة 🕌':'Prayer times 🕌',
+'اختر مدينتك لعرض المواقيت اليومية':'Choose your city to view daily prayer times',
+'تحديث ↻':'Refresh ↻',
+'الظهران':'Dhahran',
+'الجبيل':'Jubail',
+'الهفوف والأحساء':'Hofuf and Al-Ahsa',
+'حفر الباطن':'Hafar Al-Batin',
+'الخرج':'Al-Kharj',
+'المجمعة':'Al-Majma’ah',
+'وادي الدواسر':'Wadi Al-Dawasir',
+'مكة المكرمة':'Makkah',
+'الطائف':'Taif',
+'رابغ':'Rabigh',
+'ينبع':'Yanbu',
+'تبوك':'Tabuk',
+'حائل':'Hail',
+'بريدة':'Buraidah',
+'أبها':'Abha',
+'خميس مشيط':'Khamis Mushait',
+'جازان':'Jazan',
+'نجران':'Najran',
+'عرعر':'Arar',
+'سكاكا':'Sakaka',
+'جارٍ تحميل مواقيت الصلاة...':'Loading prayer times...',
+'متابعة الصلوات':'Track prayers',
+'نقاط الصلاة اليوم':'Prayer points today',
+'إنجاز اليوم':'Today’s achievement',
+'العبادات 🌿':'Worship 🌿',
+'اختر العبادة التي تريد البدء بها.':'Choose the act of worship you want to begin.',
+'القرآن الكريم':'The Holy Quran',
+'قراءة وبحث وورد يومي':'Read, search, and set a daily portion',
+'أذكار الصباح والمساء وغيرها':'Morning, evening, and other adhkar',
+'تسبيح إلكتروني ويدوي':'Digital and manual tasbeeh',
+'← رجوع إلى العبادات':'← Back to Worship',
+'المصحف الشريف':'The Holy Quran',
+'🔎 البحث عن آية':'🔎 Search for an ayah',
+'بحث':'Search',
+'اختر السورة':'Choose a surah',
+'جارٍ تحميل فهرس السور...':'Loading surah index...',
+'السورة السابقة':'Previous surah',
+'114 سورة':'114 surahs',
+'السورة التالية':'Next surah',
+'اختر سورة للبدء بالقراءة.':'Choose a surah to start reading.',
+'حفظ موضع القراءة':'Save reading position',
+'متابعة آخر موضع':'Continue from last position',
+'ورد القرآن الكريم':'Daily Quran portion',
+'سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.':'Record the pages you read and track your Quran completion.',
+'اختر وردك اليومي':'Choose your daily portion',
+'3 صفحات':'3 pages',
+'5 صفحات':'5 pages',
+'10 صفحات':'10 pages',
+'20 صفحة':'20 pages',
+'عدد آخر…':'Other amount…',
+'اختر عدد الصفحات المناسب لك.':'Choose the number of pages that suits you.',
+'+ سجّل صفحة قرأتها':'+ Record a page you read',
+'تراجع':'Undo',
+'الأذكار 🌿':'Adhkar 🌿',
+'اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».':'Choose a section, read the dhikr, then tap “Completed”.',
+'كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.':'Each completed dhikr = 2 points; completing a section = 5 extra points.',
+'الصباح':'Morning',
+'المساء':'Evening',
+'النوم':'Sleep',
+'بعد الصلاة':'After prayer',
+'الاستيقاظ':'Waking up',
+'متنوعة':'Various',
+'أذكار الصباح':'Morning adhkar',
+'السبحة':'Tasbeeh',
+'السبحة الإلكترونية':'Digital tasbeeh',
+'المسبحة اليدوية':'Manual tasbeeh',
+'اضغط للتسبيح':'Tap to count',
+'المسبحة الخشبية • ٣٣ حبة':'Wooden prayer beads • 33 beads',
+'حرّك الحبة بلمسة، وتابع عدد التسبيحات بالأعلى':'Move a bead with a touch and follow the count above',
+'تصفير العداد':'Reset counter',
+'🏆 مسابقة سؤال اليوم':'🏆 Question of the day',
+'أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.':'Answer today’s question and earn points. A new question appears daily.',
+'ثقافة إسلامية':'Islamic knowledge',
+'نقاطك في المسابقة':'Your quiz points',
+'منافسة الأصدقاء':'Friends challenge',
+'تبغى تتحدى صديقك في سؤال اليوم؟ سجّل الدخول، وأنشئ رمز دعوة وشاركه معه.':'Want to challenge a friend with today’s question? Sign in, create an invitation code, and share it.',
+'سجّل الدخول من قسم «حسابي» لتجهيز دعوة المنافسة.':'Sign in from the Account section to create a challenge invitation.',
+'إنشاء رمز دعوة':'Create invitation code',
+'إحصائياتي الشخصية':'My statistics',
+'هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.':'These figures are stored on this device and are based on your activity in the app.',
+'صفحات اليوم':'Pages today',
+'إجمالي صفحات الختمة':'Total Quran pages',
+'التسبيحات':'Tasbeeh counts',
+'الأذكار المحددة':'Completed adhkar',
+'الأهداف المكتملة':'Completed goals',
+'نقاط اليوم':'Today’s points',
+'إجمالي النقاط':'Total points',
+'ملخص آخر 7 أيام':'Last 7 days',
+'ملخص هذا الشهر':'This month',
+'لوحة الصدارة':'Leaderboard',
+'تابع ترتيبك ونافس المشاركين في أعمال الخير.':'Track your ranking and compete with others in good deeds.',
+'عرض لوحة الصدارة 🏆':'View leaderboard 🏆',
+'← رجوع إلى إنجازاتي':'← Back to My Progress',
+'🏆 مجتمع حاسب نفسك':'🏆 Hasib Nafsaka Community',
+'نافس بالخير، واجمع نقاطك من أعمالك اليومية وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.':'Compete through good deeds and earn points from daily activities and the daily question. Participation is optional and requires an account.',
+'سجّل الدخول أولًا للمشاركة في لوحة الصدارة.':'Sign in first to join the leaderboard.',
+'اشترك في لوحة الصدارة':'Join the leaderboard',
+'أفضل المشاركين':'Top participants',
+'جارٍ تحميل لوحة الصدارة...':'Loading leaderboard...',
+'تحديث القائمة':'Refresh list',
+'تعديل الاسم':'Edit name',
+'موافق':'Confirm',
+'قص صورة الحساب':'Crop profile picture',
+'تكبير الصورة':'Zoom image',
+'استخدام الصورة':'Use image',
+'إلغاء':'Cancel',
+'اكتب تعليقك أو اقتراحك هنا...':'Write your comment or suggestion here...',
+'حفظ التعليق':'Save comment'
 };
-function setLanguage(lang){
-  const en=lang==='en';
-  document.documentElement.lang=en?'en':'ar';
-  document.documentElement.dir=en?'ltr':'rtl';
-  document.querySelectorAll('.language-switch button').forEach(b=>b.classList.toggle('active',b.id===(en?'langEn':'langAr')));
+function translateTextNode(node,en){
+  const parent=node.parentElement;
+  if(!parent||parent.closest('script,style,textarea,input,select,option'))return;
+  if(!Object.prototype.hasOwnProperty.call(node,'__originalText'))node.__originalText=node.nodeValue;
+  const original=node.__originalText;
+  if(!en){node.nodeValue=original;return;}
+  let result=original;
+  for(const key of Object.keys(translations).sort((a,b)=>b.length-a.length)){
+    if(result.includes(key))result=result.split(key).join(translations[key]);
+  }
+  node.nodeValue=result;
+}
+function applyCurrentLanguage(){
+  const en=localStorage.getItem('hasibLanguage')==='en';
   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(node=>{
-    const parent=node.parentElement;
-    if(!parent||parent.closest('script,style,textarea,input,select,option'))return;
-    if(!Object.prototype.hasOwnProperty.call(node,'__originalText'))node.__originalText=node.nodeValue;
-    const original=node.__originalText, trimmed=original.trim();
-    if(!trimmed)return;
-    const translated=translations[trimmed];
-    if(en&&translated)node.nodeValue=original.replace(trimmed,translated);
-    else if(!en)node.nodeValue=original;
-  });
+  nodes.forEach(node=>translateTextNode(node,en));
   document.querySelectorAll('[placeholder]').forEach(el=>{
     if(!el.dataset.originalPlaceholder)el.dataset.originalPlaceholder=el.getAttribute('placeholder');
     const original=el.dataset.originalPlaceholder;
     el.setAttribute('placeholder',en?(translations[original]||original):original);
   });
+}
+function setLanguage(lang){
+  const en=lang==='en';
+  document.documentElement.lang=en?'en':'ar';
+  document.documentElement.dir=en?'ltr':'rtl';
+  document.querySelectorAll('.language-switch button').forEach(btn=>btn.classList.toggle('active',btn.id===(en?'langEn':'langAr')));
   document.title=en?'Hasib Nafsaka':'حاسب نفسك';
   localStorage.setItem('hasibLanguage',lang);
+  applyCurrentLanguage();
 }
 
 function saveSupportComment(){
@@ -855,6 +1032,7 @@ async function saveProfile(){
   const {error:profileError}=await sb.from('profiles').upsert(profileRow);
   if(profileError)console.warn('Profile table update:',profileError.message);
   pendingAvatarData=null;
+  pendingNicknameDelete=false;
   await updateAccount();
   $('profileEditArea').style.display='none';
   $('editProfileButton').style.display='inline-flex';
@@ -926,24 +1104,23 @@ async function signOut(){
 }
 async function updateAccount(){
   const u=await currentUser(),loggedIn=!!u;
-  $('accountStatus').textContent=loggedIn?'تم تسجيل الدخول: '+u.email:'غير مسجل الدخول — سجّل الدخول أو أنشئ حسابًا للنسخ الاحتياطي والمزامنة.';
+  $('accountStatus').style.display='none';
   $('loggedOutArea').style.display=loggedIn?'none':'block';
   $('loggedInArea').style.display=loggedIn?'block':'none';
   $('syncButton').style.display=loggedIn?'inline-flex':'none';
-  const profile=$('headerProfile');
-  if(profile)profile.style.display='flex';
-  const top=$('headerAccountButton');
-  if(top)top.style.display=loggedIn?'inline-flex':'none';
+  if($('headerProfile'))$('headerProfile').style.display='flex';
+  if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
   if(loggedIn){
     const nickname=u.user_metadata?.nickname||u.user_metadata?.full_name||u.email?.split('@')[0]||'مشارك';
     $('headerNickname').textContent=nickname;
+    $('nicknameDisplay').textContent=nickname;
     $('profileNickname').value=nickname;
-    const avatar=u.user_metadata?.avatar_data||'';
-    paintAvatar(avatar);
-    if($('profileEditArea') && $('editProfileButton')){
+    paintAvatar(u.user_metadata?.avatar_data||'');
+    if($('profileEditArea')&&$('editProfileButton')){
       $('profileEditArea').style.display='none';
       $('editProfileButton').style.display='inline-flex';
     }
+    $('nicknameEditArea').style.display='none';
   }else{
     $('headerNickname').textContent='حسابي';
     paintAvatar('');
@@ -957,7 +1134,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true,characterData:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange(async(event,session)=>{
     await updateAccount();
