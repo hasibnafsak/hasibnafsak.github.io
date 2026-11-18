@@ -165,6 +165,19 @@ function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const 
 
 function renderAll(){renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=db.tasbeeh||0;$('tasbeehStat').textContent=db.tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';$('reflection').value=db.reflections[todayKey]||'';$('dailyChallengePanel').style.display=db.reflections[todayKey]?'block':'none';$('dailyChallengeText').textContent=db.reflections[todayKey]||'';$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
+// تسجيل كل دخول للموقع في جدول app_visits (يشمل الزوار بدون حساب)
+async function trackVisit(){
+  if(!sb) return;
+  try{
+    const {error}=await sb.from('app_visits').insert({
+      visited_at:new Date().toISOString()
+    });
+    if(error) console.warn('تعذر تسجيل الزيارة:',error.message);
+  }catch(e){
+    console.warn('تعذر تسجيل الزيارة:',e);
+  }
+}
+
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
 async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
@@ -174,5 +187,5 @@ async function signOut(){if(sb)await sb.auth.signOut();msg('تم تسجيل ال
 async function updateAccount(){if(!sb)return;const u=await currentUser();$('accountStatus').textContent=u?'مسجل الدخول: '+u.email:'غير مسجل الدخول'}
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();if(sb)sb.auth.onAuthStateChange(()=>updateAccount());
+initWelcome();renderAll();updateAccount();trackVisit();if(sb)sb.auth.onAuthStateChange(()=>updateAccount());
 </script></body></html>
