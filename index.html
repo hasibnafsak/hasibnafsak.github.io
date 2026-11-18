@@ -384,13 +384,11 @@ header{position:relative;padding-top:76px!important}
 </div>
 
 
-
-<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
 <div class="panel" id="supportPanel" style="margin-top:16px">
 
   <div class="panel" style="text-align:center;padding:22px 16px">
     <div style="font-size:42px;margin-bottom:8px">🤍</div>
-    <div class="challenge-kicker">دعم ومساندة</div>
+<div class="challenge-kicker">دعم ومساندة</div>
     <h2 style="font-size:22px;margin:9px 0">ادعم المطوّر أبو سعد</h2>
     <p style="line-height:2;margin:8px auto;max-width:520px">
       أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛
@@ -408,20 +406,15 @@ header{position:relative;padding-top:76px!important}
     <p class="muted" style="font-size:12px;line-height:1.8">
       دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍
     </p>
-    <div style="text-align:right;margin-top:18px">
-      <label for="supportComment" style="display:block;font-weight:800;margin-bottom:6px">اكتب تعليقك</label>
-      <textarea id="supportComment" placeholder="اكتب تعليقك أو اقتراحك هنا..." rows="3"></textarea>
-      <button type="button" class="secondary" onclick="saveSupportComment()">حفظ التعليق</button>
-      <p id="supportCommentStatus" class="muted" role="status" aria-live="polite"></p>
-    </div>
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:center">
-      <p style="font-weight:800;margin:0 0 10px">للاستفسارات والدعم والاقتراحات، تواصل مع المطوّر أبو سعد</p>
-      <a class="btn" href="https://wa.me/966540929003" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#16745c">
-        <span aria-hidden="true">💬</span> تواصل عبر واتساب
-      </a>
+    <div style="text-align:center;margin-top:18px">
+      <a class="btn" href="https://wa.me/966540929003?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%A8%D9%88%20%D8%B3%D8%B9%D8%AF" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none;background:#16745c;color:#fff;padding:12px 18px;border-radius:12px;font-weight:800">تواصل عبر واتساب</a>
+      <p class="muted" style="margin:8px 0 0">للدعم أو الاقتراحات — المطوّر أبو سعد</p>
     </div>
   </div>
 </div>
+
+<div class="panel" id="backupPanel" style="margin-top:16px"><h2>نسخة احتياطية</h2><p class="muted">احتفظ بنسخة من بياناتك، ويمكنك استعادتها عند الحاجة.</p><div class="row"><button type="button" onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
+
 </section>
 </main>
 
@@ -950,7 +943,7 @@ const translations = {
 'إزالة الصورة':'Remove picture','حفظ الملف الشخصي':'Save profile','تعديل الملف الشخصي':'Edit profile',
 'تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.':'Signed in successfully. Your data is linked to your account.',
 'مزامنة الآن':'Sync now','نسخة احتياطية':'Backup','تصدير بياناتي':'Export my data','استيراد نسخة':'Import backup',
-'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad','دعم ومساندة':'Support','للاستفسارات والدعم والاقتراحات، تواصل مع المطوّر أبو سعد':'For questions, support, and suggestions, contact the developer Abu Saad','تواصل عبر واتساب':'Contact via WhatsApp',
+'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad','دعم ومساندة':'Support',
 'أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛':'The best way to support us is to share the Hasib Nafsaka app;',
 'لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.':'someone may benefit from it, and you may share in the reward, God willing.',
 'ساهم في نشر الخير':'Help spread goodness','شارك التطبيق':'Share the app',
