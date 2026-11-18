@@ -66,6 +66,19 @@ header{position:relative;padding-top:48px!important}
 .auth-actions{display:flex;flex-direction:row-reverse;gap:10px;margin-top:10px}
 .auth-actions button{flex:1;min-width:0}
 .auth-actions button:disabled{opacity:.6;cursor:wait}
+
+.header-profile{position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:7px;z-index:5}
+.profile-open{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 9px 5px 7px;font-size:12px;font-weight:800;cursor:pointer;max-width:170px}
+.profile-open img,.profile-open .avatar-fallback{width:31px;height:31px;border-radius:50%;object-fit:cover}
+.profile-open span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-profile .header-account{position:static;padding:7px 10px}
+.avatar-fallback{display:inline-grid;place-items:center;background:#e8eee8;color:#42634d;font-size:18px;flex:0 0 auto}
+.avatar-fallback.large{width:76px;height:76px;border-radius:50%;font-size:32px}
+.profile-editor{display:flex;align-items:center;gap:15px;margin-top:14px;padding:13px;background:var(--soft,#f5f1e8);border-radius:16px}
+.profile-preview{width:80px;height:80px;flex:0 0 80px}
+.profile-preview img{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid white}
+.avatar-upload-label{display:inline-flex;margin:4px 0;cursor:pointer}
+.profile-editor label:not(.btn){display:block;font-size:12px;font-weight:700;margin-bottom:4px}
 </style></head>
 <body>
 
@@ -80,7 +93,14 @@ header{position:relative;padding-top:48px!important}
 <div class="brand">حاسب نفسك</div>
 <div class="tag">حاسب نفسك قبل أن تحاسب</div>
 <div class="date" id="today"></div>
-<button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج" style="display:none">تسجيل الخروج</button>
+<div id="headerProfile" class="header-profile" style="display:none">
+  <button type="button" class="profile-open" onclick="go('account')" aria-label="فتح الملف الشخصي">
+    <img id="headerAvatar" alt="" style="display:none">
+    <span id="headerAvatarFallback" class="avatar-fallback">👤</span>
+    <span id="headerNickname">حسابي</span>
+  </button>
+  <button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج">خروج</button>
+</div>
 </header>
 <main>
 <section id="home" class="view active">
@@ -264,6 +284,21 @@ header{position:relative;padding-top:48px!important}
     </div>
   </div>
   <div id="loggedInArea" style="display:none">
+    <div class="profile-editor">
+      <div class="profile-preview">
+        <img id="accountAvatarPreview" alt="صورة الحساب" style="display:none">
+        <span id="accountAvatarFallback" class="avatar-fallback large">👤</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <label for="profileNickname">الاسم المستعار</label>
+        <input id="profileNickname" placeholder="اكتب الاسم الذي سيظهر للآخرين" maxlength="30">
+        <label class="btn secondary avatar-upload-label">تغيير صورة الحساب
+          <input id="avatarFile" type="file" accept="image/*" hidden onchange="handleAvatarChange(event)">
+        </label>
+        <button type="button" class="light" onclick="removeAvatar()">إزالة الصورة</button>
+      </div>
+    </div>
+    <button type="button" class="gold" style="margin-top:10px" onclick="saveProfile()">حفظ الملف الشخصي</button>
     <div class="notice" style="margin-top:10px">تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.</div>
   </div>
   <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
@@ -562,6 +597,58 @@ async function syncLeaderboard(){
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
 async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
+
+let pendingAvatarData=null;
+function currentProfileName(user){
+  return $('profileNickname')?.value.trim() ||
+    user?.user_metadata?.nickname ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split('@')[0] || 'مشارك';
+}
+function paintAvatar(dataUrl){
+  const headerImg=$('headerAvatar'),headerFallback=$('headerAvatarFallback');
+  const preview=$('accountAvatarPreview'),previewFallback=$('accountAvatarFallback');
+  [headerImg,preview].forEach(img=>{if(img){img.src=dataUrl||'';img.style.display=dataUrl?'block':'none'}});
+  if(headerFallback)headerFallback.style.display=dataUrl?'none':'inline-grid';
+  if(previewFallback)previewFallback.style.display=dataUrl?'none':'inline-grid';
+}
+function handleAvatarChange(event){
+  const file=event.target.files?.[0];if(!file)return;
+  if(!file.type.startsWith('image/')){msg('اختر ملف صورة صالحًا');return}
+  if(file.size>5*1024*1024){msg('حجم الصورة كبير. اختر صورة أقل من 5 ميجابايت');event.target.value='';return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas'),max=320,scale=Math.min(1,max/Math.max(img.width,img.height));
+      canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      pendingAvatarData=canvas.toDataURL('image/jpeg',0.78);
+      paintAvatar(pendingAvatarData);msg('تم اختيار الصورة. اضغط حفظ الملف الشخصي لتثبيتها.');
+    };
+    img.onerror=()=>msg('تعذر قراءة الصورة');
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeAvatar(){pendingAvatarData='';paintAvatar('');msg('تمت إزالة الصورة مؤقتًا. اضغط حفظ الملف الشخصي للتأكيد.')}
+async function saveProfile(){
+  const user=await currentUser();if(!user)return msg('سجّل الدخول أولًا');
+  const nickname=$('profileNickname').value.trim();
+  if(!nickname)return msg('اكتب اسمًا مستعارًا أولًا');
+  const updates={nickname};
+  if(pendingAvatarData!==null)updates.avatar_data=pendingAvatarData;
+  const {data,error}=await sb.auth.updateUser({data:updates});
+  if(error)return msg('تعذر حفظ الملف الشخصي: '+error.message);
+  const profileRow={id:user.id,nickname};
+  if(pendingAvatarData)profileRow.avatar_url=pendingAvatarData;
+  const {error:profileError}=await sb.from('profiles').upsert(profileRow);
+  if(profileError)console.warn('Profile table update:',profileError.message);
+  pendingAvatarData=null;
+  await updateAccount();
+  msg('تم حفظ الملف الشخصي بنجاح');
+}
+
 async function signUp(){
   if(!sb)return msg('خدمة الحساب غير متاحة الآن');
   const email=$('email').value.trim(),password=$('password').value,nick=$('nickname').value.trim();
@@ -604,10 +691,14 @@ async function signIn(){
 }
 async function finishAccountLogin(user){
   if(!user)return;
-  const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname;
+  const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname||user.email?.split('@')[0]||'مشارك';
   if(nick){
     const profile=await sb.from('profiles').upsert({id:user.id,nickname:nick});
     if(profile.error)console.warn('Profile update:',profile.error.message);
+    if(!user.user_metadata?.nickname){
+      const updated=await sb.auth.updateUser({data:{nickname:nick}});
+      if(updated.error)console.warn('Nickname metadata update:',updated.error.message);
+    }
   }
   const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
   if(saved.error){console.warn('Could not load user data:',saved.error.message)}
@@ -628,8 +719,17 @@ async function updateAccount(){
   $('loggedOutArea').style.display=loggedIn?'none':'block';
   $('loggedInArea').style.display=loggedIn?'block':'none';
   $('syncButton').style.display=loggedIn?'inline-flex':'none';
+  const profile=$('headerProfile');
+  if(profile)profile.style.display=loggedIn?'flex':'none';
   const top=$('headerAccountButton');
-  if(top){top.style.display=loggedIn?'inline-flex':'none';top.textContent='تسجيل الخروج';top.setAttribute('aria-label','تسجيل الخروج')}
+  if(top){top.textContent='خروج';top.setAttribute('aria-label','تسجيل الخروج')}
+  if(loggedIn){
+    const nickname=u.user_metadata?.nickname||u.user_metadata?.full_name||u.email?.split('@')[0]||'مشارك';
+    $('headerNickname').textContent=nickname;
+    $('profileNickname').value=nickname;
+    const avatar=u.user_metadata?.avatar_data||'';
+    paintAvatar(avatar);
+  }
 }
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
