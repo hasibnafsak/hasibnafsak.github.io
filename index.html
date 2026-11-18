@@ -59,6 +59,9 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 .next-prayer-home:active{transform:scale(.99)}
 .next-prayer-home:focus-visible{outline:3px solid #4b8b69;outline-offset:3px}
 .next-prayer-icon{width:64px;height:64px;flex:0 0 64px;border-radius:18px;background:#ffffffa8;display:grid;place-items:center;font-size:31px}
+
+.header-account{position:absolute;left:14px;top:12px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;cursor:pointer}
+header{position:relative;padding-top:48px!important}
 </style></head>
 <body>
 
@@ -69,7 +72,12 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <button type="button" onclick="enterApp()">ابدأ رحلتك</button>
 </div></div>
 
-<header><div class="brand">حاسب نفسك</div><div class="tag">حاسب نفسك قبل أن تحاسب</div><div class="date" id="today"></div></header>
+<header>
+<div class="brand">حاسب نفسك</div>
+<div class="tag">حاسب نفسك قبل أن تحاسب</div>
+<div class="date" id="today"></div>
+<button type="button" id="headerAccountButton" class="header-account" onclick="go('account')" aria-label="فتح الحساب">الحساب</button>
+</header>
 <main>
 <section id="home" class="view active">
 <div class="hero">
@@ -237,7 +245,29 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 </div>
 <div class="panel"><h2>أفضل المشاركين</h2><div id="leaderboardList" class="muted">جارٍ تحميل لوحة الصدارة...</div><button class="secondary" onclick="renderLeaderboard()">تحديث القائمة</button></div>
 </section>
-<section id="account" class="view"><div class="panel"><h2>الحساب والمزامنة</h2><p class="muted">يمكنك استخدام التطبيق دون حساب. الحساب مطلوب للمزامنة السحابية.</p><div id="accountStatus" class="notice">غير مسجل الدخول</div><input id="nickname" placeholder="اسم مستعار"><input id="email" type="email" placeholder="البريد الإلكتروني"><input id="password" type="password" placeholder="كلمة المرور"><div class="row"><button onclick="signUp()">إنشاء حساب</button><button class="secondary" onclick="signIn()">دخول</button><button class="light" onclick="signOut()">خروج</button></div><button class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button><p id="authMessage" class="muted"></p></div><div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div></section>
+<section id="account" class="view">
+<div class="panel">
+  <h2>الحساب والمزامنة</h2>
+  <p class="muted">سجّل الدخول لحفظ إنجازاتك ومزامنتها بين أجهزتك.</p>
+  <div id="accountStatus" class="notice">جارٍ التحقق من حالة الحساب...</div>
+  <div id="loggedOutArea">
+    <input id="nickname" placeholder="اسم مستعار">
+    <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+    <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password">
+    <div class="row">
+      <button type="button" onclick="signUp()">إنشاء حساب</button>
+      <button type="button" class="secondary" onclick="signIn()">تسجيل الدخول</button>
+    </div>
+  </div>
+  <div id="loggedInArea" style="display:none">
+    <div class="notice" style="margin-top:10px">أنت مسجل الدخول بالفعل. حسابك محفوظ على هذا الجهاز.</div>
+    <button type="button" class="light" style="margin-top:10px" onclick="signOut()">تسجيل الخروج</button>
+  </div>
+  <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
+  <p id="authMessage" class="muted" role="status" aria-live="polite"></p>
+</div>
+<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
+</section>
 </main>
 <nav class="tabs" id="tabs">
 <button type="button" class="active" data-view="home"><span class="tabicon">⌂</span>الرئيسية</button>
@@ -529,11 +559,42 @@ async function syncLeaderboard(){
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
 async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
-async function signUp(){if(!sb)return msg('خدمة الحساب غير متاحة');const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6)return msg('أدخل بريدك وكلمة مرور من 6 أحرف على الأقل');const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.href}});msg(error?error.message:(data.session?'تم إنشاء الحساب':'تم إرسال رسالة تأكيد إلى بريدك'))}
-async function signIn(){if(!sb)return msg('خدمة الحساب غير متاحة');const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)return msg(error.message);const nick=$('nickname').value.trim();if(nick)await sb.from('profiles').upsert({id:data.user.id,nickname:nick});const r=await sb.from('user_data').select('data').eq('user_id',data.user.id).maybeSingle();if(r.data?.data){db=Object.assign(blank(),r.data.data);persist();renderAll()}msg('تم تسجيل الدخول')}
-async function signOut(){if(sb)await sb.auth.signOut();msg('تم تسجيل الخروج')}
-async function updateAccount(){if(!sb)return;const u=await currentUser();$('accountStatus').textContent=u?'مسجل الدخول: '+u.email:'غير مسجل الدخول'}
+async function signUp(){if(!sb)return msg('خدمة الحساب غير متاحة');const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6)return msg('أدخل بريدك وكلمة مرور من 6 أحرف على الأقل');const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.href}});if(error)return msg(error.message);if(data.session){msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');await updateAccount()}else msg('تم إنشاء الحساب. افتح رسالة التأكيد في بريدك ثم سجّل الدخول');}
+async function signIn(){
+  if(!sb)return msg('خدمة الحساب غير متاحة');
+  const email=$('email').value.trim(),password=$('password').value;
+  if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error)return msg(error.message);
+  const nick=$('nickname').value.trim();
+  if(nick)await sb.from('profiles').upsert({id:data.user.id,nickname:nick});
+  const r=await sb.from('user_data').select('data').eq('user_id',data.user.id).maybeSingle();
+  if(r.error){console.warn('Could not load user data:',r.error.message);msg('تم تسجيل الدخول، لكن تعذر تحميل النسخة السحابية: '+r.error.message)}
+  else{
+    if(r.data?.data){db=Object.assign(blank(),r.data.data);persist();renderAll()}
+    msg('تم تسجيل الدخول بنجاح');
+  }
+  await updateAccount();
+}
+async function signOut(){
+  if(!sb)return;
+  const {error}=await sb.auth.signOut();
+  if(error)return msg('تعذر تسجيل الخروج: '+error.message);
+  msg('تم تسجيل الخروج');
+  await updateAccount();
+}
+async function updateAccount(){
+  if(!sb)return;
+  const u=await currentUser();
+  const loggedIn=!!u;
+  $('accountStatus').textContent=loggedIn?'تم تسجيل الدخول: '+u.email:'غير مسجل الدخول';
+  $('loggedOutArea').style.display=loggedIn?'none':'block';
+  $('loggedInArea').style.display=loggedIn?'block':'none';
+  $('syncButton').style.display=loggedIn?'inline-flex':'none';
+  const top=$('headerAccountButton');
+  if(top)top.textContent=loggedIn?'حسابي':'تسجيل الدخول';
+}
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hasib-nafsak-backup.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);if(sb)sb.auth.onAuthStateChange(()=>updateAccount());
+initWelcome();renderAll();updateAccount();trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);if(sb)sb.auth.onAuthStateChange((event,session)=>{updateAccount();if(event==='SIGNED_IN')msg('تم تسجيل الدخول بنجاح');if(event==='SIGNED_OUT')msg('تم تسجيل الخروج')});
 </script></body></html>
