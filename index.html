@@ -384,6 +384,8 @@ header{position:relative;padding-top:76px!important}
 </div>
 
 
+
+<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
 <div class="panel" id="supportPanel" style="margin-top:16px">
 
   <div class="panel" style="text-align:center;padding:22px 16px">
@@ -412,9 +414,14 @@ header{position:relative;padding-top:76px!important}
       <button type="button" class="secondary" onclick="saveSupportComment()">حفظ التعليق</button>
       <p id="supportCommentStatus" class="muted" role="status" aria-live="polite"></p>
     </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);text-align:center">
+      <p style="font-weight:800;margin:0 0 10px">للاستفسارات والدعم والاقتراحات، تواصل مع المطوّر أبو سعد</p>
+      <a class="btn" href="https://wa.me/966540929003" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#16745c">
+        <span aria-hidden="true">💬</span> تواصل عبر واتساب
+      </a>
+    </div>
   </div>
 </div>
-<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
 </section>
 </main>
 
@@ -943,7 +950,7 @@ const translations = {
 'إزالة الصورة':'Remove picture','حفظ الملف الشخصي':'Save profile','تعديل الملف الشخصي':'Edit profile',
 'تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.':'Signed in successfully. Your data is linked to your account.',
 'مزامنة الآن':'Sync now','نسخة احتياطية':'Backup','تصدير بياناتي':'Export my data','استيراد نسخة':'Import backup',
-'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad','دعم ومساندة':'Support',
+'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad','دعم ومساندة':'Support','للاستفسارات والدعم والاقتراحات، تواصل مع المطوّر أبو سعد':'For questions, support, and suggestions, contact the developer Abu Saad','تواصل عبر واتساب':'Contact via WhatsApp',
 'أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛':'The best way to support us is to share the Hasib Nafsaka app;',
 'لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.':'someone may benefit from it, and you may share in the reward, God willing.',
 'ساهم في نشر الخير':'Help spread goodness','شارك التطبيق':'Share the app',
