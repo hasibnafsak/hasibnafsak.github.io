@@ -51,6 +51,9 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 #realTasbeehSvg{display:block;width:100%;max-width:330px;height:auto;margin:auto;overflow:visible}
 .real-tasbeeh-caption{font-weight:900;color:#76502b;font-size:14px;margin-top:-2px}
 .real-tasbeeh-wrap .muted{color:#806d51;font-size:12px;margin-top:5px}
+
+.worship-card{min-height:126px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:13px 7px;background:var(--soft,#f5f1e8);color:var(--ink,#234);border:1px solid rgba(20,90,70,.16);border-radius:15px}
+.worship-card strong{font-size:14px}.worship-card small{font-size:11px;line-height:1.5;color:var(--muted,#777);font-weight:400}
 </style></head>
 <body>
 
@@ -84,7 +87,18 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <div class="panel"><h2>أهدافي</h2><div class="row"><input id="goalInput" placeholder="مثال: قراءة 5 صفحات" style="flex:1"><button onclick="addGoal()">إضافة</button></div><div id="goals"></div></div>
 </section>
 <section id="prayers" class="view"><div class="panel"><h2>متابعة الصلوات</h2><div class="notice">النقاط: الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط (5 إضافية للمسجد)، والمنفرد 0.</div><p class="muted">علّم الصلاة بعد أدائها وحدد مكانها وطريقة أدائها.</p><div id="prayerList"></div><div class="notice" id="prayerEncouragement" style="margin-top:12px">اختر طريقة أداء الصلاة لعرض رسالة التشجيع والنقاط.</div><div class="tile" style="margin-top:10px">نقاط الصلاة اليوم<strong id="prayerPoints">0 / 50</strong></div></div><div class="panel"><h2>إنجاز اليوم</h2><div class="progress"><span id="prayerProgress"></span></div><div id="prayerProgressText" class="muted"></div></div></section>
-<section id="quran" class="view">
+<section id="worship" class="view">
+<div class="panel">
+  <h2>العبادات 🌿</h2>
+  <p class="muted">اختر العبادة التي تريد البدء بها.</p>
+  <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+    <button type="button" class="worship-card" onclick="go('quran')"><span style="font-size:27px">📖</span><strong>القرآن الكريم</strong><small>قراءة وبحث وورد يومي</small></button>
+    <button type="button" class="worship-card" onclick="go('adhkar')"><span style="font-size:27px">🌿</span><strong>الأذكار</strong><small>أذكار الصباح والمساء وغيرها</small></button>
+    <button type="button" class="worship-card" onclick="go('tasbeeh')"><span style="font-size:27px">📿</span><strong>المسبحة</strong><small>تسبيح إلكتروني ويدوي</small></button>
+  </div>
+</div>
+</section>
+<section id="quran" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
 <div class="panel"><h2>المصحف الشريف</h2><div class="notice">النص بالرسم العثماني من خدمة القرآن الكريم. المصدر: <a href="https://tanzil.net" target="_blank" rel="noopener">مشروع تنزيل Tanzil</a>، وتُستخدم خدمة AlQuran Cloud لجلب النص. عند فتح السورة تُحفظ نسخة منها على جهازك.</div>
 <div class="panel" style="background:#fbf8ef;margin:12px 0;padding:13px">
 <label for="ayahSearchInput">🔎 البحث عن آية</label>
@@ -101,8 +115,8 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 </div>
 <div class="panel"><h2>ورد القرآن الكريم</h2><p class="muted">سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.</p><label>اختر وردك اليومي</label><select id="quranGoal" onchange="setQuranGoal(this.value)"><option value="3">3 صفحات</option><option value="5">5 صفحات</option><option value="10">10 صفحات</option><option value="20">20 صفحة</option><option value="custom">عدد آخر…</option></select><input id="quranGoalCustom" type="number" min="1" max="604" placeholder="اكتب عدد الصفحات" style="display:none" onchange="setQuranGoal(this.value)"><div class="notice" id="quranGoalProgress">اختر عدد الصفحات المناسب لك.</div><div class="row" style="margin:10px 0"><button onclick="changePages(1)">+ سجّل صفحة قرأتها</button><button class="secondary" onclick="changePages(-1)">تراجع</button><span id="pagesToday" class="pill">0</span></div></div>
 </section>
-<section id="adhkar" class="view"><div class="panel"><h2>الأذكار 🌿</h2><p class="muted">اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».</p><div class="notice">كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.</div><div class="row" style="margin-top:10px"><button type="button" class="dhikr-tab active" data-dhikr="morning" onclick="showDhikr('morning')">الصباح</button><button type="button" class="secondary dhikr-tab" data-dhikr="evening" onclick="showDhikr('evening')">المساء</button><button type="button" class="secondary dhikr-tab" data-dhikr="sleep" onclick="showDhikr('sleep')">النوم</button><button type="button" class="secondary dhikr-tab" data-dhikr="afterPrayer" onclick="showDhikr('afterPrayer')">بعد الصلاة</button><button type="button" class="secondary dhikr-tab" data-dhikr="wake" onclick="showDhikr('wake')">الاستيقاظ</button><button type="button" class="secondary dhikr-tab" data-dhikr="misc" onclick="showDhikr('misc')">متنوعة</button></div><div class="row between" style="margin-top:13px"><strong id="dhikrTitle">أذكار الصباح</strong><span class="pill" id="dhikrScore">0 نقطة</span></div><div class="mini-progress" style="margin:9px 0"><span id="dhikrProgress" style="width:0%"></span></div><div id="dhikrItems"></div><p class="muted">تنبيه: روعي اختيار أذكار مشهورة من كتب الأذكار المأثورة، ومنها حصن المسلم. يُرجى مراجعة النصوص والأعداد في المصادر المعتمدة.</p></div></section>
-<section id="tasbeeh" class="view"><div class="panel"><h2>السبحة</h2><div class="row"><button type="button" class="dhikr-tab active" id="digitalMode" onclick="setTasbeehMode('digital')">السبحة الإلكترونية</button><button type="button" class="secondary dhikr-tab" id="manualMode" onclick="setTasbeehMode('manual')">المسبحة اليدوية</button></div><div class="counter" id="tasbeehCount">0</div><div id="digitalTasbeeh"><button class="gold" style="display:block;width:100%;padding:22px;font-size:20px" onclick="tapTasbeeh()">اضغط للتسبيح</button></div><div id="manualTasbeeh" style="display:none;text-align:center">
+<section id="adhkar" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div><div class="panel"><h2>الأذكار 🌿</h2><p class="muted">اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».</p><div class="notice">كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.</div><div class="row" style="margin-top:10px"><button type="button" class="dhikr-tab active" data-dhikr="morning" onclick="showDhikr('morning')">الصباح</button><button type="button" class="secondary dhikr-tab" data-dhikr="evening" onclick="showDhikr('evening')">المساء</button><button type="button" class="secondary dhikr-tab" data-dhikr="sleep" onclick="showDhikr('sleep')">النوم</button><button type="button" class="secondary dhikr-tab" data-dhikr="afterPrayer" onclick="showDhikr('afterPrayer')">بعد الصلاة</button><button type="button" class="secondary dhikr-tab" data-dhikr="wake" onclick="showDhikr('wake')">الاستيقاظ</button><button type="button" class="secondary dhikr-tab" data-dhikr="misc" onclick="showDhikr('misc')">متنوعة</button></div><div class="row between" style="margin-top:13px"><strong id="dhikrTitle">أذكار الصباح</strong><span class="pill" id="dhikrScore">0 نقطة</span></div><div class="mini-progress" style="margin:9px 0"><span id="dhikrProgress" style="width:0%"></span></div><div id="dhikrItems"></div><p class="muted">تنبيه: روعي اختيار أذكار مشهورة من كتب الأذكار المأثورة، ومنها حصن المسلم. يُرجى مراجعة النصوص والأعداد في المصادر المعتمدة.</p></div></section>
+<section id="tasbeeh" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div><div class="panel"><h2>السبحة</h2><div class="row"><button type="button" class="dhikr-tab active" id="digitalMode" onclick="setTasbeehMode('digital')">السبحة الإلكترونية</button><button type="button" class="secondary dhikr-tab" id="manualMode" onclick="setTasbeehMode('manual')">المسبحة اليدوية</button></div><div class="counter" id="tasbeehCount">0</div><div id="digitalTasbeeh"><button class="gold" style="display:block;width:100%;padding:22px;font-size:20px" onclick="tapTasbeeh()">اضغط للتسبيح</button></div><div id="manualTasbeeh" style="display:none;text-align:center">
 <div class="real-tasbeeh-wrap">
   <button type="button" class="real-tasbeeh-hit" onclick="tapTasbeeh()" aria-label="حرّك حبة المسبحة للتسبيح">
     <svg id="realTasbeehSvg" viewBox="0 0 340 310" role="img" aria-label="مسبحة يدوية من 33 حبة">
@@ -126,8 +140,8 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 </div><div class="row" style="justify-content:center;margin-top:10px"><button class="secondary" onclick="resetTasbeeh()">تصفير العداد</button><button class="light" onclick="setPhrase('سبحان الله')">سبحان الله</button><button class="light" onclick="setPhrase('الحمد لله')">الحمد لله</button><button class="light" onclick="setPhrase('الله أكبر')">الله أكبر</button></div><p id="tasbeehPhrase" class="muted" style="text-align:center"></p></div></section>
 <section id="quiz" class="view"><div class="panel"><h2>🏆 مسابقة سؤال اليوم</h2><p class="muted">أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.</p><span class="pill">ثقافة إسلامية</span><h3 id="question" style="margin-top:13px"></h3><div id="answers"></div><p id="quizResult" class="muted"></p><div class="tile">نقاطك في المسابقة<strong id="points">0</strong></div><div class="panel" style="margin-top:14px"><h3>منافسة الأصدقاء</h3><p class="muted">تبغى تتحدى صديقك في سؤال اليوم؟ سجّل الدخول، وأنشئ رمز دعوة وشاركه معه.</p><div id="friendStatus" class="notice">سجّل الدخول من قسم «حسابي» لتجهيز دعوة المنافسة.</div><button class="gold" onclick="createFriendInvite()">إنشاء رمز دعوة</button><div id="friendInvite" class="muted" style="margin-top:9px"></div></div></div></section>
 <section id="stats" class="view"><div class="panel"><h2>إحصائياتي الشخصية</h2><p class="muted">هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.</p><div class="grid"><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div><div class="tile">التسبيحات<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المحددة<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة<strong id="sGoals">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div></div></div>
-<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div></div></section>
-<section id="leaderboard" class="view">
+<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
+<section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
   <div class="challenge-kicker">🏆 مجتمع حاسب نفسك</div>
   <h2 style="margin-top:7px">لوحة الصدارة</h2>
@@ -142,13 +156,10 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 <nav class="tabs" id="tabs">
 <button type="button" class="active" data-view="home"><span class="tabicon">⌂</span>الرئيسية</button>
 <button type="button" data-view="prayers"><span class="tabicon">☾</span>الصلاة</button>
-<button type="button" data-view="quran"><span class="tabicon">📖</span>القرآن</button>
-<button type="button" data-view="adhkar"><span class="tabicon">✿</span>الأذكار</button>
-<button type="button" data-view="tasbeeh"><span class="tabicon">◉</span>السبحة</button>
+<button type="button" data-view="worship"><span class="tabicon">📖</span>العبادات</button>
+<button type="button" data-view="stats"><span class="tabicon">🏆</span>إنجازاتي</button>
 <button type="button" data-view="quiz"><span class="tabicon">؟</span>السؤال</button>
-<button type="button" data-view="stats"><span class="tabicon">▥</span>إحصائياتي</button>
-<button type="button" data-view="leaderboard"><span class="tabicon">🏆</span>التصدر</button>
-<button type="button" data-view="account"><span class="tabicon">♙</span>حسابي</button>
+<button type="button" data-view="account"><span class="tabicon">♙</span>الحساب</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -159,7 +170,7 @@ const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'
 let db=Object.assign(blank(),safeLoad()||{});
 const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo(0,0);if(id==='stats')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':id);document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard()}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
   b.addEventListener('click',function(ev){
