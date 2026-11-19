@@ -777,14 +777,14 @@ async function renderLeaderboard(){
     if(error)throw error;
     if(!data||!data.length){box.textContent='لا يوجد مشاركون حتى الآن. كن أول من يتصدر!';return}
     box.innerHTML=data.map((u,i)=>`<div class="leader-row"><span class="leader-rank">${i+1}</span><span class="leader-name">${escapeQuranText(u.nickname||'مشارك')}</span><span class="leader-points">${Number(u.total_points)||0} نقطة</span></div>`).join('');
-  }catch(e){box.textContent='تعذر تحميل الصدارة. تأكد من إعداد جدول leaderboard في Supabase.';console.warn(e)}
+  }catch(e){box.textContent='تعذر تحميل الصدارة بسبب صلاحيات جدول leaderboard في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة.';console.warn(e)}
 }
 async function joinLeaderboard(){
   const u=await currentUser();
   if(!u){$('leaderboardStatus').textContent='للمشاركة، سجّل الدخول أولًا من قسم حسابي.';return}
   const nickname=$('nickname').value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
   const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة: '+error.message;return}
+  if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة بسبب صلاحيات جدول الصدارة في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة. ('+error.message+')';return}
   localStorage.setItem('hasibLeaderboardJoined','yes');
   $('leaderboardStatus').textContent='تم تفعيل مشاركتك! سيتم تحديث نقاطك مع أنشطتك القادمة.';
   renderLeaderboard();
@@ -1395,7 +1395,7 @@ if(sb){
   });
   sb.auth.getSession().then(async({data,error})=>{
     if(error)console.warn('Session restore:',error.message);
-    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount()}
+    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount();loadFriends();renderLeaderboard()}
   });
 }
 </script></body></html>
