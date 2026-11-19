@@ -286,7 +286,7 @@ header{position:relative;padding-top:76px!important}
   <div class="muted">حرّك الحبة بلمسة، وتابع عدد التسبيحات بالأعلى</div>
 </div>
 </div><div class="row" style="justify-content:center;margin-top:10px"><button class="secondary" onclick="resetTasbeeh()">تصفير العداد</button><button class="light" onclick="setPhrase('سبحان الله')">سبحان الله</button><button class="light" onclick="setPhrase('الحمد لله')">الحمد لله</button><button class="light" onclick="setPhrase('الله أكبر')">الله أكبر</button></div><p id="tasbeehPhrase" class="muted" style="text-align:center"></p></div></section>
-<section id="quiz" class="view"><div class="panel"><h2>🏆 مسابقة سؤال اليوم</h2><p class="muted">أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.</p><p id="quizAccessNote" class="notice" style="margin:8px 0">السؤال متاح للجميع حتى بدون حساب. سجّل الدخول لحفظ نقاطك ضمن حسابك.</p><span class="pill">ثقافة إسلامية</span><h3 id="question" style="margin-top:13px"></h3><div id="answers"></div><p id="quizResult" class="muted"></p><div class="tile">نقاطك في المسابقة<strong id="points">0</strong></div><div class="panel" style="margin-top:14px" id="friendsChallengePanel">
+<section id="quiz" class="view"><div class="panel"><h2>🏆 مسابقة سؤال اليوم</h2><h3 id="question" style="margin-top:13px"></h3><div id="answers"></div><p id="quizResult" class="muted" role="status" aria-live="polite"></p><div class="tile">نقاط المسابقة<strong id="points">0</strong></div><div class="panel" style="margin-top:14px" id="friendsChallengePanel">
 <h3>🤝 تحدي الأصدقاء</h3>
 <p class="muted">كوّن قائمة أصدقائك وتابعوا نقاطكم في أعمال الخير وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.</p>
 <div id="friendStatus" class="notice">سجّل الدخول أولًا لتبدأ تحدي الأصدقاء.</div>
@@ -529,7 +529,7 @@ async function shareApp(){
 function safeLoad(){try{const v=JSON.parse(localStorage.getItem('hasibNafsakData')||'null');return v&&typeof v==='object'?v:null}catch(e){console.warn('Local data could not be read',e);return null}}
 const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'سبحان الله',points:0,answers:{},reflections:{}});
 let db=Object.assign(blank(),safeLoad()||{});
-const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
+const todayKey=(()=>{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v={};parts.forEach(x=>v[x.type]=x.value);return v.year+'-'+v.month+'-'+v.day})();
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
 let pendingAccountNotice='';
 let pendingAccountReturnView='';
@@ -783,73 +783,107 @@ function nextDailyChallenge(){
 }
 function addGoal(){const preset=$('goalPreset')?.value;const x=preset==='custom'?($('goalCustomInput')?.value||'').trim():(preset||'').trim();if(!x)return;if(db.goals.some(g=>g.text===x&&!g.done)){alert('هذا الهدف موجود بالفعل في قائمتك.');return;}db.goals.push({text:x,done:false,createdAt:todayKey});trackAppEvent('goal_added');if($('goalCustomInput'))$('goalCustomInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;db.goals[i].completedAt=v?todayKey:null;save()}function removeGoal(i){db.goals.splice(i,1);save()}
 $('goalPreset')?.addEventListener('change',()=>{if($('goalCustomInput')){$('goalCustomInput').style.display=$('goalPreset').value==='custom'?'block':'none';if($('goalPreset').value==='custom')$('goalCustomInput').focus();}});
-const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
+const questions=[
+ {q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},
+ {q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},
+ {q:'كم عدد الصلوات المفروضة في اليوم والليلة؟',a:['ثلاث صلوات','خمس صلوات','سبع صلوات'],c:1},
+ {q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1},
+ {q:'كم عدد أجزاء القرآن الكريم؟',a:['20 جزءًا','30 جزءًا','40 جزءًا'],c:1},
+ {q:'ما الليلة التي هي خير من ألف شهر؟',a:['ليلة النصف من شعبان','ليلة القدر','ليلة العيد'],c:1},
+ {q:'ما أطول سورة في القرآن الكريم؟',a:['آل عمران','البقرة','النساء'],c:1}
+];
+let qi=Math.floor(new Date(todayKey+'T00:00:00+03:00').getTime()/86400000)%questions.length;
+let quizSubmitting=false;
 function renderQuiz(){
   const questionEl=$('question'),answersEl=$('answers');
   if(!questionEl||!answersEl)return;
-  // قائمة أسئلة محلية مضمونة حتى تظهر المسابقة للزائر دون انتظار تسجيل الدخول أو اتصال Supabase.
-  const fallbackQuestions=[
-    {q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},
-    {q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},
-    {q:'كم عدد الصلوات المفروضة في اليوم والليلة؟',a:['ثلاث صلوات','خمس صلوات','سبع صلوات'],c:1},
-    {q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1},
-    {q:'كم عدد أجزاء القرآن الكريم؟',a:['20 جزءًا','30 جزءًا','40 جزءًا'],c:1},
-    {q:'ما الليلة التي هي خير من ألف شهر؟',a:['ليلة النصف من شعبان','ليلة القدر','ليلة العيد'],c:1},
-    {q:'ما أطول سورة في القرآن الكريم؟',a:['آل عمران','البقرة','النساء'],c:1}
-  ];
-  const list=(Array.isArray(questions)&&questions.length)?questions:fallbackQuestions;
-  const index=((Math.floor(Date.now()/86400000)%list.length)+list.length)%list.length;
-  const q=list[index]||fallbackQuestions[0];
+  const index=((Math.floor(new Date(todayKey+'T00:00:00+03:00').getTime()/86400000)%questions.length)+questions.length)%questions.length;
   qi=index;
+  const q=questions[index];
   const signedIn=!!window.__hasibSignedIn;
   const answered=signedIn&&db.answers&&db.answers[todayKey]!==undefined;
   questionEl.textContent=q.q;
-  answersEl.innerHTML=q.a.map((a,i)=>`<button type="button" class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered?'disabled':''}>${a}</button>`).join('');
-  if($('quizResult'))$('quizResult').textContent=answered?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';
-  if($('points'))$('points').textContent=db.points||0;
-  if($('quizAccessNote'))$('quizAccessNote').textContent='السؤال والاختيارات متاحة للجميع. سجّل الدخول للمشاركة واحتساب النقاط؛ لا يمكن إرسال الإجابة دون حساب.';
+  answersEl.innerHTML=q.a.map((a,i)=>`<button type="button" class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered||quizSubmitting?'disabled':''}>${a}</button>`).join('');
+  if($('quizResult')&&!answered&&!quizSubmitting)$('quizResult').textContent='';
+  if($('quizResult')&&answered)$('quizResult').textContent='تم تسجيل إجابتك اليوم.';
+  if($('points'))$('points').textContent=String(db.quizPointsByDate?.[todayKey]??(db.answers?.[todayKey]!==undefined?10:0));
 }
 async function loadDailyQuizAnswer(){
   const user=await currentUser();if(!user||!sb)return;
   try{
-    const {data,error}=await sb.from('daily_quiz_answers').select('selected_answer,is_correct').eq('user_id',user.id).eq('answer_date',todayKey).maybeSingle();
+    const {data,error}=await sb.from('daily_quiz_answers')
+      .select('selected_answer,is_correct,points_awarded')
+      .eq('user_id',user.id).eq('answer_date',todayKey).maybeSingle();
     if(error)throw error;
-    if(data){db.answers[todayKey]=Number(data.selected_answer);persist();renderQuiz();}
+    if(data){
+      db.answers=db.answers||{};
+      db.quizPointsByDate=db.quizPointsByDate||{};
+      db.answers[todayKey]=Number(data.selected_answer);
+      db.quizPointsByDate[todayKey]=Number(data.points_awarded)||0;
+      persist();
+    }
   }catch(e){console.warn('تعذر تحميل إجابة سؤال اليوم:',e.message)}
 }
 async function answerQuiz(i){
+  if(quizSubmitting)return;
   const user=await currentUser();
   if(!user){
-    $('quizResult').textContent='سجّل دخولك للمشاركة في سؤال اليوم واحتساب نقاطك.';
-    msg('يلزم تسجيل الدخول للمشاركة في مسابقة سؤال اليوم.');
-    pendingAccountReturnView='quiz';go('account');updateAccount(null);return;
+    if($('quizResult'))$('quizResult').textContent='سجّل الدخول للمشاركة في السؤال.';
+    msg('سجّل الدخول للمشاركة في سؤال اليوم.');
+    pendingAccountReturnView='quiz';
+    go('account');
+    await updateAccount(null);
+    return;
   }
+  db.answers=db.answers||{};
   if(db.answers[todayKey]!==undefined){
-    $('quizResult').textContent='سبق أن أجبت عن سؤال اليوم. لا يمكن جمع النقاط مرة أخرى.';
+    if($('quizResult'))$('quizResult').textContent='سبق أن أجبت عن سؤال اليوم.';
     renderQuiz();return;
   }
-  const q=questions[qi];if(!q)return;
-  const buttons=$('answers').querySelectorAll('button');buttons.forEach(b=>b.disabled=true);
-  let ok=i===q.c,awarded=ok?10:0;
-  if(sb){
-    try{
-      const {data,error}=await sb.rpc('hn_submit_daily_quiz_answer',{p_answer_date:todayKey,p_question_index:qi,p_selected_answer:i,p_correct_answer:q.c});
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      if(!result)throw new Error('لم تصل نتيجة تسجيل الإجابة');
-      if(result.already_answered){
-        db.answers[todayKey]=Number(result.selected_answer);persist();
-        $('quizResult').textContent='سبق أن أجبت عن سؤال اليوم. لا يمكن جمع النقاط مرة أخرى.';renderQuiz();return;
-      }
-      ok=!!result.is_correct;awarded=Number(result.awarded_points)||0;
-    }catch(e){
-      buttons.forEach(b=>b.disabled=false);
-      $('quizResult').textContent='تعذر تثبيت إجابتك في الحساب. حاول مرة أخرى. ('+e.message+')';return;
+  const q=questions[qi];
+  if(!q||!Number.isInteger(i)||i<0||i>=q.a.length)return;
+  if(!sb){if($('quizResult'))$('quizResult').textContent='تعذر الاتصال بالخدمة. حاول مرة أخرى.';return;}
+  quizSubmitting=true;
+  const buttons=$('answers').querySelectorAll('button');
+  buttons.forEach(b=>b.disabled=true);
+  if($('quizResult'))$('quizResult').textContent='جارٍ تسجيل إجابتك...';
+  try{
+    const {data,error}=await sb.rpc('hn_submit_daily_quiz_answer',{
+      p_answer_date:todayKey,
+      p_question_index:qi,
+      p_selected_answer:i,
+      p_correct_answer:q.c
+    });
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(!result)throw new Error('لم تصل نتيجة تسجيل الإجابة');
+    db.answers=db.answers||{};
+    db.quizPointsByDate=db.quizPointsByDate||{};
+    if(result.already_answered){
+      db.answers[todayKey]=Number(result.selected_answer);
+      db.quizPointsByDate[todayKey]=Number(result.awarded_points)||0;
+      persist();
+      if($('quizResult'))$('quizResult').textContent='سبق أن أجبت عن سؤال اليوم.';
+      return;
     }
+    const awarded=Math.max(0,Number(result.awarded_points)||0);
+    const correct=!!result.is_correct;
+    // لا تُضاف النقاط إلا مرة واحدة بعد تأكيد قاعدة البيانات.
+    db.answers[todayKey]=i;
+    db.quizPointsByDate[todayKey]=awarded;
+    db.points=(Number(db.points)||0)+awarded;
+    trackAppEvent('quiz_answered');
+    save();
+    if($('quizResult'))$('quizResult').textContent=correct?'إجابة صحيحة! أُضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غدًا.';
+  }catch(e){
+    console.error('Daily quiz submission:',e);
+    if($('quizResult'))$('quizResult').textContent='تعذر تسجيل الإجابة. حاول مرة أخرى.';
+  }finally{
+    quizSubmitting=false;
+    const resultText=$('quizResult')?.textContent||'';
+    renderQuiz();
+    if(resultText && $('quizResult'))$('quizResult').textContent=resultText;
   }
-  trackAppEvent('quiz_answered');db.answers[todayKey]=i;if(awarded)db.points=(db.points||0)+awarded;save();
-  $('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غدًا.';
-  $('answers').querySelectorAll('button').forEach(b=>b.disabled=true);$('points').textContent=db.points||0;
 }
 function renderStats(){
  const d=day(),n=prayers.filter(p=>d.prayers?.[p]?.done).length;
@@ -1571,6 +1605,7 @@ async function finishAccountLogin(user){
   if(accountHydrationPromise&&accountHydrationUserId===user.id)return accountHydrationPromise;
   accountHydrationUserId=user.id;
   accountHydrationPromise=(async()=>{
+  window.__hasibSignedIn=true;
   // لا نستخدم الاسم المكتوب في نموذج الدخول لتغيير هوية الحساب؛ البريد هو المعروض، والبيانات مرتبطة بمعرّف حساب Supabase الثابت.
   const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
   if(saved.error){
@@ -1662,7 +1697,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;loadPrayerTimes(true)}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;loadPrayerTimes(true)}}});window.addEventListener('pageshow',()=>{updateNextPrayer();loadPrayerTimes(false)});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
@@ -1683,7 +1718,7 @@ if(sb){
           $('passwordRecoveryArea').style.display='block';
           msg('أدخل كلمة مرور جديدة لحسابك ثم اضغط حفظ كلمة المرور الجديدة.');
         }
-        if(event==='SIGNED_OUT'){await updateAccount(null);msg('تم تسجيل الخروج');renderQuiz();}
+        if(event==='SIGNED_OUT'){window.__hasibSignedIn=false;await updateAccount(null);msg('تم تسجيل الخروج');renderQuiz();}
       }catch(e){console.warn('Auth state UI refresh:',e)}
     },0);
   });
