@@ -533,8 +533,9 @@ const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMont
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
 let pendingAccountNotice='';
 let pendingAccountReturnView='';
+let pendingAccountAction='';
 let lastCreatedFriendCode='';
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz')loadFriends();if(id==='account')updateAccount()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
 function requireAccountForFeature(feature,returnView=''){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';pendingAccountReturnView=returnView;go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
@@ -766,11 +767,24 @@ function addGoal(){const preset=$('goalPreset')?.value;const x=preset==='custom'
 $('goalPreset')?.addEventListener('change',()=>{if($('goalCustomInput')){$('goalCustomInput').style.display=$('goalPreset').value==='custom'?'block':'none';if($('goalPreset').value==='custom')$('goalCustomInput').focus();}});
 const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
 function renderQuiz(){
-  const q=questions[qi],questionEl=$('question'),answersEl=$('answers');
+  const questionEl=$('question'),answersEl=$('answers');
   if(!questionEl||!answersEl)return;
-  if(!q){questionEl.textContent='لا يتوفر سؤال اليوم حاليًا.';answersEl.innerHTML='';return;}
+  // قائمة أسئلة محلية مضمونة حتى تظهر المسابقة للزائر دون انتظار تسجيل الدخول أو اتصال Supabase.
+  const fallbackQuestions=[
+    {q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},
+    {q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},
+    {q:'كم عدد الصلوات المفروضة في اليوم والليلة؟',a:['ثلاث صلوات','خمس صلوات','سبع صلوات'],c:1},
+    {q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1},
+    {q:'كم عدد أجزاء القرآن الكريم؟',a:['20 جزءًا','30 جزءًا','40 جزءًا'],c:1},
+    {q:'ما الليلة التي هي خير من ألف شهر؟',a:['ليلة النصف من شعبان','ليلة القدر','ليلة العيد'],c:1},
+    {q:'ما أطول سورة في القرآن الكريم؟',a:['آل عمران','البقرة','النساء'],c:1}
+  ];
+  const list=(Array.isArray(questions)&&questions.length)?questions:fallbackQuestions;
+  const index=((Math.floor(Date.now()/86400000)%list.length)+list.length)%list.length;
+  const q=list[index]||fallbackQuestions[0];
+  qi=index;
   const signedIn=!!window.__hasibSignedIn;
-  const answered=signedIn&&db.answers[todayKey]!==undefined;
+  const answered=signedIn&&db.answers&&db.answers[todayKey]!==undefined;
   questionEl.textContent=q.q;
   answersEl.innerHTML=q.a.map((a,i)=>`<button type="button" class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered?'disabled':''}>${a}</button>`).join('');
   if($('quizResult'))$('quizResult').textContent=answered?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';
@@ -1061,9 +1075,18 @@ async function enableQiblaCompass(){
 }
 
 // ===== تحدي الأصدقاء (يتطلب تشغيل SQL المرفق مرة واحدة في Supabase) =====
+async function resumePendingAccountAction(){
+  if(!pendingAccountAction)return;
+  const action=pendingAccountAction;
+  pendingAccountAction='';
+  if(action==='createFriendInvite'){
+    go('quiz');
+    await createFriendInvite();
+  }
+}
 async function createFriendInvite(){
   const user=await currentUser();
-  if(!user){requireAccountForFeature('لإنشاء رمز دعوة لتحدي الأصدقاء','quiz');return}
+  if(!user){pendingAccountAction='createFriendInvite';requireAccountForFeature('لإنشاء رمز دعوة لتحدي الأصدقاء','quiz');return}
   if(!sb){$('friendStatus').textContent='الخدمة غير متاحة حاليًا.';return}
   $('friendStatus').textContent='جارٍ إنشاء رمز الدعوة...';
   try{
@@ -1444,6 +1467,7 @@ async function signUp(){
       await updateAccount(data.user);
       msg('تم إنشاء الحساب وتسجيل الدخول بنجاح، أهلًا بك.');
       if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
+      await resumePendingAccountAction();
     }else{
       showResendConfirmation(true);msg('تم إنشاء الحساب. تحقق من بريدك لتأكيد الحساب، وإذا لم تصلك الرسالة اضغط «إعادة إرسال تأكيد البريد».');
     }
@@ -1467,6 +1491,7 @@ async function signIn(){
     await updateAccount(data.user);
     msg('تم تسجيل الدخول بنجاح، أهلًا بعودتك.');
     if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
+    await resumePendingAccountAction();
   }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='تسجيل الدخول'}
 }
@@ -1619,7 +1644,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
@@ -1633,6 +1658,7 @@ if(sb){
           await updateAccount(session.user);
           await loadSupportComments();
           loadFriends();renderLeaderboard();
+          await resumePendingAccountAction();
           msg('تم تسجيل الدخول بنجاح، أهلًا بعودتك.');
         }
         if(event==='PASSWORD_RECOVERY'){
