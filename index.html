@@ -1463,7 +1463,16 @@ async function updateAccount(){
   if($('headerProfile'))$('headerProfile').style.display='flex';
   if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
   if(loggedIn){
-    const accountLabel=u.email||'حسابي';
+    // اسم الحساب يُحفظ عند إنشاء الحساب ويُستعاد من بيانات المستخدم،
+    // ولا يُطلب من المستخدم إدخاله مرة أخرى عند تسجيل الدخول.
+    let savedName = u.user_metadata?.nickname || u.user_metadata?.full_name || '';
+    if(!savedName && sb){
+      try{
+        const {data:profile}=await sb.from('profiles').select('nickname').eq('id',u.id).maybeSingle();
+        savedName=profile?.nickname || '';
+      }catch(e){console.warn('Could not load saved profile name:',e)}
+    }
+    const accountLabel=savedName || u.email?.split('@')[0] || 'حسابي';
     $('headerNickname').textContent=accountLabel;
     $('nicknameDisplay').textContent=accountLabel;
     $('profileNickname').value=accountLabel;
