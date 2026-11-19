@@ -436,10 +436,22 @@ header{position:relative;padding-top:76px!important}
       <button type="button" class="secondary" onclick="go('guide')" style="width:100%">📘 دليل استخدام حاسب نفسك</button>
     </div>
     <div style="text-align:right;margin-top:18px">
-      <label for="supportComment" style="display:block;font-weight:800;margin-bottom:6px">اكتب تعليقك</label>
-      <textarea id="supportComment" placeholder="اكتب تعليقك أو اقتراحك هنا..." rows="3"></textarea>
-      <button type="button" class="secondary" onclick="saveSupportComment()">حفظ التعليق</button>
+      <h3 style="margin-bottom:8px">💬 ملاحظاتكم واقتراحاتكم</h3>
+      <p class="muted" style="line-height:1.8">شاركنا رأيك باسم مستعار، ولا تحتاج إلى إنشاء حساب. ستظهر الملاحظة للزوار بعد إرسالها.</p>
+      <label for="supportNickname" style="display:block;font-weight:800;margin:10px 0 6px">اسمك المستعار</label>
+      <input id="supportNickname" type="text" maxlength="40" placeholder="مثال: محب الخير" autocomplete="nickname">
+      <label for="supportComment" style="display:block;font-weight:800;margin:10px 0 6px">تعليقك أو اقتراحك</label>
+      <textarea id="supportComment" maxlength="1000" placeholder="اكتب ملاحظتك أو اقتراحك هنا..." rows="3"></textarea>
+      <button type="button" class="secondary" onclick="saveSupportComment()">إرسال التعليق</button>
       <p id="supportCommentStatus" class="muted" role="status" aria-live="polite"></p>
+    </div>
+    <div id="supportCommentsList" style="text-align:right;margin-top:18px">
+      <h3>💬 تعليقات المجتمع</h3><p class="muted">جاري تحميل التعليقات...</p>
+    </div>
+    <div id="supportAdminPanel" class="tile" style="display:none;text-align:right;margin-top:18px">
+      <h3>🛡️ إدارة التعليقات</h3>
+      <p class="muted">هذه اللوحة تظهر لحساب إدارة حاسب نفسك فقط.</p>
+      <div id="supportAdminComments"></div>
     </div>
   </div>
 </div>
@@ -1207,14 +1219,50 @@ function setLanguage(lang){
   applyCurrentLanguage();
 }
 
-function saveSupportComment(){
-  const value=$('supportComment')?.value.trim()||'';
-  if(!value){$('supportCommentStatus').textContent='اكتب تعليقك أولًا';return;}
-  const comments=JSON.parse(localStorage.getItem('hasibSupportComments')||'[]');
-  comments.push({text:value,createdAt:new Date().toISOString()});
-  localStorage.setItem('hasibSupportComments',JSON.stringify(comments));
+const SUPPORT_ADMIN_ID='b8999022-3244-4c28-9957-35ae17675670';
+function escapeSupportText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function saveSupportComment(){
+  const nickname=$('supportNickname')?.value.trim()||'';
+  const body=$('supportComment')?.value.trim()||'';
+  const status=$('supportCommentStatus');
+  if(!nickname){status.textContent='اكتب اسمًا مستعارًا أولًا';$('supportNickname').focus();return;}
+  if(nickname.length>40){status.textContent='الاسم المستعار يجب ألا يتجاوز 40 حرفًا';return;}
+  if(!body){status.textContent='اكتب تعليقك أولًا';$('supportComment').focus();return;}
+  if(body.length>1000){status.textContent='التعليق طويل جدًا؛ اختصره إلى 1000 حرف';return;}
+  if(!sb){status.textContent='تعذر الاتصال بالخدمة حاليًا';return;}
+  status.textContent='جارٍ إرسال تعليقك...';
+  const {error}=await sb.from('support_comments').insert({author_name:nickname,body});
+  if(error){console.warn('Support comment insert:',error);status.textContent='تعذر إرسال التعليق. تأكد من تنفيذ كود إعداد التعليقات في Supabase.';return;}
   $('supportComment').value='';
-  $('supportCommentStatus').textContent='تم حفظ تعليقك على هذا الجهاز، شكرًا لك 🤍';
+  status.textContent='وصل تعليقك بنجاح، شكرًا لمشاركتك 🤍';
+  await loadSupportComments();
+}
+async function loadSupportComments(){
+  const box=$('supportCommentsList');if(!box||!sb)return;
+  const {data,error}=await sb.from('support_comments').select('id,author_name,body,created_at,admin_reply,replied_at').order('created_at',{ascending:false}).limit(100);
+  if(error){box.innerHTML='<h3>💬 تعليقات المجتمع</h3><p class="muted">تعذر تحميل التعليقات. تأكد من إعداد جدول التعليقات في Supabase.</p>';console.warn('Load comments:',error.message);return;}
+  const comments=data||[];
+  box.innerHTML='<h3>💬 تعليقات المجتمع ('+comments.length+')</h3>'+(comments.length?comments.map(c=>`<article class="tile" style="margin:10px 0;text-align:right"><strong>${escapeSupportText(c.author_name)}</strong><p style="white-space:pre-wrap;line-height:1.8;margin:8px 0">${escapeSupportText(c.body)}</p><small class="muted">${new Date(c.created_at).toLocaleString('ar-SA')}</small>${c.admin_reply?`<div style="margin-top:12px;padding:10px;border-right:3px solid #16865b;background:rgba(22,134,91,.08);border-radius:8px"><strong>رد إدارة حاسب نفسك</strong><p style="white-space:pre-wrap;margin:6px 0">${escapeSupportText(c.admin_reply)}</p></div>`:''}</article>`).join(''):'<p class="muted">لا توجد تعليقات حتى الآن. كن أول من يشاركنا رأيه.</p>');
+  const user=await currentUser();
+  const adminPanel=$('supportAdminPanel');
+  if(user?.id===SUPPORT_ADMIN_ID){
+    adminPanel.style.display='block';
+    $('supportAdminComments').innerHTML=comments.length?comments.map(c=>`<article class="tile" style="margin:10px 0"><strong>${escapeSupportText(c.author_name)}</strong><p style="white-space:pre-wrap">${escapeSupportText(c.body)}</p><textarea id="supportReply_${c.id}" rows="2" maxlength="1000" placeholder="اكتب رد الإدارة...">${escapeSupportText(c.admin_reply||'')}</textarea><div class="row" style="gap:8px;margin-top:8px"><button type="button" onclick="replySupportComment(${c.id})">حفظ الرد</button><button type="button" class="secondary" onclick="deleteSupportComment(${c.id})">حذف التعليق</button></div></article>`).join(''):'<p class="muted">لا توجد تعليقات لإدارتها.</p>';
+  }else if(adminPanel){adminPanel.style.display='none';}
+}
+async function replySupportComment(id){
+  const user=await currentUser();if(user?.id!==SUPPORT_ADMIN_ID){alert('غير مصرح لك بهذا الإجراء');return;}
+  const reply=$('supportReply_'+id)?.value.trim()||'';
+  const {error}=await sb.from('support_comments').update({admin_reply:reply,replied_at:reply?new Date().toISOString():null}).eq('id',id);
+  if(error){alert('تعذر حفظ الرد: '+error.message);return;}
+  await loadSupportComments();
+}
+async function deleteSupportComment(id){
+  const user=await currentUser();if(user?.id!==SUPPORT_ADMIN_ID){alert('غير مصرح لك بهذا الإجراء');return;}
+  if(!confirm('هل تريد حذف هذا التعليق نهائيًا؟'))return;
+  const {error}=await sb.from('support_comments').delete().eq('id',id);
+  if(error){alert('تعذر حذف التعليق: '+error.message);return;}
+  await loadSupportComments();
 }
 
 async function saveProfile(){
@@ -1402,12 +1450,13 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+initWelcome();renderAll();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange(async(event,session)=>{
     await updateAccount();
     if(event==='SIGNED_IN'&&session?.user){
       await finishAccountLogin(session.user);
+      await loadSupportComments();
       msg('تم تأكيد البريد وتسجيل الدخول بنجاح');
     }
     if(event==='PASSWORD_RECOVERY'){
@@ -1418,7 +1467,7 @@ if(sb){
   });
   sb.auth.getSession().then(async({data,error})=>{
     if(error)console.warn('Session restore:',error.message);
-    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount();loadFriends();renderLeaderboard()}
+    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount();loadFriends();renderLeaderboard();loadSupportComments()}
   });
 }
 </script></body></html>
