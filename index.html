@@ -339,22 +339,31 @@ header{position:relative;padding-top:76px!important}
 <section id="account" class="view">
 <div class="panel">
   <h2>حسابك في حاسب نفسك</h2>
-  <p class="muted">أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.</p>
+  <p class="muted">بياناتك وإنجازاتك مرتبطة بحسابك عبر بريدك الإلكتروني. سجّل الدخول ببريدك وكلمة المرور، أو أنشئ حسابًا جديدًا بإضافة اسمك.</p>
   <div id="accountStatus" class="notice" style="display:none"></div>
   <div id="loggedOutArea">
-    <input id="nickname" placeholder="اسمك أو اسم مستعار (عند إنشاء الحساب)" autocomplete="nickname">
+    <div class="auth-actions" style="display:flex;gap:8px;margin-bottom:14px">
+      <button type="button" id="loginModeButton" onclick="setAuthMode('login')">تسجيل الدخول</button>
+      <button type="button" id="signupModeButton" class="secondary" onclick="setAuthMode('signup')">إنشاء حساب</button>
+    </div>
+    <div id="signupNameField" style="display:none">
+      <label for="nickname">الاسم</label>
+      <input id="nickname" placeholder="اكتب اسمك" autocomplete="name" maxlength="40">
+    </div>
+    <label for="email">البريد الإلكتروني</label>
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+    <label for="password">كلمة المرور</label>
     <div class="password-field" style="display:flex;align-items:center;gap:7px">
-      <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password" style="flex:1;min-width:0">
+      <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" style="flex:1;min-width:0">
       <button type="button" class="secondary password-toggle" onclick="togglePasswordVisibility('password',this)" aria-label="إظهار كلمة المرور" aria-pressed="false" style="padding:10px 12px;flex:0 0 auto">👁️</button>
     </div>
-    <div class="first-time-account-note" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
-      <strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أول مرة تستخدم حاسب نفسك؟</strong>
-      <span>إذا ما سبق لك إنشاء حساب، اختر «إنشاء حساب» أولًا. أما إذا كان لديك حساب بالفعل، فأدخل بريدك وكلمة المرور واضغط «تسجيل الدخول».</span>
+    <div class="first-time-account-note" id="authModeNote" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
+      <strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أهلًا بعودتك</strong>
+      <span>أدخل بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك واستعادة بياناتك.</span>
     </div>
     <div class="auth-actions">
       <button type="button" id="signInButton" onclick="signIn()">تسجيل الدخول</button>
-      <button type="button" id="signUpButton" class="secondary" onclick="signUp()">إنشاء حساب</button>
+      <button type="button" id="signUpButton" class="secondary" onclick="signUp()" style="display:none">إنشاء حساب</button>
     </div>
     <div class="auth-links" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px">
       <button type="button" class="text-button" onclick="sendPasswordReset()" style="background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">نسيت كلمة المرور؟</button>
@@ -555,7 +564,8 @@ const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textCo
 $('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
-function save(){persist();renderAll();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard()}
+function save(){persist();renderAll();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
+async function syncUserDataSilently(){try{if(!sb)return;const user=await currentUser();if(!user)return;const {error}=await sb.from('user_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Automatic account sync:',error.message)}catch(error){console.warn('Automatic account sync failed:',error)}}
 
 const prayerCityNames={Dammam:'الدمام','Al Khobar':'الخبر',Dhahran:'الظهران',Jubail:'الجبيل',Hofuf:'الهفوف والأحساء','Hafar Al Batin':'حفر الباطن',Riyadh:'الرياض','Al Kharj':'الخرج',"Al Majma'ah":'المجمعة','Wadi Al Dawasir':'وادي الدواسر',Makkah:'مكة المكرمة',Jeddah:'جدة',Taif:'الطائف',Rabigh:'رابغ',Madinah:'المدينة المنورة',Yanbu:'ينبع',Tabuk:'تبوك',Hail:'حائل',Buraydah:'بريدة',Abha:'أبها','Khamis Mushait':'خميس مشيط',Jazan:'جازان',Najran:'نجران',Arar:'عرعر',Sakaka:'سكاكا'};
 const prayerNames=[['Fajr','الفجر'],['Sunrise','الشروق'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']];
@@ -1219,6 +1229,17 @@ function setLanguage(lang){
   applyCurrentLanguage();
 }
 
+function saveSupportComment(){
+  const value=$('supportComment')?.value.trim()||'';
+  if(!value){$('supportCommentStatus').textContent='اكتب تعليقك أولًا';return;}
+  const comments=JSON.parse(localStorage.getItem('hasibSupportComments')||'[]');
+  comments.push({text:value,createdAt:new Date().toISOString()});
+  localStorage.setItem('hasibSupportComments',JSON.stringify(comments));
+  $('supportComment').value='';
+  $('supportCommentStatus').textContent='تم حفظ تعليقك على هذا الجهاز، شكرًا لك 🤍';
+}
+
+
 const SUPPORT_ADMIN_ID='b8999022-3244-4c28-9957-35ae17675670';
 function escapeSupportText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function saveSupportComment(){
@@ -1285,9 +1306,30 @@ async function saveProfile(){
   msg('تم حفظ الملف الشخصي بنجاح');
 }
 
+let authMode='login';
+function setAuthMode(mode){
+  authMode=mode==='signup'?'signup':'login';
+  const signup=authMode==='signup';
+  $('signupNameField').style.display=signup?'block':'none';
+  $('nickname').required=signup;
+  $('nickname').disabled=!signup;
+  if(!signup)$('nickname').value='';
+  $('email').autocomplete='email';
+  $('email').placeholder='البريد الإلكتروني';
+  $('signInButton').style.display=signup?'none':'inline-flex';
+  $('signUpButton').style.display=signup?'inline-flex':'none';
+  $('loginModeButton').classList.toggle('secondary',signup);
+  $('signupModeButton').classList.toggle('secondary',!signup);
+  $('password').autocomplete=signup?'new-password':'current-password';
+  $('authModeNote').innerHTML=signup
+    ? '<strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 إنشاء حساب جديد</strong><span>اكتب اسمك وبريدك الإلكتروني وكلمة المرور. ستُحفظ إنجازاتك في حسابك المرتبط ببريدك.</span>'
+    : '<strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أهلًا بعودتك</strong><span>أدخل بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك واستعادة بياناتك.</span>';
+}
+
 async function signUp(){
   if(!sb)return msg('خدمة الحساب غير متاحة الآن');
-  const email=$('email').value.trim(),password=$('password').value,nick=$('nickname').value.trim();
+  const email=$('email').value.trim().toLowerCase(),password=$('password').value,nick=$('nickname').value.trim();
+  if(!nick)return msg('اكتب اسمك أولًا');
   if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
   if(password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
   const button=$('signUpButton');button.disabled=true;button.textContent='جارٍ إنشاء الحساب...';
@@ -1309,7 +1351,7 @@ async function signUp(){
 }
 async function signIn(){
   if(!sb)return msg('خدمة الحساب غير متاحة الآن');
-  const email=$('email').value.trim(),password=$('password').value;
+  const email=$('email').value.trim().toLowerCase(),password=$('password').value;
   if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
   const button=$('signInButton');button.disabled=true;button.textContent='جارٍ تسجيل الدخول...';
   try{
@@ -1379,15 +1421,7 @@ async function saveRecoveredPassword(){
 
 async function finishAccountLogin(user){
   if(!user)return;
-  const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname||user.email?.split('@')[0]||'مشارك';
-  if(nick){
-    const profile=await sb.from('profiles').upsert({id:user.id,nickname:nick});
-    if(profile.error)console.warn('Profile update:',profile.error.message);
-    if(!user.user_metadata?.nickname){
-      const updated=await sb.auth.updateUser({data:{nickname:nick}});
-      if(updated.error)console.warn('Nickname metadata update:',updated.error.message);
-    }
-  }
+  // لا نستخدم الاسم المكتوب في نموذج الدخول لتغيير هوية الحساب؛ البريد هو المعروض، والبيانات مرتبطة بمعرّف حساب Supabase الثابت.
   const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
   if(saved.error){
     console.warn('Could not load user data:',saved.error.message);
@@ -1413,6 +1447,8 @@ async function finishAccountLogin(user){
 }
 async function signOut(){
   if(!sb)return;
+  // احفظ بيانات الحساب الحالي قبل تسجيل الخروج حتى لا تضيع آخر التغييرات.
+  await syncUserDataSilently();
   const {error}=await sb.auth.signOut();
   if(error){msg('تعذر تسجيل الخروج: '+error.message);return}
   msg('تم تسجيل الخروج');
@@ -1427,10 +1463,10 @@ async function updateAccount(){
   if($('headerProfile'))$('headerProfile').style.display='flex';
   if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
   if(loggedIn){
-    const nickname=u.user_metadata?.nickname||u.user_metadata?.full_name||u.email?.split('@')[0]||'مشارك';
-    $('headerNickname').textContent=nickname;
-    $('nicknameDisplay').textContent=nickname;
-    $('profileNickname').value=nickname;
+    const accountLabel=u.email||'حسابي';
+    $('headerNickname').textContent=accountLabel;
+    $('nicknameDisplay').textContent=accountLabel;
+    $('profileNickname').value=accountLabel;
     paintAvatar(u.user_metadata?.avatar_data||'');
     if($('profileEditArea')&&$('editProfileButton')){
       $('profileEditArea').style.display='none';
@@ -1450,7 +1486,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-initWelcome();renderAll();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+setAuthMode('login');initWelcome();renderAll();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange(async(event,session)=>{
     await updateAccount();
