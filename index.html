@@ -573,6 +573,36 @@ function changePrayerCity(city){
   if($('prayerCity'))$('prayerCity').value=city;
   persist();syncUserDataSilently();loadPrayerTimes(true);
 }
+function localPrayerTimesForCity(city,parts){
+  // حساب محلي احتياطي: Umm Al-Qura تقريبًا (الفجر 18.5° والعشاء 90 دقيقة بعد المغرب)
+  const coords=prayerCityCoords[city]||prayerCityCoords.Dammam,lat=coords[0],lon=coords[1];
+  const rad=Math.PI/180,deg=180/Math.PI;
+  const aa=Math.floor((14-parts.month)/12),yy=parts.year+4800-aa,mm=parts.month+12*aa-3;
+  const jdn=parts.day+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;
+  const dayNumber=jdn-0.5;
+  const T=(dayNumber-2451545.0)/36525;
+  const L0=(280.46646+T*(36000.76983+T*0.0003032))%360;
+  const M=357.52911+T*(35999.05029-0.0001537*T);
+  const e=0.016708634-T*(0.000042037+0.0000001267*T);
+  const C=Math.sin(M*rad)*(1.914602-T*(0.004817+0.000014*T))+Math.sin(2*M*rad)*(0.019993-0.000101*T)+Math.sin(3*M*rad)*0.000289;
+  const trueLong=L0+C;
+  const omega=125.04-1934.136*T;
+  const lambda=trueLong-0.00569-0.00478*Math.sin(omega*rad);
+  const obliq=23+(26+(21.448-T*(46.815+T*(0.00059-T*0.001813)))/60)/60+0.00256*Math.cos(omega*rad);
+  const decl=Math.asin(Math.sin(obliq*rad)*Math.sin(lambda*rad));
+  const y=Math.tan(obliq*rad/2)**2;
+  const L=L0*rad,Mr=M*rad;
+  const eq=4*deg*(y*Math.sin(2*L)-2*e*Math.sin(Mr)+4*e*y*Math.sin(Mr)*Math.cos(2*L)-0.5*y*y*Math.sin(4*L)-1.25*e*e*Math.sin(2*Mr));
+  const solarNoon=720-4*lon-eq+180; // minutes from UTC midnight converted to Saudi local (+3)
+  const hourAngle=alt=>{const c=(Math.sin(alt*rad)-Math.sin(lat*rad)*Math.sin(decl))/(Math.cos(lat*rad)*Math.cos(decl));return Math.acos(Math.max(-1,Math.min(1,c)))*deg*4};
+  const sunrise=solarNoon-hourAngle(-0.833),sunset=solarNoon+hourAngle(-0.833);
+  const fajr=solarNoon-hourAngle(-18.5);
+  const dhuhr=solarNoon+2;
+  const asrAlt=Math.atan(1/(1+Math.tan(Math.abs(lat*rad-decl))))*deg;
+  const asr=solarNoon+hourAngle(asrAlt);
+  const toTime=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(Math.floor(m%60)).padStart(2,'0')};
+  return {timings:{Fajr:toTime(fajr),Sunrise:toTime(sunrise),Dhuhr:toTime(dhuhr),Asr:toTime(asr),Maghrib:toTime(sunset),Isha:toTime(sunset+90)},city,date:apiDate(parts),calculatedLocally:true};
+}
 async function loadPrayerTimes(force=false){
   const select=$('prayerCity'),status=$('prayerTimesStatus'),homeSelect=$('homePrayerCitySelect');
   const saved=getSavedPrayerCity();
@@ -595,6 +625,11 @@ async function loadPrayerTimes(force=false){
   if(instantCache?.timings){
     prayerTimesData={...instantCache,city:saved,date};
     renderPrayerTimes();
+  } else {
+    // اعرض توقيتًا محسوبًا محليًا فورًا، فلا تبقى الصفحة فارغة إذا تعذر الاتصال.
+    prayerTimesData=localPrayerTimesForCity(saved,parts);
+    renderPrayerTimes();
+    try{localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));localStorage.setItem('hasibPrayerTimesLatest:'+saved,JSON.stringify(prayerTimesData));}catch(e){}
   }
   if(!force && sameDayCache?.timings){
     prayerTimesData=sameDayCache;renderPrayerTimes();return;
@@ -641,9 +676,11 @@ async function loadPrayerTimes(force=false){
       prayerTimesData={...fallback,city:saved};renderPrayerTimes();
       status.textContent=(fallback.date===date?'نعرض مواقيت اليوم المحفوظة':'تعذر الاتصال؛ نعرض آخر مواقيت محفوظة مؤقتًا')+' لمدينة '+(prayerCityNames[saved]||saved)+'. ستتحدث تلقائيًا عند عودة الاتصال.';
     }else{
-      status.textContent='تعذر تحميل المواقيت حاليًا. تأكد من الإنترنت ثم اضغط تحديث.';
-      if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل مواقيت '+(prayerCityNames[saved]||saved);
-      if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';
+      // لا تترك العداد فارغًا: احتفظ بالحساب المحلي لليوم واعرض توضيحًا مختصرًا.
+      prayerTimesData=localPrayerTimesForCity(saved,parts);
+      try{localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));localStorage.setItem('hasibPrayerTimesLatest:'+saved,JSON.stringify(prayerTimesData));}catch(e){}
+      renderPrayerTimes();
+      status.textContent='مواقيت محسوبة محليًا لمدينة '+(prayerCityNames[saved]||saved)+' عند تعذر الاتصال بالمصدر.';
     }
     if(homeSelect)homeSelect.value=saved;
   }
@@ -976,7 +1013,7 @@ async function trackVisit(){
 async function renderLeaderboard(){
   const box=$('leaderboardList');if(!box)return;
   const signedUser=await currentUser();
-  if(!signedUser){$('leaderboardStatus').textContent='للاشتراك في لوحة الصدارة، اضغط الزر ثم سجّل الدخول من قسم حسابي.';}
+  if(!signedUser){$('leaderboardStatus').textContent='🔐 سجّل الدخول أولًا للاشتراك في لوحة الصدارة.';}
   if(!sb){box.textContent='تعذر الاتصال بالخدمة.';return}
   box.textContent='جارٍ تحميل القائمة...';
   try{
@@ -988,7 +1025,7 @@ async function renderLeaderboard(){
 }
 async function joinLeaderboard(){
   const u=await currentUser();
-  if(!u){requireAccountForFeature('للاشتراك في لوحة الصدارة','leaderboard');return}
+  if(!u){$('leaderboardStatus').textContent='🔐 سجّل الدخول أولًا للاشتراك في لوحة الصدارة.';return}
   const nickname=$('nickname').value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
   const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
   if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة بسبب صلاحيات جدول الصدارة في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة. ('+error.message+')';return}
@@ -1160,7 +1197,7 @@ async function resumePendingAccountAction(){
 }
 async function createFriendInvite(){
   const user=await currentUser();
-  if(!user){pendingAccountAction='createFriendInvite';requireAccountForFeature('لإنشاء رمز دعوة لتحدي الأصدقاء','quiz');return}
+  if(!user){$('friendStatus').textContent='🔐 سجّل الدخول أولًا لإنشاء رمز دعوة.';return}
   if(!sb){$('friendStatus').textContent='الخدمة غير متاحة حاليًا.';return}
   $('friendStatus').textContent='جارٍ إنشاء رمز الدعوة...';
   try{
@@ -1187,7 +1224,7 @@ async function copyFriendInvite(){
 }
 async function acceptFriendInvite(){
   const user=await currentUser(),code=$('friendCodeInput').value.trim().toUpperCase();
-  if(!user){requireAccountForFeature('للانضمام إلى تحدي الأصدقاء','quiz');return}
+  if(!user){$('friendStatus').textContent='🔐 سجّل الدخول أولًا للانضمام إلى تحدي الأصدقاء.';return}
   if(!code){$('friendStatus').textContent='اكتب رمز الدعوة أولًا.';return}
   $('friendStatus').textContent='جارٍ التحقق من الرمز...';
   try{
