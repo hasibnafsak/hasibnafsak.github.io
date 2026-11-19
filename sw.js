@@ -1,28 +1,45 @@
-const CACHE_NAME = 'hasib-nafsak-offline-v1';
-const APP_SHELL = [
+const CACHE_NAME = 'hasib-nafsak-pwa-v2';
+const CORE_FILES = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon.svg'
 ];
+const CDN_FILES = [
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Cache each core file independently so an optional path/redirect
+    // cannot abort installation of the whole service worker.
+    for (const file of CORE_FILES) {
+      try {
+        const response = await fetch(file, { cache: 'reload' });
+        if (response && response.ok) await cache.put(file, response);
+      } catch (e) {}
+    }
+    // Supabase is optional for offline reading/local activity, but cache its
+    // browser library while online so it can be available offline as well.
+    for (const file of CDN_FILES) {
+      try {
+        const response = await fetch(file, { mode: 'cors' });
+        if (response && response.ok) await cache.put(file, response);
+      } catch (e) {}
+    }
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key.startsWith('hasib-nafsak-') && key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter(key => key.startsWith('hasib-nafsak-') && key !== CACHE_NAME)
+      .map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', event => {
@@ -30,23 +47,31 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-
-  // Never cache Supabase API/auth traffic: it must remain live and private.
+  // Never cache authenticated requests, database data, or user-specific API traffic.
   if (url.hostname.endsWith('supabase.co')) return;
 
-  // App shell: serve cached files offline, refresh from network when available.
+  // Cache-first for the app itself. This makes the saved app open immediately offline.
   if (url.origin === self.location.origin) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(request);
+      const cached = await cache.match(request, { ignoreSearch: true });
+      if (cached) {
+        // Refresh the cached copy quietly when online.
+        fetch(request).then(response => {
+          if (response && response.ok) cache.put(request, response.clone());
+        }).catch(() => {});
+        return cached;
+      }
       try {
         const response = await fetch(request);
         if (response && response.ok) await cache.put(request, response.clone());
         return response;
       } catch (error) {
-        if (cached) return cached;
         if (request.mode === 'navigate') {
-          return (await cache.match('./index.html')) || Response.error();
+          return (await cache.match('./index.html')) || new Response(
+            '<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>حاسب نفسك</title><body style="font-family:Arial;text-align:center;padding:30px"><h2>حاسب نفسك</h2><p>افتح الموقع مرة واحدة بالإنترنت حتى يتم حفظه للعمل دون اتصال.</p></body></html>',
+            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+          );
         }
         return Response.error();
       }
@@ -54,20 +79,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache static libraries, images and Quran text after they have been fetched once.
-  const cacheableHost =
-    url.hostname === 'cdn.jsdelivr.net' ||
-    url.hostname === 'images.unsplash.com' ||
-    url.hostname.includes('quran') ||
-    url.hostname.includes('alquran');
-
-  if (cacheableHost) {
+  // Cache static CDN libraries and decorative images after successful online fetch.
+  const isSupabaseLibrary = url.hostname === 'cdn.jsdelivr.net';
+  const isDecorativeImage = url.hostname === 'images.unsplash.com';
+  if (isSupabaseLibrary || isDecorativeImage) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       const cached = await cache.match(request);
+      if (cached) return cached;
       try {
         const response = await fetch(request);
-        if (response && response.ok) await cache.put(request, response.clone());
+        if (response && (response.ok || response.type === 'opaque')) {
+          await cache.put(request, response.clone());
+        }
         return response;
       } catch (error) {
         return cached || Response.error();

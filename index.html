@@ -1289,10 +1289,10 @@ if(sb){
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
-      console.warn('تعذر تفعيل وضع العمل دون إنترنت:', err);
-    });
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(function (registration) { registration.update().catch(function(){}); })
+      .catch(function (error) { console.warn('Offline support unavailable:', error); });
   });
 }
 </script>
