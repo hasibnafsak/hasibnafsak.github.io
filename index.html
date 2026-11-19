@@ -303,8 +303,8 @@ header{position:relative;padding-top:76px!important}
 <h3 style="margin-top:18px">أصدقائي</h3>
 <div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
 </div></div></section>
-<section id="stats" class="view"><div class="panel"><h2>إحصائياتي الشخصية</h2><p class="muted">هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.</p><div class="grid"><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div><div class="tile">التسبيحات<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المحددة<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة<strong id="sGoals">0</strong></div><div class="tile">تحدي الخطوة الصالحة<strong id="sChallengeDone">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div></div></div>
-<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div><p class="muted" style="font-size:12px">تعرض الملخصات الأيام المسجلة في حسابك؛ الأيام السابقة التي لم تُحفظ بياناتها لا يمكن استعادتها تلقائيًا.</p></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
+<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>إنجازاتك محفوظة لك</h2><p>سجّل الدخول لعرض صلواتك وتسبيحاتك وأهدافك ونقاطك وملخصاتك الشخصية.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائياتي الشخصية</h2><p class="muted">هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.</p><div class="grid"><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div><div class="tile">التسبيحات<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المحددة<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة<strong id="sGoals">0</strong></div><div class="tile">تحدي الخطوة الصالحة<strong id="sChallengeDone">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div></div></div>
+<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div><p class="muted" style="font-size:12px">تعرض الملخصات الأيام المسجلة في حسابك؛ الأيام السابقة التي لم تُحفظ بياناتها لا يمكن استعادتها تلقائيًا.</p></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></div></section>
 <section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
   <div class="challenge-kicker">🏆 مجتمع حاسب نفسك</div>
@@ -945,6 +945,11 @@ async function answerQuiz(i){
   }
 }
 function renderStats(){
+ const signedIn=!!window.__hasibSignedIn;
+ const notice=$('statsLoginNotice'),privateContent=$('statsPrivateContent');
+ if(notice)notice.style.display=signedIn?'none':'block';
+ if(privateContent)privateContent.style.display=signedIn?'block':'none';
+ if(!signedIn)return;
  const d=day(),n=prayers.filter(p=>d.prayers?.[p]?.done).length;
  $('sPrayerToday').textContent=n+' / 5';$('sPagesToday').textContent=d.pages||0;$('sPagesTotal').textContent=db.quranTotal||0;$('sTasbeeh').textContent=db.tasbeeh||0;$('sDhikr').textContent=countDhikrToday();$('sGoals').textContent=db.goals.filter(g=>g.done).length;
  if($('sChallengeDone'))$('sChallengeDone').textContent=d.challengeDone?1:0;
@@ -1698,6 +1703,13 @@ async function finishAccountLogin(user){
   try{return await accountHydrationPromise;}
   finally{accountHydrationPromise=null;accountHydrationUserId=null;}
 }
+function clearPrivateViewAfterSignOut(){
+  window.__hasibSignedIn=false;
+  db=blank();
+  try{localStorage.removeItem('hasibNafsakData')}catch(e){}
+  renderAll();
+  renderStats();
+}
 async function signOut(){
   if(!sb)return;
   // احفظ بيانات الحساب الحالي قبل تسجيل الخروج حتى لا تضيع آخر التغييرات.
@@ -1705,7 +1717,7 @@ async function signOut(){
   const {error}=await sb.auth.signOut();
   if(error){msg('تعذر تسجيل الخروج: '+error.message);return}
   msg('تم تسجيل الخروج');
-  window.__hasibSignedIn=false;
+  clearPrivateViewAfterSignOut();
   await updateAccount();
 }
 async function updateAccount(userOverride=null){
@@ -1747,6 +1759,7 @@ async function updateAccount(userOverride=null){
     $('headerNickname').textContent='حسابي';
     paintAvatar('');
   }
+  if(typeof renderStats==='function')renderStats();
 }
 function exportData(){
   const backup={app:'hasib-nafsak',version:1,exportedAt:new Date().toISOString(),data:db};
@@ -1777,7 +1790,7 @@ if(sb){
           $('passwordRecoveryArea').style.display='block';
           msg('أدخل كلمة مرور جديدة لحسابك ثم اضغط حفظ كلمة المرور الجديدة.');
         }
-        if(event==='SIGNED_OUT'){window.__hasibSignedIn=false;await updateAccount(null);msg('تم تسجيل الخروج');renderQuiz();}
+        if(event==='SIGNED_OUT'){clearPrivateViewAfterSignOut();await updateAccount(null);msg('تم تسجيل الخروج');renderQuiz();}
       }catch(e){console.warn('Auth state UI refresh:',e)}
     },0);
   });
