@@ -82,7 +82,7 @@ header{position:relative;padding-top:76px!important}
 .crop-card .row{justify-content:center;margin-top:12px}
 #avatarZoom{accent-color:var(--g)}
 
-.auth-actions{display:flex;flex-direction:row-reverse;gap:10px;margin-top:10px}
+.password-toggle{min-width:48px;font-size:18px;line-height:1}\n.auth-actions{display:flex;flex-direction:row-reverse;gap:10px;margin-top:10px}
 .auth-actions button{flex:1;min-width:0}
 .auth-actions button:disabled{opacity:.6;cursor:wait}
 
@@ -344,7 +344,10 @@ header{position:relative;padding-top:76px!important}
   <div id="loggedOutArea">
     <input id="nickname" placeholder="اسمك أو اسم مستعار (عند إنشاء الحساب)" autocomplete="nickname">
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
-    <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password">
+    <div class="password-field" style="display:flex;align-items:center;gap:7px">
+      <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password" style="flex:1;min-width:0">
+      <button type="button" class="secondary password-toggle" onclick="togglePasswordVisibility('password',this)" aria-label="إظهار كلمة المرور" aria-pressed="false" style="padding:10px 12px;flex:0 0 auto">👁️</button>
+    </div>
     <div class="first-time-account-note" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
       <strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أول مرة تستخدم حاسب نفسك؟</strong>
       <span>إذا ما سبق لك إنشاء حساب، اختر «إنشاء حساب» أولًا. أما إذا كان لديك حساب بالفعل، فأدخل بريدك وكلمة المرور واضغط «تسجيل الدخول».</span>
@@ -419,6 +422,14 @@ header{position:relative;padding-top:76px!important}
     <p class="muted" style="font-size:12px;line-height:1.8">
       دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍
     </p>
+    <div style="display:grid;gap:9px;margin:16px 0">
+      <a href="https://wa.me/966540929003" target="_blank" rel="noopener noreferrer"
+         style="display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 16px;border-radius:12px;background:#16865b;color:#fff;text-decoration:none;font-weight:800">
+        <span style="font-size:20px">◉</span><span>تواصل مع المبدع أبو سعد عبر واتساب</span>
+      </a>
+      <button type="button" class="secondary" onclick="showInstallGuide()" style="width:100%">📲 طريقة إضافة حاسب نفسك إلى الشاشة الرئيسية</button>
+      <button type="button" class="secondary" onclick="go('guide')" style="width:100%">📘 دليل استخدام حاسب نفسك</button>
+    </div>
     <div style="text-align:right;margin-top:18px">
       <label for="supportComment" style="display:block;font-weight:800;margin-bottom:6px">اكتب تعليقك</label>
       <textarea id="supportComment" placeholder="اكتب تعليقك أو اقتراحك هنا..." rows="3"></textarea>
@@ -428,6 +439,21 @@ header{position:relative;padding-top:76px!important}
   </div>
 </div>
 <div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
+</section>
+<section id="guide" class="view">
+  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('account')">← العودة إلى الحساب</button></div>
+  <div class="panel"><div class="challenge-kicker">📘 دليل المستخدم</div><h2 style="margin-top:7px">دليل استخدام حاسب نفسك</h2><p class="muted" style="line-height:1.9">مرحبًا بك! هذا الدليل يشرح أقسام الموقع وطريقة الاستفادة من أدواته خطوة بخطوة.</p></div>
+  <div class="panel"><h3>1. إنشاء حساب وتسجيل الدخول</h3><ol style="line-height:2"><li>افتح قسم «حسابي».</li><li>لأول مرة، أدخل اسمًا مستعارًا وبريدك الإلكتروني وكلمة مرور، ثم اضغط «إنشاء حساب».</li><li>افتح رسالة تأكيد البريد واضغط رابط التأكيد.</li><li>إذا كان لديك حساب سابق، أدخل البريد وكلمة المرور واضغط «تسجيل الدخول».</li><li>إذا نسيت كلمة المرور، استخدم «نسيت كلمة المرور؟». وإذا لم تصلك رسالة التأكيد، استخدم «إعادة إرسال رسالة تأكيد البريد».</li></ol></div>
+  <div class="panel"><h3>2. متابعة الصلوات</h3><p style="line-height:2">من قسم «الصلاة» اختر مدينتك لمشاهدة المواقيت، ثم سجّل الصلوات بعد أدائها وحدد طريقة ومكان الصلاة. يمكنك كذلك استخدام اتجاه القبلة بعد السماح للموقع بالوصول إلى موقعك.</p></div>
+  <div class="panel"><h3>3. القرآن الكريم والورد اليومي</h3><p style="line-height:2">من «العبادات» افتح القرآن الكريم، واختر السورة، واستخدم البحث عن آية عند الحاجة. سجّل الصفحات التي قرأتها من الورد اليومي، واحفظ موضع القراءة لتعود إليه لاحقًا.</p></div>
+  <div class="panel"><h3>4. الأذكار والتسبيح</h3><p style="line-height:2">اختر قسم الأذكار مثل الصباح أو المساء أو بعد الصلاة، واقرأ الذكر ثم اضغط «تمت القراءة». وفي قسم المسبحة اختر الإلكترونية أو اليدوية واضغط للعدّ.</p></div>
+  <div class="panel"><h3>5. سؤال اليوم والمسابقة</h3><p style="line-height:2">افتح تبويب «السؤال»، اقرأ سؤال اليوم واختر إجابتك. تتجدد المسابقة يوميًا، وتظهر نتيجة إجابتك ونقاط المسابقة في نفس القسم.</p></div>
+  <div class="panel"><h3>6. تحدي الأصدقاء</h3><ol style="line-height:2"><li>سجّل الدخول أولًا.</li><li>اضغط «إنشاء رمز دعوة» وشارك الرمز مع صديقك.</li><li>يدخل صديقك الرمز في خانة «عندك رمز من صديق؟» ثم يضغط «انضمام».</li><li>استخدم «تحديث الأصدقاء» لمشاهدة القائمة.</li></ol></div>
+  <div class="panel"><h3>7. الإنجازات ولوحة الصدارة</h3><p style="line-height:2">من «إنجازاتي» راجع إحصائياتك اليومية والأسبوعية والشهرية. ويمكنك فتح لوحة الصدارة للاطلاع على ترتيب المشاركين. الاشتراك في الصدارة يتطلب تسجيل الدخول والاتصال بالإنترنت.</p></div>
+  <div class="panel"><h3>8. النسخة الاحتياطية وتصدير البيانات</h3><p style="line-height:2">من قسم الحساب اختر «تصدير بياناتي» لحفظ نسخة من بياناتك على جهازك. ولإرجاع نسخة محفوظة، اختر «استيراد نسخة» وحدد ملف النسخة الاحتياطية الصحيح. احتفظ بالملف في مكان آمن.</p></div>
+  <div class="panel"><h3>9. إضافة الموقع إلى شاشة الآيفون الرئيسية</h3><ol style="line-height:2"><li>افتح الموقع من متصفح Safari.</li><li>اضغط زر المشاركة أسفل الشاشة.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». ستظهر أيقونة حاسب نفسك على الشاشة.</li></ol><p class="notice">للاستخدام دون اتصال، افتح الموقع أول مرة بالإنترنت وانتظر تحميله. بعض الخدمات مثل تسجيل الدخول والمزامنة والصدارة تحتاج اتصالًا.</p></div>
+  <div class="panel"><h3>10. التواصل والدعم</h3><p style="line-height:2">للتواصل مع المبدع أبو سعد أو إرسال اقتراح، ارجع إلى قسم الحساب واستخدم زر واتساب أو نموذج التعليقات والاقتراحات.</p><a href="https://wa.me/966540929003" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#16865b;color:white;text-decoration:none;font-weight:800">تواصل عبر واتساب</a></div>
+  <div class="panel"><p class="muted" style="line-height:1.9">نسأل الله أن يجعل هذا العمل نافعًا، وأن يعيننا وإياكم على ذكره وشكره وحسن عبادته 🤍</p><button type="button" class="gold" onclick="go('account')" style="width:100%">العودة إلى الحساب</button></div>
 </section>
 </main>
 
@@ -458,6 +484,23 @@ header{position:relative;padding-top:76px!important}
 'use strict';
 const $=id=>document.getElementById(id);
 
+function togglePasswordVisibility(inputId,button){
+  const field=$(inputId);if(!field)return;
+  const reveal=field.type==='password';
+  field.type=reveal?'text':'password';
+  if(button){
+    button.textContent=reveal?'🙈':'👁️';
+    button.setAttribute('aria-label',reveal?'إخفاء كلمة المرور':'إظهار كلمة المرور');
+    button.setAttribute('aria-pressed',reveal?'true':'false');
+  }
+}
+function showInstallGuide(){
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const message=isIOS
+    ?'لإضافة حاسب نفسك إلى شاشة الآيفون: افتح الموقع في Safari، اضغط زر المشاركة، اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».'
+    :'افتح الموقع من متصفح يدعم التثبيت، ثم افتح قائمة المتصفح واختر «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق» إذا ظهر الخيار.';
+  alert(message);
+}
 async function shareApp(){
   const shareUrl=window.location.origin+window.location.pathname;
   const shareData={title:'حاسب نفسك',text:'جرّب تطبيق حاسب نفسك — رفيقك اليومي للصلاة والقرآن والأذكار ومحاسبة النفس.',url:shareUrl};
@@ -482,7 +525,7 @@ const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'
 let db=Object.assign(blank(),safeLoad()||{});
 const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':id);document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz')loadFriends()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz')loadFriends()}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
   b.addEventListener('click',function(ev){
