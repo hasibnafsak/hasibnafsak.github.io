@@ -345,9 +345,22 @@ header{position:relative;padding-top:76px!important}
     <input id="nickname" placeholder="اسمك أو اسم مستعار (عند إنشاء الحساب)" autocomplete="nickname">
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
     <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password">
+    <div class="first-time-account-note" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
+      <strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أول مرة تستخدم حاسب نفسك؟</strong>
+      <span>إذا ما سبق لك إنشاء حساب، اختر «إنشاء حساب» أولًا. أما إذا كان لديك حساب بالفعل، فأدخل بريدك وكلمة المرور واضغط «تسجيل الدخول».</span>
+    </div>
     <div class="auth-actions">
       <button type="button" id="signInButton" onclick="signIn()">تسجيل الدخول</button>
       <button type="button" id="signUpButton" class="secondary" onclick="signUp()">إنشاء حساب</button>
+    </div>
+    <div class="auth-links" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px">
+      <button type="button" class="text-button" onclick="sendPasswordReset()" style="background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">نسيت كلمة المرور؟</button>
+      <button type="button" id="resendConfirmButton" class="text-button" onclick="resendConfirmationEmail()" style="display:none;background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">إعادة إرسال تأكيد البريد</button>
+    </div>
+    <div id="passwordRecoveryArea" style="display:none;margin-top:14px">
+      <label for="newPassword">كلمة المرور الجديدة</label>
+      <input id="newPassword" type="password" autocomplete="new-password" placeholder="أدخل كلمة مرور جديدة (6 أحرف على الأقل)">
+      <button type="button" class="gold" onclick="saveRecoveredPassword()">حفظ كلمة المرور الجديدة</button>
     </div>
   </div>
   <div id="loggedInArea" style="display:none">
@@ -938,7 +951,7 @@ const translations = {
 'ابدأ رحلتك':'Begin your journey','ابدأ يومك بخطوة':'Start your day with one step','رحلتك الإيمانية':'Your spiritual journey',
 'حسابك في حاسب نفسك':'Your Hasib Nafsaka Account','أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.':'Enter your email and password. Sign in if you already have an account, or create a new one.',
 'جارٍ التحقق من حالة الحساب...':'Checking account status...','اسمك أو اسم مستعار (عند إنشاء الحساب)':'Your name or nickname (when creating an account)',
-'البريد الإلكتروني':'Email address','كلمة المرور (6 أحرف على الأقل)':'Password (at least 6 characters)','تسجيل الدخول':'Sign in','إنشاء حساب':'Create account',
+'البريد الإلكتروني':'Email address','كلمة المرور (6 أحرف على الأقل)':'Password (at least 6 characters)','تسجيل الدخول':'Sign in','إنشاء حساب':'Create account','نسيت كلمة المرور؟':'Forgot password?','إعادة إرسال تأكيد البريد':'Resend confirmation email','كلمة المرور الجديدة':'New password','أدخل كلمة مرور جديدة (6 أحرف على الأقل)':'Enter a new password (at least 6 characters)','حفظ كلمة المرور الجديدة':'Save new password',
 'الاسم المستعار':'Nickname','اكتب الاسم الذي سيظهر للآخرين':'Enter the name others will see','تغيير صورة الحساب':'Change profile picture',
 'إزالة الصورة':'Remove picture','حفظ الملف الشخصي':'Save profile','تعديل الملف الشخصي':'Edit profile',
 'تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.':'Signed in successfully. Your data is linked to your account.',
@@ -1193,7 +1206,7 @@ async function signUp(){
       await finishAccountLogin(data.user);
       msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');
     }else{
-      msg('تم إنشاء الحساب. أرسلنا رسالة تأكيد إلى بريدك إذا كان تأكيد البريد مفعّلًا. افتح الرسالة من نفس المتصفح أو ارجع إلى الموقع بعد التأكيد.');
+      showResendConfirmation(true);msg('تم إنشاء الحساب. تحقق من بريدك لتأكيد الحساب، وإذا لم تصلك الرسالة اضغط «إعادة إرسال تأكيد البريد».');
     }
   }catch(error){console.error('Sign up:',error);msg('حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='إنشاء حساب'}
@@ -1207,7 +1220,7 @@ async function signIn(){
     const {data,error}=await sb.auth.signInWithPassword({email,password});
     if(error){
       const em=String(error.message||'').toLowerCase();
-      if(em.includes('email not confirmed'))msg('البريد الإلكتروني غير مؤكد. افتح رسالة التأكيد أولًا، أو أعد إرسالها من صفحة الحساب.');
+      if(em.includes('email not confirmed')){showResendConfirmation(true);msg('البريد الإلكتروني غير مؤكد. أعد إرسال رسالة التأكيد من الرابط الظاهر أسفل الأزرار.');}
       else msg('تعذر تسجيل الدخول: '+error.message);
       return;
     }
@@ -1216,6 +1229,58 @@ async function signIn(){
   }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='تسجيل الدخول'}
 }
+function showResendConfirmation(show){
+  const button=$('resendConfirmButton');
+  if(button)button.style.display=show?'inline-flex':'none';
+}
+async function sendPasswordReset(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim();
+  if(!email)return msg('اكتب بريدك الإلكتروني أولًا، ثم اضغط نسيت كلمة المرور.');
+  try{
+    const redirectUrl=window.location.origin+window.location.pathname;
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl});
+    if(error)throw error;
+    msg('إذا كان البريد مسجلًا لدينا، فستصلك رسالة لإعادة تعيين كلمة المرور. افتح الرابط من نفس الجهاز.');
+  }catch(error){
+    console.error('Password reset:',error);
+    msg('تعذر إرسال رابط استعادة كلمة المرور: '+(error.message||'حاول مرة أخرى'));
+  }
+}
+async function resendConfirmationEmail(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim();
+  if(!email)return msg('اكتب البريد الإلكتروني الذي سجلت به أولًا.');
+  try{
+    const redirectUrl=window.location.origin+window.location.pathname;
+    const {error}=await sb.auth.resend({
+      type:'signup',
+      email,
+      options:{emailRedirectTo:redirectUrl}
+    });
+    if(error)throw error;
+    msg('تم طلب إعادة إرسال رسالة التأكيد. تحقق من صندوق الوارد والرسائل غير المرغوب فيها.');
+  }catch(error){
+    console.error('Resend confirmation:',error);
+    msg('تعذر إعادة إرسال رسالة التأكيد: '+(error.message||'تحقق من البريد وحاول لاحقًا'));
+  }
+}
+async function saveRecoveredPassword(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const password=$('newPassword').value;
+  if(!password||password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  try{
+    const {error}=await sb.auth.updateUser({password});
+    if(error)throw error;
+    $('newPassword').value='';
+    $('passwordRecoveryArea').style.display='none';
+    msg('تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.');
+  }catch(error){
+    console.error('Password update:',error);
+    msg('تعذر تغيير كلمة المرور: '+(error.message||'حاول مرة أخرى'));
+  }
+}
+
 async function finishAccountLogin(user){
   if(!user)return;
   const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname||user.email?.split('@')[0]||'مشارك';
@@ -1279,6 +1344,10 @@ if(sb){
       await finishAccountLogin(session.user);
       msg('تم تأكيد البريد وتسجيل الدخول بنجاح');
     }
+    if(event==='PASSWORD_RECOVERY'){
+      $('passwordRecoveryArea').style.display='block';
+      msg('أدخل كلمة مرور جديدة لحسابك ثم اضغط حفظ كلمة المرور الجديدة.');
+    }
     if(event==='SIGNED_OUT')msg('تم تسجيل الخروج');
   });
   sb.auth.getSession().then(async({data,error})=>{
@@ -1286,15 +1355,4 @@ if(sb){
     if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount()}
   });
 }
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(function (registration) { registration.update().catch(function(){}); })
-      .catch(function (error) { console.warn('Offline support unavailable:', error); });
-  });
-}
-</script>
-
-</body></html>
+</script></body></html>
