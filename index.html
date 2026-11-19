@@ -562,20 +562,60 @@ function saudiDateTime(parts,minutes){return new Date(Date.UTC(parts.year,parts.
 function formatPrayerTime(value){const mins=timeMinutes(value);if(mins===null)return '—';const d=new Date(Date.UTC(2020,0,1,Math.floor(mins/60),mins%60));return new Intl.DateTimeFormat('ar-SA',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'UTC'}).format(d)}
 function validPrayerCity(city){const select=$('prayerCity');return !!city&&!!select&&Array.from(select.options).some(o=>o.value===city)}
 function getSavedPrayerCity(){const fromDb=db?.settings?.prayerCity;const fromLocal=localStorage.getItem('hasibPrayerCity');const city=validPrayerCity(fromDb)?fromDb:(validPrayerCity(fromLocal)?fromLocal:'Dammam');localStorage.setItem('hasibPrayerCity',city);if(!db.settings)db.settings={};db.settings.prayerCity=city;return city}
-function changePrayerCity(city){if(!validPrayerCity(city))return;localStorage.setItem('hasibPrayerCity',city);if(!db.settings)db.settings={};db.settings.prayerCity=city;persist();syncUserDataSilently();loadPrayerTimes(true)}
+function changePrayerCity(city){
+  if(!validPrayerCity(city))return;
+  localStorage.setItem('hasibPrayerCity',city);
+  if(!db.settings)db.settings={};
+  db.settings.prayerCity=city;
+  if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=city;
+  if($('prayerCity'))$('prayerCity').value=city;
+  persist();syncUserDataSilently();loadPrayerTimes(true);
+}
 async function loadPrayerTimes(force=false){
-  const select=$('prayerCity'),status=$('prayerTimesStatus');if(!select||!status)return;
-  const saved=getSavedPrayerCity();if(select.value!==saved)select.value=saved;if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=saved;
+  const select=$('prayerCity'),status=$('prayerTimesStatus'),homeSelect=$('homePrayerCitySelect');
+  const saved=getSavedPrayerCity();
+  if(homeSelect)homeSelect.value=saved;
+  if(select)select.value=saved;
+  if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[saved]||saved);
+  if(!status||!select)return;
   const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+saved+':'+date;
-  if(!force){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.timings){prayerTimesData=cached;renderPrayerTimes();return}}catch(e){}}
+  if(!force){
+    try{
+      const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
+      if(cached?.timings){prayerTimesData=cached;renderPrayerTimes();return;}
+    }catch(e){}
+  }
   status.textContent='جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
   try{
-    const url='https://api.aladhan.com/v1/timingsByCity/'+date+'?city='+encodeURIComponent(saved)+'&country=Saudi%20Arabia&method=4&school=0';
-    const response=await fetch(url);if(!response.ok)throw new Error('HTTP '+response.status);
-    const result=await response.json();if(result.code!==200||!result.data?.timings)throw new Error('Invalid prayer times response');
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    let result;
+    try{
+      const url='https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(saved)+'&country='+encodeURIComponent('Saudi Arabia')+'&method=4&school=0';
+      const response=await fetch(url,{method:'GET',cache:'no-store',signal:controller.signal});
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      result=await response.json();
+    }finally{clearTimeout(timer);}
+    if(result.code!==200||!result.data?.timings)throw new Error('لم تصل مواقيت الصلاة من المصدر');
     prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
-    localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));renderPrayerTimes();
-  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.';if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل الصلاة القادمة';if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=saved}
+    localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));
+    renderPrayerTimes();
+  }catch(error){
+    console.error('Prayer times error:',error);
+    let fallback=null;
+    try{
+      const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
+      if(keys.length)fallback=JSON.parse(localStorage.getItem(keys[0])||'null');
+    }catch(e){}
+    if(fallback?.timings){
+      prayerTimesData=fallback;renderPrayerTimes();
+      status.textContent='نعرض آخر مواقيت محفوظة لمدينة '+(prayerCityNames[saved]||saved)+'؛ حدّث عند توفر الاتصال.';
+    }else{
+      status.textContent='تعذر تحميل المواقيت حاليًا. تأكد من الإنترنت ثم اضغط تحديث.';
+      if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل مواقيت '+(prayerCityNames[saved]||saved);
+      if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';
+    }
+    if(homeSelect)homeSelect.value=saved;
+  }
 }
 function renderPrayerTimes(){
   if(!prayerTimesData)return;
@@ -725,7 +765,18 @@ function nextDailyChallenge(){
 function addGoal(){const preset=$('goalPreset')?.value;const x=preset==='custom'?($('goalCustomInput')?.value||'').trim():(preset||'').trim();if(!x)return;if(db.goals.some(g=>g.text===x&&!g.done)){alert('هذا الهدف موجود بالفعل في قائمتك.');return;}db.goals.push({text:x,done:false,createdAt:todayKey});trackAppEvent('goal_added');if($('goalCustomInput'))$('goalCustomInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;db.goals[i].completedAt=v?todayKey:null;save()}function removeGoal(i){db.goals.splice(i,1);save()}
 $('goalPreset')?.addEventListener('change',()=>{if($('goalCustomInput')){$('goalCustomInput').style.display=$('goalPreset').value==='custom'?'block':'none';if($('goalPreset').value==='custom')$('goalCustomInput').focus();}});
 const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
-function renderQuiz(){const q=questions[qi];if(!q){$('question').textContent='سيظهر سؤال اليوم قريبًا.';$('answers').innerHTML='';return;}const signedIn=!!window.__hasibSignedIn;const answered=signedIn&&db.answers[todayKey]!==undefined;$('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered?'disabled':''}>${a}</button>`).join('');$('quizResult').textContent=answered?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';$('points').textContent=db.points||0;if($('quizAccessNote'))$('quizAccessNote').textContent='السؤال والاختيارات متاحة للجميع. سجّل الدخول للمشاركة واحتساب النقاط؛ لا يمكن إرسال الإجابة دون حساب.';}
+function renderQuiz(){
+  const q=questions[qi],questionEl=$('question'),answersEl=$('answers');
+  if(!questionEl||!answersEl)return;
+  if(!q){questionEl.textContent='لا يتوفر سؤال اليوم حاليًا.';answersEl.innerHTML='';return;}
+  const signedIn=!!window.__hasibSignedIn;
+  const answered=signedIn&&db.answers[todayKey]!==undefined;
+  questionEl.textContent=q.q;
+  answersEl.innerHTML=q.a.map((a,i)=>`<button type="button" class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered?'disabled':''}>${a}</button>`).join('');
+  if($('quizResult'))$('quizResult').textContent=answered?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';
+  if($('points'))$('points').textContent=db.points||0;
+  if($('quizAccessNote'))$('quizAccessNote').textContent='السؤال والاختيارات متاحة للجميع. سجّل الدخول للمشاركة واحتساب النقاط؛ لا يمكن إرسال الإجابة دون حساب.';
+}
 async function loadDailyQuizAnswer(){
   const user=await currentUser();if(!user||!sb)return;
   try{
@@ -735,27 +786,38 @@ async function loadDailyQuizAnswer(){
   }catch(e){console.warn('تعذر تحميل إجابة سؤال اليوم:',e.message)}
 }
 async function answerQuiz(i){
-  if(db.answers[todayKey]!==undefined)return;
   const user=await currentUser();
   if(!user){
-    $('quizResult').textContent='للمشاركة في سؤال اليوم واحتساب النقاط، سجّل الدخول إلى حسابك أولًا.';
-    msg('سجّل الدخول لتشارك في سؤال اليوم وتُحتسب نقاطك.');
-    go('account');
-    return;
+    $('quizResult').textContent='سجّل دخولك للمشاركة في سؤال اليوم واحتساب نقاطك.';
+    msg('يلزم تسجيل الدخول للمشاركة في مسابقة سؤال اليوم.');
+    pendingAccountReturnView='quiz';go('account');updateAccount(null);return;
   }
+  if(db.answers[todayKey]!==undefined){
+    $('quizResult').textContent='سبق أن أجبت عن سؤال اليوم. لا يمكن جمع النقاط مرة أخرى.';
+    renderQuiz();return;
+  }
+  const q=questions[qi];if(!q)return;
   const buttons=$('answers').querySelectorAll('button');buttons.forEach(b=>b.disabled=true);
-  const q=questions[qi];let ok=i===q.c;let awarded=ok?10:0;
-  if(user&&sb){
+  let ok=i===q.c,awarded=ok?10:0;
+  if(sb){
     try{
       const {data,error}=await sb.rpc('hn_submit_daily_quiz_answer',{p_answer_date:todayKey,p_question_index:qi,p_selected_answer:i,p_correct_answer:q.c});
       if(error)throw error;
       const result=Array.isArray(data)?data[0]:data;
       if(!result)throw new Error('لم تصل نتيجة تسجيل الإجابة');
-      if(result.already_answered){db.answers[todayKey]=Number(result.selected_answer);$('quizResult').textContent='سبق أن أجبت عن سؤال اليوم. لا يمكن جمع النقاط مرة أخرى.';persist();renderQuiz();return;}
+      if(result.already_answered){
+        db.answers[todayKey]=Number(result.selected_answer);persist();
+        $('quizResult').textContent='سبق أن أجبت عن سؤال اليوم. لا يمكن جمع النقاط مرة أخرى.';renderQuiz();return;
+      }
       ok=!!result.is_correct;awarded=Number(result.awarded_points)||0;
-    }catch(e){buttons.forEach(b=>b.disabled=false);$('quizResult').textContent='تعذر تثبيت إجابتك في الحساب. حاول مرة أخرى. ('+e.message+')';return;}
+    }catch(e){
+      buttons.forEach(b=>b.disabled=false);
+      $('quizResult').textContent='تعذر تثبيت إجابتك في الحساب. حاول مرة أخرى. ('+e.message+')';return;
+    }
   }
-  trackAppEvent('quiz_answered');db.answers[todayKey]=i;if(awarded)db.points=(db.points||0)+awarded;save();$('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غداً.';$('answers').querySelectorAll('button').forEach(b=>b.disabled=true);$('points').textContent=db.points||0;
+  trackAppEvent('quiz_answered');db.answers[todayKey]=i;if(awarded)db.points=(db.points||0)+awarded;save();
+  $('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غدًا.';
+  $('answers').querySelectorAll('button').forEach(b=>b.disabled=true);$('points').textContent=db.points||0;
 }
 function renderStats(){
  const d=day(),n=prayers.filter(p=>d.prayers?.[p]?.done).length;
@@ -1012,12 +1074,20 @@ async function createFriendInvite(){
     const shareText='انضم إليّ في تحدي الأصدقاء بتطبيق حاسب نفسك. رمز الدعوة: '+code+'\\n'+window.location.origin;
     lastCreatedFriendCode=code;
     $('friendInvite').style.display='block';
-    $('friendInvite').innerHTML='<strong>رمز دعوتك: '+code+'</strong><div style="margin-top:5px">انسخه وأرسله لصديقك لينضم إليك في التحدي.</div>';
+    $('friendInvite').innerHTML='<strong>رمز دعوتك: '+code+'</strong><div style="margin-top:5px">انسخ الرمز فقط وأرسله لصديقك.</div>';
     if($('copyFriendInviteButton'))$('copyFriendInviteButton').style.display='inline-flex';
     $('friendStatus').textContent='تم إنشاء رمز الدعوة بنجاح. اضغط زر النسخ لإرساله لصديقك.';
   }catch(e){$('friendStatus').textContent='تعذر إنشاء الدعوة. تأكد من تنفيذ ملف SQL المرفق في Supabase. '+(e.message||'')}
 }
-async function copyFriendInvite(){if(!lastCreatedFriendCode)return;const text='انضم إليّ في تحدي الأصدقاء في حاسب نفسك. رمز الدعوة: '+lastCreatedFriendCode+'\n'+window.location.origin;try{await navigator.clipboard.writeText(text);$('friendStatus').textContent='تم نسخ رمز الدعوة والرابط. أرسله لصديقك.';}catch(e){window.prompt('انسخ الدعوة التالية:',text);}}
+async function copyFriendInvite(){
+  if(!lastCreatedFriendCode)return;
+  const text=lastCreatedFriendCode;
+  try{
+    if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);
+    else throw new Error('clipboard unavailable');
+    $('friendStatus').textContent='تم نسخ رمز الدعوة فقط.';
+  }catch(e){window.prompt('انسخ رمز الدعوة فقط:',text);}
+}
 async function acceptFriendInvite(){
   const user=await currentUser(),code=$('friendCodeInput').value.trim().toUpperCase();
   if(!user){requireAccountForFeature('للانضمام إلى تحدي الأصدقاء','quiz');return}
@@ -1452,8 +1522,12 @@ async function saveRecoveredPassword(){
   }
 }
 
+let accountHydrationPromise=null,accountHydrationUserId=null;
 async function finishAccountLogin(user){
   if(!user)return;
+  if(accountHydrationPromise&&accountHydrationUserId===user.id)return accountHydrationPromise;
+  accountHydrationUserId=user.id;
+  accountHydrationPromise=(async()=>{
   // لا نستخدم الاسم المكتوب في نموذج الدخول لتغيير هوية الحساب؛ البريد هو المعروض، والبيانات مرتبطة بمعرّف حساب Supabase الثابت.
   const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
   if(saved.error){
@@ -1482,6 +1556,10 @@ async function finishAccountLogin(user){
   await updateAccount(user);
   await loadDailyQuizAnswer();
   renderQuiz();
+  window.__hasibSignedIn=true;
+  })();
+  try{return await accountHydrationPromise;}
+  finally{accountHydrationPromise=null;accountHydrationUserId=null;}
 }
 async function signOut(){
   if(!sb)return;
@@ -1490,6 +1568,7 @@ async function signOut(){
   const {error}=await sb.auth.signOut();
   if(error){msg('تعذر تسجيل الخروج: '+error.message);return}
   msg('تم تسجيل الخروج');
+  window.__hasibSignedIn=false;
   await updateAccount();
 }
 async function updateAccount(userOverride=null){
@@ -1500,6 +1579,10 @@ async function updateAccount(userOverride=null){
   if(loggedIn)pendingAccountNotice='';
   $('loggedOutArea').style.display=loggedIn?'none':'block';
   $('loggedInArea').style.display=loggedIn?'block':'none';
+  if(loggedIn&&$('accountStatus')){
+    $('accountStatus').style.display='block';
+    $('accountStatus').textContent='مرحبًا بعودتك، '+(u.user_metadata?.nickname||u.user_metadata?.full_name||u.email||'');
+  }
   $('syncButton').style.display=loggedIn?'inline-flex':'none';
   if($('headerProfile'))$('headerProfile').style.display='flex';
   if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
@@ -1536,7 +1619,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();getSavedPrayerCity();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
@@ -1562,7 +1645,7 @@ if(sb){
   });
   sb.auth.getSession().then(async({data,error})=>{
     if(error)console.warn('Session restore:',error.message);
-    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount(data.session.user);loadFriends();renderLeaderboard();loadSupportComments();const city=getSavedPrayerCity();if($('prayerCity'))$('prayerCity').value=city;loadPrayerTimes(false)}else{await updateAccount(null)}
+    if(data?.session?.user){window.__hasibSignedIn=true;await finishAccountLogin(data.session.user);await updateAccount(data.session.user);loadFriends();renderLeaderboard();loadSupportComments();const city=getSavedPrayerCity();if($('prayerCity'))$('prayerCity').value=city;loadPrayerTimes(false)}else{await updateAccount(null)}
   });
 }
 </script></body></html>
