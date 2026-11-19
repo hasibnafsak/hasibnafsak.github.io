@@ -580,13 +580,27 @@ async function loadPrayerTimes(force=false){
   if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[saved]||saved);
   if(!status||!select)return;
   const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+saved+':'+date;
-  if(!force){
-    try{
-      const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');
-      if(cached?.timings){prayerTimesData=cached;renderPrayerTimes();return;}
-    }catch(e){}
+  // اعرض آخر مواقيت محفوظة فور فتح الصفحة، قبل انتظار الشبكة، حتى لا يختفي العداد بعد تحديث Safari.
+  let sameDayCache=null,latestCityCache=null;
+  try{
+    sameDayCache=JSON.parse(localStorage.getItem(cacheKey)||'null');
+    latestCityCache=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+saved)||'null');
+    if(!latestCityCache){
+      const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
+      if(keys.length)latestCityCache=JSON.parse(localStorage.getItem(keys[0])||'null');
+    }
+  }catch(e){}
+  const instantCache=sameDayCache?.timings?sameDayCache:(latestCityCache?.timings?latestCityCache:null);
+  if(instantCache?.timings){
+    prayerTimesData={...instantCache,city:saved,date};
+    renderPrayerTimes();
   }
-  status.textContent='جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
+  if(!force && sameDayCache?.timings){
+    prayerTimesData=sameDayCache;renderPrayerTimes();return;
+  }
+  status.textContent=instantCache?.timings
+    ? 'نعرض مواقيت '+(prayerCityNames[saved]||saved)+' المحفوظة، ونتحقق من تحديثها...'
+    : 'جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
   try{
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
     let result;
@@ -599,13 +613,17 @@ async function loadPrayerTimes(force=false){
     if(result.code!==200||!result.data?.timings)throw new Error('لم تصل مواقيت الصلاة من المصدر');
     prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
     localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));
+    localStorage.setItem('hasibPrayerTimesLatest:'+saved,JSON.stringify(prayerTimesData));
     renderPrayerTimes();
   }catch(error){
     console.error('Prayer times error:',error);
     let fallback=null;
     try{
-      const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
-      if(keys.length)fallback=JSON.parse(localStorage.getItem(keys[0])||'null');
+      fallback=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+saved)||'null');
+      if(!fallback?.timings){
+        const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
+        if(keys.length)fallback=JSON.parse(localStorage.getItem(keys[0])||'null');
+      }
     }catch(e){}
     if(fallback?.timings){
       prayerTimesData=fallback;renderPrayerTimes();
@@ -1644,7 +1662,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[initialPrayerCity]||initialPrayerCity);loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
