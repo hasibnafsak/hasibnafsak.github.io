@@ -1341,8 +1341,26 @@ async function finishAccountLogin(user){
     }
   }
   const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
-  if(saved.error){console.warn('Could not load user data:',saved.error.message)}
-  else if(saved.data?.data){db=Object.assign(blank(),saved.data.data);persist();renderAll()}
+  if(saved.error){
+    console.warn('Could not load user data:',saved.error.message);
+    msg('تعذر تحميل بيانات حسابك من السحابة: '+saved.error.message);
+  }else if(saved.data?.data){
+    // استعادة بيانات هذا الحساب فقط من Supabase
+    db=Object.assign(blank(),saved.data.data);
+    persist();
+    renderAll();
+  }else{
+    // الحساب جديد ولا يملك سجلًا بعد: أنشئ له سجلًا مستقلًا ببيانات ابتدائية فارغة
+    // ولا تنسخ بيانات localStorage المشتركة من حساب آخر.
+    db=blank();
+    persist();
+    renderAll();
+    const {error:insertError}=await sb.from('user_data').insert({user_id:user.id,data:db});
+    if(insertError){
+      console.error('Could not initialize user data:',insertError.message);
+      msg('تم تسجيل الدخول، لكن تعذر إنشاء مساحة بيانات الحساب: '+insertError.message);
+    }
+  }
   await updateAccount();
 }
 async function signOut(){
