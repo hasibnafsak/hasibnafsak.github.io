@@ -146,7 +146,7 @@ header{position:relative;padding-top:76px!important}
      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
   <div class="row between" style="align-items:center;gap:12px">
     <div style="min-width:0">
-      <div class="muted" style="font-size:12px">الصلاة القادمة <span id="homePrayerCity"></span></div>
+      <div class="muted" style="font-size:12px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">الصلاة القادمة <label for="homePrayerCitySelect" style="margin:0"> <select id="homePrayerCitySelect" aria-label="اختر مدينة مواقيت الصلاة" onchange="changePrayerCity(this.value)" style="display:inline-block;width:auto;max-width:145px;padding:3px 7px;font-size:12px;border-radius:9px"><option value="Dammam" selected>الدمام</option><option value="Al Khobar">الخبر</option><option value="Dhahran">الظهران</option><option value="Jubail">الجبيل</option><option value="Hofuf">الهفوف والأحساء</option><option value="Hafar Al Batin">حفر الباطن</option><option value="Riyadh">الرياض</option><option value="Al Kharj">الخرج</option><option value="Al Majma'ah">المجمعة</option><option value="Makkah">مكة المكرمة</option><option value="Jeddah">جدة</option><option value="Madinah">المدينة المنورة</option><option value="Taif">الطائف</option><option value="Tabuk">تبوك</option><option value="Buraydah">بريدة</option><option value="Abha">أبها</option></select></label></div>
       <h2 id="homeNextPrayerName" style="margin:6px 0">جارٍ تحديد الصلاة القادمة...</h2>
       <div class="muted" style="font-size:12px">الوقت المتبقي</div>
       <strong id="homeNextPrayerCountdown" style="display:block;font-size:25px;letter-spacing:1px;margin-top:3px">--:--:--</strong>
@@ -294,7 +294,7 @@ header{position:relative;padding-top:76px!important}
 <button class="gold" type="button" onclick="createFriendInvite()">إنشاء رمز دعوة</button>
 <button class="secondary" type="button" onclick="loadFriends()">تحديث الأصدقاء</button>
 </div>
-<div id="friendInvite" class="notice" style="margin-top:9px;display:none"></div>
+<div id="friendInvite" class="notice" style="margin-top:9px;display:none"></div><button id="copyFriendInviteButton" type="button" class="secondary" style="display:none;margin-top:7px" onclick="copyFriendInvite()">📋 نسخ رمز الدعوة</button>
 <label for="friendCodeInput" style="display:block;margin-top:12px">عندك رمز من صديق؟</label>
 <div class="friend-entry">
 <input id="friendCodeInput" maxlength="12" placeholder="مثال: HN-ABC123" autocomplete="off">
@@ -532,8 +532,10 @@ let db=Object.assign(blank(),safeLoad()||{});
 const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
 let pendingAccountNotice='';
+let pendingAccountReturnView='';
+let lastCreatedFriendCode='';
 function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz')loadFriends();if(id==='account')updateAccount()}
-function requireAccountForFeature(feature){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
+function requireAccountForFeature(feature,returnView=''){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';pendingAccountReturnView=returnView;go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
   b.addEventListener('click',function(ev){
@@ -563,7 +565,7 @@ function getSavedPrayerCity(){const fromDb=db?.settings?.prayerCity;const fromLo
 function changePrayerCity(city){if(!validPrayerCity(city))return;localStorage.setItem('hasibPrayerCity',city);if(!db.settings)db.settings={};db.settings.prayerCity=city;persist();syncUserDataSilently();loadPrayerTimes(true)}
 async function loadPrayerTimes(force=false){
   const select=$('prayerCity'),status=$('prayerTimesStatus');if(!select||!status)return;
-  const saved=getSavedPrayerCity();if(select.value!==saved)select.value=saved;
+  const saved=getSavedPrayerCity();if(select.value!==saved)select.value=saved;if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=saved;
   const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+saved+':'+date;
   if(!force){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.timings){prayerTimesData=cached;renderPrayerTimes();return}}catch(e){}}
   status.textContent='جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
@@ -573,7 +575,7 @@ async function loadPrayerTimes(force=false){
     const result=await response.json();if(result.code!==200||!result.data?.timings)throw new Error('Invalid prayer times response');
     prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
     localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));renderPrayerTimes();
-  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.';if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل الصلاة القادمة';if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';if($('homePrayerCity'))$('homePrayerCity').textContent='· '+(prayerCityNames[saved]||saved)}
+  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.';if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل الصلاة القادمة';if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=saved}
 }
 function renderPrayerTimes(){
   if(!prayerTimesData)return;
@@ -595,7 +597,7 @@ function updateNextPrayer(){
   $('nextPrayerCountdown').textContent=countdown;
   if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='صلاة '+next.label;
   if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent=countdown;
-  if($('homePrayerCity'))$('homePrayerCity').textContent='· '+(prayerCityNames[prayerTimesData.city]||prayerTimesData.city);
+  if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=prayerTimesData.city;if($('prayerCity'))$('prayerCity').value=prayerTimesData.city;
 }
 
 function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
@@ -723,7 +725,7 @@ function nextDailyChallenge(){
 function addGoal(){const preset=$('goalPreset')?.value;const x=preset==='custom'?($('goalCustomInput')?.value||'').trim():(preset||'').trim();if(!x)return;if(db.goals.some(g=>g.text===x&&!g.done)){alert('هذا الهدف موجود بالفعل في قائمتك.');return;}db.goals.push({text:x,done:false,createdAt:todayKey});trackAppEvent('goal_added');if($('goalCustomInput'))$('goalCustomInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;db.goals[i].completedAt=v?todayKey:null;save()}function removeGoal(i){db.goals.splice(i,1);save()}
 $('goalPreset')?.addEventListener('change',()=>{if($('goalCustomInput')){$('goalCustomInput').style.display=$('goalPreset').value==='custom'?'block':'none';if($('goalPreset').value==='custom')$('goalCustomInput').focus();}});
 const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
-function renderQuiz(){const q=questions[qi];if(!q){$('question').textContent='سيظهر سؤال اليوم قريبًا.';$('answers').innerHTML='';return;} $('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${db.answers[todayKey]!==undefined?'disabled':''}>${a}</button>`).join('');$('quizResult').textContent=db.answers[todayKey]!==undefined?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';$('points').textContent=db.points||0;if($('quizAccessNote'))$('quizAccessNote').textContent='السؤال والاختيارات متاحة للجميع. للمشاركة واحتساب النقاط، سجّل الدخول إلى حسابك أولًا.';}
+function renderQuiz(){const q=questions[qi];if(!q){$('question').textContent='سيظهر سؤال اليوم قريبًا.';$('answers').innerHTML='';return;}const signedIn=!!window.__hasibSignedIn;const answered=signedIn&&db.answers[todayKey]!==undefined;$('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})" ${answered?'disabled':''}>${a}</button>`).join('');$('quizResult').textContent=answered?'تم تسجيل إجابتك اليوم. لا يمكن الإجابة مرة أخرى اليوم.':'';$('points').textContent=db.points||0;if($('quizAccessNote'))$('quizAccessNote').textContent='السؤال والاختيارات متاحة للجميع. سجّل الدخول للمشاركة واحتساب النقاط؛ لا يمكن إرسال الإجابة دون حساب.';}
 async function loadDailyQuizAnswer(){
   const user=await currentUser();if(!user||!sb)return;
   try{
@@ -836,7 +838,7 @@ async function renderLeaderboard(){
 }
 async function joinLeaderboard(){
   const u=await currentUser();
-  if(!u){requireAccountForFeature('للاشتراك في لوحة الصدارة');return}
+  if(!u){requireAccountForFeature('للاشتراك في لوحة الصدارة','leaderboard');return}
   const nickname=$('nickname').value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
   const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
   if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة بسبب صلاحيات جدول الصدارة في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة. ('+error.message+')';return}
@@ -999,7 +1001,7 @@ async function enableQiblaCompass(){
 // ===== تحدي الأصدقاء (يتطلب تشغيل SQL المرفق مرة واحدة في Supabase) =====
 async function createFriendInvite(){
   const user=await currentUser();
-  if(!user){requireAccountForFeature('لإنشاء رمز دعوة لتحدي الأصدقاء');return}
+  if(!user){requireAccountForFeature('لإنشاء رمز دعوة لتحدي الأصدقاء','quiz');return}
   if(!sb){$('friendStatus').textContent='الخدمة غير متاحة حاليًا.';return}
   $('friendStatus').textContent='جارٍ إنشاء رمز الدعوة...';
   try{
@@ -1008,18 +1010,17 @@ async function createFriendInvite(){
     const code=typeof data==='string'?data:(data?.invite_code||data?.code);
     if(!code)throw new Error('لم يصل رمز الدعوة من الخادم.');
     const shareText='انضم إليّ في تحدي الأصدقاء بتطبيق حاسب نفسك. رمز الدعوة: '+code+'\\n'+window.location.origin;
+    lastCreatedFriendCode=code;
     $('friendInvite').style.display='block';
-    $('friendInvite').textContent='رمز دعوتك: '+code+' — شاركه مع صديقك.';
-    try{
-      if(navigator.share)await navigator.share({title:'تحدي الأصدقاء - حاسب نفسك',text:shareText});
-      else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(shareText);$('friendStatus').textContent='تم نسخ الدعوة. أرسلها لصديقك.'}
-      else $('friendStatus').textContent='انسخ رمز الدعوة وشاركه مع صديقك.';
-    }catch(e){if(e?.name!=='AbortError')$('friendStatus').textContent='تم إنشاء الرمز. يمكنك مشاركته يدويًا.'}
+    $('friendInvite').innerHTML='<strong>رمز دعوتك: '+code+'</strong><div style="margin-top:5px">انسخه وأرسله لصديقك لينضم إليك في التحدي.</div>';
+    if($('copyFriendInviteButton'))$('copyFriendInviteButton').style.display='inline-flex';
+    $('friendStatus').textContent='تم إنشاء رمز الدعوة بنجاح. اضغط زر النسخ لإرساله لصديقك.';
   }catch(e){$('friendStatus').textContent='تعذر إنشاء الدعوة. تأكد من تنفيذ ملف SQL المرفق في Supabase. '+(e.message||'')}
 }
+async function copyFriendInvite(){if(!lastCreatedFriendCode)return;const text='انضم إليّ في تحدي الأصدقاء في حاسب نفسك. رمز الدعوة: '+lastCreatedFriendCode+'\n'+window.location.origin;try{await navigator.clipboard.writeText(text);$('friendStatus').textContent='تم نسخ رمز الدعوة والرابط. أرسله لصديقك.';}catch(e){window.prompt('انسخ الدعوة التالية:',text);}}
 async function acceptFriendInvite(){
   const user=await currentUser(),code=$('friendCodeInput').value.trim().toUpperCase();
-  if(!user){requireAccountForFeature('للانضمام إلى تحدي الأصدقاء');return}
+  if(!user){requireAccountForFeature('للانضمام إلى تحدي الأصدقاء','quiz');return}
   if(!code){$('friendStatus').textContent='اكتب رمز الدعوة أولًا.';return}
   $('friendStatus').textContent='جارٍ التحقق من الرمز...';
   try{
@@ -1370,7 +1371,9 @@ async function signUp(){
     if(error){msg('تعذر إنشاء الحساب: '+error.message);return}
     if(data.session&&data.user){
       await finishAccountLogin(data.user);
-      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');
+      await updateAccount(data.user);
+      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح، أهلًا بك.');
+      if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
     }else{
       showResendConfirmation(true);msg('تم إنشاء الحساب. تحقق من بريدك لتأكيد الحساب، وإذا لم تصلك الرسالة اضغط «إعادة إرسال تأكيد البريد».');
     }
@@ -1391,7 +1394,9 @@ async function signIn(){
       return;
     }
     await finishAccountLogin(data.user);
-    msg('تم تسجيل الدخول بنجاح');
+    await updateAccount(data.user);
+    msg('تم تسجيل الدخول بنجاح، أهلًا بعودتك.');
+    if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
   }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='تسجيل الدخول'}
 }
@@ -1489,6 +1494,7 @@ async function signOut(){
 }
 async function updateAccount(userOverride=null){
   const u=userOverride||await currentUser(),loggedIn=!!u;
+  window.__hasibSignedIn=loggedIn;
   $('accountStatus').style.display=pendingAccountNotice&&!loggedIn?'block':'none';
   if(pendingAccountNotice&&!loggedIn)$('accountStatus').textContent=pendingAccountNotice;
   if(loggedIn)pendingAccountNotice='';
@@ -1530,7 +1536,7 @@ function exportData(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
-setAuthMode('login');initWelcome();renderAll();renderQuiz();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();getSavedPrayerCity();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
