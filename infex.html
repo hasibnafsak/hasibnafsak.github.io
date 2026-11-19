@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d5b48"><meta name="description" content="حاسب نفسك: رفيقك اليومي للصلاة والقرآن والأذكار ومحاسبة النفس"><title>حاسب نفسك</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--g:#0d5b48;--g2:#16745c;--gold:#c69a45;--bg:#f7f3e9;--paper:#fffdf7;--ink:#20352e;--muted:#718078;--line:#e8e0cf}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;padding-bottom:86px}
+header{background:linear-gradient(135deg,#0a493b,#16745c);color:white;padding:24px 18px;border-radius:0 0 24px 24px}.brand{font-size:23px;font-weight:800}.tag{font-size:12px;color:#e8d7ac;margin-top:4px}.date{font-size:12px;margin-top:10px;color:#e5eee8}
+main{max-width:760px;margin:auto;padding:14px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 4px 15px #233c2c08}
+h2{font-size:18px;margin:0 0 12px;color:var(--g)}h3{font-size:15px;margin:0 0 8px}.muted{color:var(--muted);font-size:13px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+button,.btn{border:0;border-radius:11px;background:var(--g);color:white;padding:11px 13px;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation}
+button.secondary{background:#e9f0eb;color:var(--g)}button.gold{background:var(--gold)}button.light{background:#f3eee2;color:var(--ink)}button:disabled{opacity:.5}
+input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:#fffefa;color:var(--ink);font:inherit;margin:5px 0}textarea{min-height:75px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile{background:#f5f1e7;border-radius:13px;padding:12px;text-align:center}.tile strong{display:block;font-size:22px;color:var(--g);margin:5px}
+.prayer{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:9px 0}.check{width:21px;height:21px;accent-color:var(--g)}
+.progress{height:9px;background:#e9e4d8;border-radius:20px;overflow:hidden;margin:9px 0}.progress span{height:100%;display:block;background:var(--g);width:0}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#fffdf8;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 3px calc(6px + env(safe-area-inset-bottom));z-index:9999;overflow-x:auto}
+.tabs button{background:transparent;color:var(--muted);padding:7px 3px;font-size:10px;flex:1;min-width:0;white-space:nowrap;position:relative;z-index:10000}.tabs button.active{color:var(--g);background:#edf3ee}.dhikr-tab.active{background:var(--g)!important;color:#fff!important}
+.tabicon{display:block;font-size:18px;margin-bottom:2px}.view{display:none}.view.active{display:block}.counter{font-size:40px;color:var(--g);font-weight:800;text-align:center;padding:10px}
+.ayah{font-family:serif;font-size:21px;line-height:2;text-align:center;background:#f7f2e5;padding:15px;border-radius:13px}.pill{display:inline-block;background:#edf3ee;color:var(--g);padding:5px 9px;border-radius:20px;font-size:11px}
+.quran-ayah{padding:12px 4px;border-bottom:1px solid var(--line);font-family:serif;font-size:23px;line-height:2.15;text-align:justify}.quran-ayah small{display:inline-block;color:var(--gold);font-family:Arial;font-size:12px;margin:0 5px}hr{border:0;border-top:1px solid var(--line);margin:13px 0}.notice{padding:10px;border-radius:11px;background:#f6efdd;color:#6e5526;font-size:12px;line-height:1.7}
+
+.splash{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#073d32eF,#0d5b48eF),url('https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1600&q=85') center/cover;color:#fff;text-align:center}
+.splash-card{width:min(560px,100%);padding:30px 22px;border:1px solid #d7bd7a88;border-radius:26px;background:linear-gradient(160deg,#0b493ddd,#082f29ee);box-shadow:0 20px 70px #0005}
+.splash-mark{font-size:42px;margin-bottom:12px}.splash h1{font-size:30px;margin:5px 0;color:#f3dfad}.splash-phrase{font-size:19px;line-height:2;margin:22px 0;min-height:82px}.splash button{background:linear-gradient(120deg,#d7b66c,#b88936);color:#17382e;padding:14px 28px;font-size:16px}
+.hero{border-radius:18px;padding:20px;color:#fff;background:linear-gradient(120deg,#0a493bde,#16745cdd),url('https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1200&q=80') center/cover;margin-bottom:12px}
+.hero h2{color:#fff;font-size:22px}.hero p{color:#f3ead5;line-height:1.8}
+.dhikr-card{border:1px solid var(--line);border-radius:13px;padding:12px;margin:9px 0;background:#fffefa}.dhikr-text{font-family:serif;font-size:19px;line-height:2.0}.dhikr-count{font-weight:800;color:var(--g);min-width:60px;text-align:center}.dhikr-actions{display:flex;align-items:center;gap:8px;margin-top:8px}.dhikr-actions button{padding:8px 12px}.mini-progress{height:7px;background:#e9e4d8;border-radius:10px;overflow:hidden}.mini-progress span{height:100%;display:block;background:var(--gold)}
+.dhikr-card{padding:15px}.dhikr-text{white-space:pre-line}.dhikr-actions button:first-child{min-width:125px}.dhikr-actions button:disabled{background:#e5efe8;color:#0d5b48;opacity:1}.beads{display:inline-block;padding:25px;border-radius:50%;background:#edf3ee;color:var(--g);font-size:25px;line-height:2.2;box-shadow:inset 0 0 0 8px #d8e7dc;cursor:pointer;min-width:210px}
+
+.challenge-card{position:relative;overflow:hidden;border:1px solid #d9c58e;background:linear-gradient(145deg,#fffdf6,#f3ead5)}
+.challenge-card:before{content:"✦";position:absolute;left:15px;top:8px;font-size:42px;color:#d8bd7c;opacity:.35}
+.challenge-kicker{color:#98722f;font-size:12px;font-weight:800;letter-spacing:.4px}
+.challenge-title{font-size:20px;color:var(--g);font-weight:900;margin:7px 0}
+.challenge-copy{font-size:16px;line-height:1.9;font-weight:700;max-width:92%}
+.challenge-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.challenge-done{background:#e7f2e9!important;color:#17613f!important}
+.manual-device{width:250px;height:250px;margin:18px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(circle,#fffdf7 48%,#e7d6ad 49%,#c5a45e 54%,#f6edd8 58%,#d4bd88 62%,#f7f1e4 68%);box-shadow:0 12px 28px #1e3c2c20,inset 0 0 0 8px #fff9e9}
+.manual-device:before{content:"";position:absolute;inset:17px;border:2px dashed #b99a58;border-radius:50%}
+.manual-device button{width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#267c60,#0d5b48 68%);box-shadow:0 7px 0 #073d32,0 12px 20px #163c2c35;border:5px solid #e6d5ad;color:#fff;font-size:17px;line-height:1.7;z-index:1}
+.manual-device button:active{transform:translateY(4px);box-shadow:0 3px 0 #073d32}
+.leader-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.leader-rank{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#f1ead9;color:#805f24;font-weight:900}
+.leader-name{font-weight:800;flex:1}.leader-points{color:var(--g);font-weight:900}
+
+
+.real-tasbeeh-wrap{max-width:360px;margin:12px auto 4px;padding:8px 10px 14px;border-radius:24px;background:linear-gradient(145deg,#f8f1df,#eee1c5);box-shadow:inset 0 2px 8px #fff9e8,0 8px 22px #3b2b1718}
+.real-tasbeeh-hit{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;touch-action:manipulation;outline-offset:5px}
+#realTasbeehSvg{display:block;width:100%;max-width:330px;height:auto;margin:auto;overflow:visible}
+.real-tasbeeh-caption{font-weight:900;color:#76502b;font-size:14px;margin-top:-2px}
+.real-tasbeeh-wrap .muted{color:#806d51;font-size:12px;margin-top:5px}
+
+.worship-card{min-height:126px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:13px 7px;background:var(--soft,#f5f1e8);color:var(--ink,#234);border:1px solid rgba(20,90,70,.16);border-radius:15px}
+.worship-card strong{font-size:14px}.worship-card small{font-size:11px;line-height:1.5;color:var(--muted,#777);font-weight:400}
+
+.next-prayer-home{cursor:pointer;background:linear-gradient(135deg,#f5f1e7,#e8efe7);border:1px solid rgba(20,90,70,.2);border-radius:17px;transition:transform .15s ease}
+.next-prayer-home:active{transform:scale(.99)}
+.next-prayer-home:focus-visible{outline:3px solid #4b8b69;outline-offset:3px}
+.next-prayer-icon{width:64px;height:64px;flex:0 0 64px;border-radius:18px;background:#ffffffa8;display:grid;place-items:center;font-size:31px}
+
+.header-account{position:absolute;left:14px;top:12px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;cursor:pointer}
+header{position:relative;padding-top:76px!important}
+.language-switch{position:absolute;top:10px;right:14px;display:flex;gap:4px;padding:3px;border-radius:999px;background:#ffffff20;border:1px solid #ffffff45;z-index:6}
+.language-switch button{background:transparent;color:#fff;padding:6px 10px;font-size:11px;border-radius:999px}
+.language-switch button.active{background:#fff;color:var(--g)}
+.profile-preview{cursor:pointer}
+.profile-preview img{width:76px;height:76px;border-radius:50%;object-fit:cover}
+[dir="ltr"] .header-profile{left:auto;right:12px}
+[dir="ltr"] .language-switch{right:auto;left:14px}
+[dir="ltr"] .header-account{left:auto;right:12px}
+
+
+.profile-open{display:flex;align-items:center;gap:7px;background:#ffffffed;color:var(--g);border:1px solid #ffffff88;border-radius:999px;padding:5px 10px 5px 6px;box-shadow:0 3px 12px #0002}
+.profile-open img,.profile-open .avatar-fallback{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.header-account{position:static;margin-inline-start:3px}
+.crop-modal{position:fixed;inset:0;z-index:30000;background:#071d18c9;display:flex;align-items:center;justify-content:center;padding:18px}
+.crop-card{width:min(420px,100%);background:var(--paper);border-radius:20px;padding:18px;box-shadow:0 20px 70px #0005}
+.crop-frame{width:260px;height:260px;max-width:75vw;max-height:75vw;margin:14px auto;border-radius:50%;overflow:hidden;border:4px solid #d1b36d;background:#e9e3d6}
+.crop-frame canvas{width:100%;height:100%;display:block}
+.crop-card .row{justify-content:center;margin-top:12px}
+#avatarZoom{accent-color:var(--g)}
+
+.password-toggle{min-width:48px;font-size:18px;line-height:1}\n.auth-actions{display:flex;flex-direction:row-reverse;gap:10px;margin-top:10px}
+.auth-actions button{flex:1;min-width:0}
+.auth-actions button:disabled{opacity:.6;cursor:wait}
+
+.header-profile{position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:7px;z-index:5}
+.profile-open{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 9px 5px 7px;font-size:12px;font-weight:800;cursor:pointer;max-width:170px}
+.profile-open img,.profile-open .avatar-fallback{width:31px;height:31px;border-radius:50%;object-fit:cover}
+.profile-open span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-profile .header-account{position:static;padding:7px 10px}
+.avatar-fallback{display:inline-grid;place-items:center;background:#e8eee8;color:#42634d;font-size:18px;flex:0 0 auto}
+.avatar-fallback.large{width:76px;height:76px;border-radius:50%;font-size:32px}
+.profile-editor{display:flex;align-items:center;gap:15px;margin-top:14px;padding:13px;background:var(--soft,#f5f1e8);border-radius:16px}
+.profile-preview{width:80px;height:80px;flex:0 0 80px}
+.profile-preview img{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid white}
+.avatar-upload-label{display:inline-flex;margin:4px 0;cursor:pointer}
+.profile-editor label:not(.btn){display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+
+.qibla-compass{width:230px;height:230px;margin:18px auto;border-radius:50%;position:relative;display:grid;place-items:center;background:radial-gradient(circle,#fffdf7 0 57%,#e9dfc9 58% 62%,#fffaf0 63%);border:8px solid #d8c79f;box-shadow:0 8px 22px #233c2c18}
+.qibla-compass:before{content:"N";position:absolute;top:12px;font-weight:900;color:#a17a32}
+.qibla-needle{font-size:74px;color:var(--g);line-height:1;transform-origin:50% 55%;transition:transform .25s ease;filter:drop-shadow(0 3px 2px #0002)}
+.qibla-kaaba{position:absolute;bottom:25px;font-size:24px}
+.friend-entry{display:flex;gap:8px;align-items:center}.friend-entry input{flex:1;min-width:0}.friend-item{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}.friend-avatar{width:36px;height:36px;border-radius:50%;background:#edf3ee;display:grid;place-items:center;font-size:18px}
+
+</style></head>
+<body>
+
+<div class="splash" id="welcomeSplash"><div class="splash-card">
+<div class="splash-mark">☾ ✦</div><h1>حاسب نفسك</h1><div class="tag">حاسب نفسك قبل أن تحاسب</div>
+<div class="splash-phrase" id="welcomePhrase"></div>
+<p style="color:#e8dfc8;line-height:1.9">أعن نفسك على طاعة الله، واجعل لكل يوم وقفة، ولكل عمل أثرًا.</p>
+<button type="button" onclick="enterApp()">ابدأ رحلتك</button>
+</div></div>
+
+<header>
+<div class="language-switch" aria-label="Language">
+  <button type="button" id="langAr" class="active" onclick="setLanguage('ar')">العربية</button>
+  <button type="button" id="langEn" onclick="setLanguage('en')">English</button>
+</div>
+<div class="brand" id="brandTitle">حاسب نفسك</div>
+<div class="tag">حاسب نفسك قبل أن تحاسب</div>
+<div class="date" id="today"></div>
+<div id="headerProfile" class="header-profile">
+  <button type="button" class="profile-open" onclick="go('account')" aria-label="فتح الحساب">
+    <img id="headerAvatar" alt="" style="display:none">
+    <span id="headerAvatarFallback" class="avatar-fallback">👤</span>
+    <span id="headerNickname">حسابي</span>
+  </button>
+  <button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج" style="display:none">خروج</button>
+</div>
+</header>
+<main>
+<section id="home" class="view active">
+<div class="hero">
+  <div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div>
+  <h2>ابدأ يومك بخطوة 🌿</h2>
+  <p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p>
+</div>
+
+<div class="panel next-prayer-home" role="button" tabindex="0"
+     onclick="go('prayers')"
+     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
+  <div class="row between" style="align-items:center;gap:12px">
+    <div style="min-width:0">
+      <div class="muted" style="font-size:12px">الصلاة القادمة <span id="homePrayerCity"></span></div>
+      <h2 id="homeNextPrayerName" style="margin:6px 0">جارٍ تحديد الصلاة القادمة...</h2>
+      <div class="muted" style="font-size:12px">الوقت المتبقي</div>
+      <strong id="homeNextPrayerCountdown" style="display:block;font-size:25px;letter-spacing:1px;margin-top:3px">--:--:--</strong>
+    </div>
+    <div class="next-prayer-icon" aria-hidden="true">🕌</div>
+  </div>
+  <div class="row between" style="margin-top:12px;align-items:center">
+    <span class="muted" style="font-size:12px">اضغط لعرض مواقيت الصلاة ومتابعتها</span>
+    <span style="font-weight:800">←</span>
+  </div>
+</div>
+
+<div class="panel challenge-card" id="dailyChallengePanel">
+  <div class="challenge-kicker">✦ تحدّي اليوم</div>
+  <div class="challenge-title">تحدّى نفسك بخطوة صالحة</div>
+  <div class="challenge-copy" id="dailyChallengeText">...</div>
+  <div class="row between" style="margin-top:10px"><span class="pill" id="challengeStatus">تحدٍّ جديد ينتظرك</span><span class="muted">كل يوم بداية جديدة</span></div>
+  <div class="challenge-actions">
+    <button id="challengeDoneBtn" onclick="completeDailyChallenge()">أنجزت التحدي ✓</button>
+    <button class="secondary" onclick="nextDailyChallenge()">تحدٍّ آخر</button>
+  </div>
+</div>
+<div class="panel">
+  <div class="row between">
+    <div><h2>أهلاً بك 🌿</h2><div class="muted">خطوات صغيرة وثابتة تقرّبك من الله</div></div>
+    <span class="pill">بداية جديدة</span>
+  </div>
+  <div class="ayah" id="welcomeVerse" style="margin-top:12px">إِنَّ مَعَ الْعُسْرِ يُسْرًا</div>
+  <div class="muted" id="verseSource" style="text-align:center;margin-top:5px">سورة الشرح، آية ٦</div>
+  <div class="grid" style="margin-top:14px">
+    <div class="tile">الصلوات اليوم<strong id="prayerStat">0 / 5</strong></div>
+    <div class="tile">ورد القرآن<strong id="quranStat">0 صفحة</strong></div>
+    <div class="tile">الأذكار المكتملة<strong id="dhikrStat">0</strong></div>
+    <div class="tile">التسبيح<strong id="tasbeehStat">0</strong></div>
+  </div>
+</div>
+<div class="panel">
+  <div class="row between"><h2>رحلتك اليوم</h2><strong id="dailyPercent" style="font-size:25px;color:var(--g)">0%</strong></div>
+  <div class="progress"><span id="dailyProgress"></span></div>
+  <div class="grid">
+    <div class="tile">الصلاة<strong id="weightPrayer">0%</strong></div>
+    <div class="tile">القرآن<strong id="weightQuran">0%</strong></div>
+    <div class="tile">الأذكار<strong id="weightDhikr">0%</strong></div>
+    <div class="tile">التسبيح<strong id="weightTasbeeh">0%</strong></div>
+    <div class="tile">محاسبة النفس<strong id="weightReflection">0%</strong></div>
+  </div>
+</div>
+<div class="panel">
+  <h2>أهدافي</h2>
+  <div class="row"><input id="goalInput" placeholder="مثال: قراءة 5 صفحات" style="flex:1"><button onclick="addGoal()">إضافة</button></div>
+  <div id="goals"></div>
+</div>
+</section>
+<section id="prayers" class="view">
+<div class="panel" id="prayerTimesPanel">
+  <div class="row between" style="align-items:center;gap:10px">
+    <div><h2 style="margin-bottom:3px">مواقيت الصلاة 🕌</h2><p class="muted" style="margin:0">اختر مدينتك لعرض المواقيت اليومية</p></div>
+    <button type="button" class="secondary" onclick="loadPrayerTimes(true)" style="white-space:nowrap">تحديث ↻</button>
+  </div>
+  <label for="prayerCity" style="display:block;margin:13px 0 6px;font-weight:700">المدينة</label>
+  <select id="prayerCity" onchange="changePrayerCity(this.value)" style="width:100%">
+    <optgroup label="المنطقة الشرقية">
+      <option value="Dammam">الدمام</option><option value="Al Khobar">الخبر</option><option value="Dhahran">الظهران</option><option value="Jubail">الجبيل</option><option value="Hofuf">الهفوف والأحساء</option><option value="Hafar Al Batin">حفر الباطن</option>
+    </optgroup>
+    <optgroup label="منطقة الرياض">
+      <option value="Riyadh">الرياض</option><option value="Al Kharj">الخرج</option><option value="Al Majma'ah">المجمعة</option><option value="Wadi Al Dawasir">وادي الدواسر</option>
+    </optgroup>
+    <optgroup label="منطقة مكة المكرمة">
+      <option value="Makkah">مكة المكرمة</option><option value="Jeddah">جدة</option><option value="Taif">الطائف</option><option value="Rabigh">رابغ</option>
+    </optgroup>
+    <optgroup label="منطقة المدينة المنورة">
+      <option value="Madinah">المدينة المنورة</option><option value="Yanbu">ينبع</option>
+    </optgroup>
+    <optgroup label="مناطق أخرى">
+      <option value="Tabuk">تبوك</option><option value="Hail">حائل</option><option value="Buraydah">بريدة</option><option value="Abha">أبها</option><option value="Khamis Mushait">خميس مشيط</option><option value="Jazan">جازان</option><option value="Najran">نجران</option><option value="Arar">عرعر</option><option value="Sakaka">سكاكا</option>
+    </optgroup>
+  </select>
+  <div id="prayerTimesStatus" class="muted" style="margin:10px 0">جارٍ تحميل مواقيت الصلاة...</div>
+  <div id="nextPrayerBox" class="tile" style="margin:10px 0;text-align:center">
+    <div class="muted">الصلاة القادمة</div><strong id="nextPrayerName" style="font-size:20px">—</strong>
+    <div id="nextPrayerCountdown" style="font-size:25px;font-weight:800;margin-top:4px">--:--:--</div>
+  </div>
+  <div id="prayerTimesGrid" class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+    <div class="tile">الفجر<strong>—</strong></div><div class="tile">الشروق<strong>—</strong></div><div class="tile">الظهر<strong>—</strong></div>
+    <div class="tile">العصر<strong>—</strong></div><div class="tile">المغرب<strong>—</strong></div><div class="tile">العشاء<strong>—</strong></div>
+  </div>
+  <p class="muted" style="font-size:11px;margin:10px 0 0">المصدر: AlAdhan API — طريقة أم القرى (مكة). قد تختلف بعض الدقائق عن تقويم المسجد المحلي؛ اعتمد تقويم الجهة الرسمية أو مسجدك عند الاختلاف.</p>
+</div>
+
+<div class="panel" id="qiblaPanel">
+  <h2>🧭 اتجاه القبلة</h2>
+  <p class="muted">حدد موقعك لمعرفة اتجاه الكعبة المشرفة، ثم وجّه الهاتف حسب البوصلة.</p>
+  <div class="qibla-compass" aria-label="بوصلة اتجاه القبلة">
+    <div id="qiblaNeedle" class="qibla-needle">➤</div>
+    <div class="qibla-kaaba">🕋</div>
+  </div>
+  <div class="tile">
+    <div class="muted">اتجاه القبلة من الشمال</div>
+    <strong id="qiblaBearing" style="font-size:25px">—</strong>
+    <div id="qiblaStatus" class="muted">اضغط تحديد موقعي لبدء الحساب.</div>
+  </div>
+  <div class="row" style="justify-content:center;margin-top:10px">
+    <button type="button" onclick="locateQibla()">تحديد موقعي</button>
+    <button type="button" class="secondary" onclick="enableQiblaCompass()">تفعيل البوصلة</button>
+  </div>
+  <p class="notice" style="margin-top:10px">لأفضل دقة، فعّل الموقع والبوصلة وابتعد عن الأجهزة والمعادن التي قد تؤثر في المجال المغناطيسي. قد تحتاج إلى معايرة بوصلة الهاتف.</p>
+</div>
+
+<div class="panel"><h2>متابعة الصلوات</h2><div class="notice">النقاط: الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط (5 إضافية للمسجد)، والمنفرد 0.</div><p class="muted">علّم الصلاة بعد أدائها وحدد مكانها وطريقة أدائها.</p><div id="prayerList"></div><div class="notice" id="prayerEncouragement" style="margin-top:12px">اختر طريقة أداء الصلاة لعرض رسالة التشجيع والنقاط.</div><div class="tile" style="margin-top:10px">نقاط الصلاة اليوم<strong id="prayerPoints">0 / 50</strong></div></div><div class="panel"><h2>إنجاز اليوم</h2><div class="progress"><span id="prayerProgress"></span></div><div id="prayerProgressText" class="muted"></div></div></section>
+<section id="worship" class="view">
+<div class="panel">
+  <h2>العبادات 🌿</h2>
+  <p class="muted">اختر العبادة التي تريد البدء بها.</p>
+  <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+    <button type="button" class="worship-card" onclick="go('quran')"><span style="font-size:27px">📖</span><strong>القرآن الكريم</strong><small>قراءة وبحث وورد يومي</small></button>
+    <button type="button" class="worship-card" onclick="go('adhkar')"><span style="font-size:27px">🌿</span><strong>الأذكار</strong><small>أذكار الصباح والمساء وغيرها</small></button>
+    <button type="button" class="worship-card" onclick="go('tasbeeh')"><span style="font-size:27px">📿</span><strong>المسبحة</strong><small>تسبيح إلكتروني ويدوي</small></button>
+  </div>
+</div>
+</section>
+<section id="quran" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
+<div class="panel"><h2>المصحف الشريف</h2><div class="notice">النص بالرسم العثماني من خدمة القرآن الكريم. المصدر: <a href="https://tanzil.net" target="_blank" rel="noopener">مشروع تنزيل Tanzil</a>، وتُستخدم خدمة AlQuran Cloud لجلب النص. عند فتح السورة تُحفظ نسخة منها على جهازك.</div>
+<div class="panel" style="background:#fbf8ef;margin:12px 0;padding:13px">
+<label for="ayahSearchInput">🔎 البحث عن آية</label>
+<div class="row"><input id="ayahSearchInput" type="search" placeholder="اكتب كلمة أو جزءًا من آية..." style="flex:1" onkeydown="if(event.key==='Enter')searchAyah()"><button onclick="searchAyah()">بحث</button></div>
+<div id="ayahSearchStatus" class="muted" style="margin-top:8px">ابحث بكلمة من الآية للوصول إلى موضعها في القرآن.</div>
+<div id="ayahSearchResults"></div>
+</div>
+<label for="surahSelect">اختر السورة</label><select id="surahSelect" onchange="loadSurah(this.value)"><option value="">جارٍ تحميل فهرس السور...</option></select>
+<div class="row between" style="margin-top:8px"><button class="secondary" onclick="changeSurah(-1)">السورة السابقة</button><span class="pill" id="surahMeta">114 سورة</span><button class="secondary" onclick="changeSurah(1)">السورة التالية</button></div>
+<div id="quranStatus" class="muted" style="margin:10px 0">اختر سورة للبدء بالقراءة.</div>
+<div id="surahHeading" class="ayah" style="display:none;margin:12px 0"></div>
+<div id="surahText" style="font-family:serif;font-size:23px;line-height:2.2;text-align:justify;white-space:normal"></div>
+<div class="row between" style="margin-top:12px"><button class="gold" onclick="saveQuranBookmark()">حفظ موضع القراءة</button><button class="secondary" onclick="resumeQuran()">متابعة آخر موضع</button></div>
+</div>
+<div class="panel"><h2>ورد القرآن الكريم</h2><p class="muted">سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.</p><label>اختر وردك اليومي</label><select id="quranGoal" onchange="setQuranGoal(this.value)"><option value="3">3 صفحات</option><option value="5">5 صفحات</option><option value="10">10 صفحات</option><option value="20">20 صفحة</option><option value="custom">عدد آخر…</option></select><input id="quranGoalCustom" type="number" min="1" max="604" placeholder="اكتب عدد الصفحات" style="display:none" onchange="setQuranGoal(this.value)"><div class="notice" id="quranGoalProgress">اختر عدد الصفحات المناسب لك.</div><div class="row" style="margin:10px 0"><button onclick="changePages(1)">+ سجّل صفحة قرأتها</button><button class="secondary" onclick="changePages(-1)">تراجع</button><span id="pagesToday" class="pill">0</span></div></div>
+</section>
+<section id="adhkar" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div><div class="panel"><h2>الأذكار 🌿</h2><p class="muted">اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».</p><div class="notice">كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.</div><div class="row" style="margin-top:10px"><button type="button" class="dhikr-tab active" data-dhikr="morning" onclick="showDhikr('morning')">الصباح</button><button type="button" class="secondary dhikr-tab" data-dhikr="evening" onclick="showDhikr('evening')">المساء</button><button type="button" class="secondary dhikr-tab" data-dhikr="sleep" onclick="showDhikr('sleep')">النوم</button><button type="button" class="secondary dhikr-tab" data-dhikr="afterPrayer" onclick="showDhikr('afterPrayer')">بعد الصلاة</button><button type="button" class="secondary dhikr-tab" data-dhikr="wake" onclick="showDhikr('wake')">الاستيقاظ</button><button type="button" class="secondary dhikr-tab" data-dhikr="misc" onclick="showDhikr('misc')">متنوعة</button></div><div class="row between" style="margin-top:13px"><strong id="dhikrTitle">أذكار الصباح</strong><span class="pill" id="dhikrScore">0 نقطة</span></div><div class="mini-progress" style="margin:9px 0"><span id="dhikrProgress" style="width:0%"></span></div><div id="dhikrItems"></div><p class="muted">تنبيه: روعي اختيار أذكار مشهورة من كتب الأذكار المأثورة، ومنها حصن المسلم. يُرجى مراجعة النصوص والأعداد في المصادر المعتمدة.</p></div></section>
+<section id="tasbeeh" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div><div class="panel"><h2>السبحة</h2><div class="row"><button type="button" class="dhikr-tab active" id="digitalMode" onclick="setTasbeehMode('digital')">السبحة الإلكترونية</button><button type="button" class="secondary dhikr-tab" id="manualMode" onclick="setTasbeehMode('manual')">المسبحة اليدوية</button></div><div class="counter" id="tasbeehCount">0</div><div id="digitalTasbeeh"><button class="gold" style="display:block;width:100%;padding:22px;font-size:20px" onclick="tapTasbeeh()">اضغط للتسبيح</button></div><div id="manualTasbeeh" style="display:none;text-align:center">
+<div class="real-tasbeeh-wrap">
+  <button type="button" class="real-tasbeeh-hit" onclick="tapTasbeeh()" aria-label="حرّك حبة المسبحة للتسبيح">
+    <svg id="realTasbeehSvg" viewBox="0 0 340 310" role="img" aria-label="مسبحة يدوية من 33 حبة">
+      <defs>
+        <radialGradient id="woodBead" cx="32%" cy="25%" r="75%"><stop offset="0%" stop-color="#f6e7bd"/><stop offset="45%" stop-color="#c99a55"/><stop offset="100%" stop-color="#75451f"/></radialGradient>
+        <radialGradient id="activeBead" cx="30%" cy="25%" r="75%"><stop offset="0%" stop-color="#fff2c7"/><stop offset="45%" stop-color="#e6bd68"/><stop offset="100%" stop-color="#98611f"/></radialGradient>
+        <filter id="beadShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#4b321b" flood-opacity=".35"/></filter>
+      </defs>
+      <ellipse cx="170" cy="145" rx="105" ry="112" fill="none" stroke="#a77a43" stroke-width="3" opacity=".75"/>
+      <g id="realTasbeehBeads"></g>
+      <g filter="url(#beadShadow)">
+        <path d="M170 32 L170 12" stroke="#8a5c2d" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="170" cy="9" r="7" fill="url(#woodBead)" stroke="#74451f" stroke-width="1.5"/>
+        <path d="M170 2 Q158 -7 162 -19 M170 2 Q182 -7 178 -19 M170 2 L170 -24" stroke="#b18a51" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </button>
+  <div class="real-tasbeeh-caption">المسبحة الخشبية • ٣٣ حبة</div>
+  <div class="muted">حرّك الحبة بلمسة، وتابع عدد التسبيحات بالأعلى</div>
+</div>
+</div><div class="row" style="justify-content:center;margin-top:10px"><button class="secondary" onclick="resetTasbeeh()">تصفير العداد</button><button class="light" onclick="setPhrase('سبحان الله')">سبحان الله</button><button class="light" onclick="setPhrase('الحمد لله')">الحمد لله</button><button class="light" onclick="setPhrase('الله أكبر')">الله أكبر</button></div><p id="tasbeehPhrase" class="muted" style="text-align:center"></p></div></section>
+<section id="quiz" class="view"><div class="panel"><h2>🏆 مسابقة سؤال اليوم</h2><p class="muted">أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.</p><span class="pill">ثقافة إسلامية</span><h3 id="question" style="margin-top:13px"></h3><div id="answers"></div><p id="quizResult" class="muted"></p><div class="tile">نقاطك في المسابقة<strong id="points">0</strong></div><div class="panel" style="margin-top:14px" id="friendsChallengePanel">
+<h3>🤝 تحدي الأصدقاء</h3>
+<p class="muted">كوّن قائمة أصدقائك وتابعوا نقاطكم في أعمال الخير وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.</p>
+<div id="friendStatus" class="notice">سجّل الدخول أولًا لتبدأ تحدي الأصدقاء.</div>
+<div class="row" style="margin-top:10px">
+<button class="gold" type="button" onclick="createFriendInvite()">إنشاء رمز دعوة</button>
+<button class="secondary" type="button" onclick="loadFriends()">تحديث الأصدقاء</button>
+</div>
+<div id="friendInvite" class="notice" style="margin-top:9px;display:none"></div>
+<label for="friendCodeInput" style="display:block;margin-top:12px">عندك رمز من صديق؟</label>
+<div class="friend-entry">
+<input id="friendCodeInput" maxlength="12" placeholder="مثال: HN-ABC123" autocomplete="off">
+<button type="button" onclick="acceptFriendInvite()">انضمام</button>
+</div>
+<h3 style="margin-top:18px">أصدقائي</h3>
+<div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
+</div></div></section>
+<section id="stats" class="view"><div class="panel"><h2>إحصائياتي الشخصية</h2><p class="muted">هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.</p><div class="grid"><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div><div class="tile">التسبيحات<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المحددة<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة<strong id="sGoals">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div></div></div>
+<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted"></div></div><div class="panel"><h2>ملخص هذا الشهر</h2><div id="monthlyStats" class="muted"></div></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
+<section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
+<div class="panel">
+  <div class="challenge-kicker">🏆 مجتمع حاسب نفسك</div>
+  <h2 style="margin-top:7px">لوحة الصدارة</h2>
+  <p class="muted">نافس بالخير، واجمع نقاطك من أعمالك اليومية وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.</p>
+  <div id="leaderboardStatus" class="notice">سجّل الدخول أولًا للمشاركة في لوحة الصدارة.</div>
+  <button id="joinLeaderboardBtn" onclick="joinLeaderboard()">اشترك في لوحة الصدارة</button>
+</div>
+<div class="panel"><h2>أفضل المشاركين</h2><div id="leaderboardList" class="muted">جارٍ تحميل لوحة الصدارة...</div><button class="secondary" onclick="renderLeaderboard()">تحديث القائمة</button></div>
+</section>
+
+<section id="account" class="view">
+<div class="panel">
+  <h2>حسابك في حاسب نفسك</h2>
+  <p class="muted">أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.</p>
+  <div id="accountStatus" class="notice" style="display:none"></div>
+  <div id="loggedOutArea">
+    <input id="nickname" placeholder="اسمك أو اسم مستعار (عند إنشاء الحساب)" autocomplete="nickname">
+    <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
+    <div class="password-field" style="display:flex;align-items:center;gap:7px">
+      <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password" style="flex:1;min-width:0">
+      <button type="button" class="secondary password-toggle" onclick="togglePasswordVisibility('password',this)" aria-label="إظهار كلمة المرور" aria-pressed="false" style="padding:10px 12px;flex:0 0 auto">👁️</button>
+    </div>
+    <div class="first-time-account-note" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
+      <strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أول مرة تستخدم حاسب نفسك؟</strong>
+      <span>إذا ما سبق لك إنشاء حساب، اختر «إنشاء حساب» أولًا. أما إذا كان لديك حساب بالفعل، فأدخل بريدك وكلمة المرور واضغط «تسجيل الدخول».</span>
+    </div>
+    <div class="auth-actions">
+      <button type="button" id="signInButton" onclick="signIn()">تسجيل الدخول</button>
+      <button type="button" id="signUpButton" class="secondary" onclick="signUp()">إنشاء حساب</button>
+    </div>
+    <div class="auth-links" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px">
+      <button type="button" class="text-button" onclick="sendPasswordReset()" style="background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">نسيت كلمة المرور؟</button>
+      <button type="button" id="resendConfirmButton" class="text-button" onclick="resendConfirmationEmail()" style="display:inline-flex;background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">إعادة إرسال رسالة تأكيد البريد</button>
+    </div>
+    <div id="passwordRecoveryArea" style="display:none;margin-top:14px">
+      <label for="newPassword">كلمة المرور الجديدة</label>
+      <input id="newPassword" type="password" autocomplete="new-password" placeholder="أدخل كلمة مرور جديدة (6 أحرف على الأقل)">
+      <button type="button" class="gold" onclick="saveRecoveredPassword()">حفظ كلمة المرور الجديدة</button>
+    </div>
+  </div>
+  <div id="loggedInArea" style="display:none">
+    <button type="button" id="editProfileButton" class="secondary" style="margin-bottom:10px;display:none" onclick="showProfileEditor()">تعديل الملف الشخصي</button>
+    <div id="profileEditArea">
+    <div class="profile-editor">
+      <label class="profile-preview" for="avatarFile" title="اضغط لتغيير الصورة">
+        <img id="accountAvatarPreview" alt="صورة الحساب" style="display:none">
+        <span id="accountAvatarFallback" class="avatar-fallback large">👤</span>
+      </label>
+      <div style="flex:1;min-width:0">
+        <div id="nicknameDisplay" style="font-weight:800;margin:8px 0"></div>
+        <button type="button" class="secondary" onclick="showNicknameEditor()">تعديل الاسم</button>
+        <div id="nicknameEditArea" style="display:none;margin-top:8px">
+          <label for="profileNickname">الاسم المستعار</label>
+          <input id="profileNickname" placeholder="اكتب الاسم الذي سيظهر للآخرين" maxlength="30">
+          <div class="row">
+            <button type="button" class="gold" onclick="confirmNickname()">موافق</button>
+            <button type="button" class="light" onclick="deleteNickname()">حذف الاسم</button>
+          </div>
+        </div>
+        <label class="btn secondary avatar-upload-label">تغيير صورة الحساب
+          <input id="avatarFile" type="file" accept="image/*" hidden onchange="handleAvatarChange(event)">
+        </label>
+        <button type="button" class="light" onclick="removeAvatar()">حذف الصورة</button>
+      </div>
+    </div>
+    <button type="button" class="gold" style="margin-top:10px" onclick="saveProfile()">حفظ الملف الشخصي</button>
+    </div>
+    
+  </div>
+  <button type="button" id="syncButton" class="gold" style="margin-top:10px" onclick="syncNow()">مزامنة الآن</button>
+  <p id="authMessage" class="muted" role="status" aria-live="polite"></p>
+</div>
+
+
+<div class="panel" id="supportPanel" style="margin-top:16px">
+
+  <div class="panel" style="text-align:center;padding:22px 16px">
+    <div style="font-size:42px;margin-bottom:8px">🤍</div>
+    <div class="challenge-kicker">دعم ومساندة</div>
+    <h2 style="font-size:22px;margin:9px 0">ادعم المطوّر أبو سعد</h2>
+    <p style="line-height:2;margin:8px auto;max-width:520px">
+      أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛
+      لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.
+    </p>
+    <div class="tile" style="margin:16px 0;text-align:center">
+      <div style="font-size:28px">📲</div>
+      <strong style="font-size:17px">ساهم في نشر الخير</strong>
+      <p class="muted" style="line-height:1.8;margin:7px 0 12px">
+        شارك التطبيق مع أهلك وأصدقائك، وعرّفهم على الصلاة والقرآن والأذكار ومحاسبة النفس.
+      </p>
+      <button type="button" class="gold" onclick="shareApp()">شارك التطبيق</button>
+      <p id="supportShareMessage" class="muted" role="status" aria-live="polite" style="margin:10px 0 0"></p>
+    </div>
+    <p class="muted" style="font-size:12px;line-height:1.8">
+      دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍
+    </p>
+    <div style="display:grid;gap:9px;margin:16px 0">
+      <div style="background:rgba(22,134,91,.10);border:1px solid rgba(22,134,91,.25);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-size:25px;margin-bottom:6px">📢</div>
+        <strong style="display:block;font-size:17px;margin-bottom:7px">تابعنا في قناة حاسب نفسك على واتساب</strong>
+        <p class="muted" style="line-height:1.9;margin:0 0 12px">عندك ملاحظة أو اقتراح؟ أو ودك تكون أول من يعرف جديد الموقع وتحديثاته؟ تابع قناتنا لتصلك الإضافات والأخبار، ويسعدنا سماع ملاحظاتك واقتراحاتك من خلال النموذج أدناه.</p>
+        <a href="https://whatsapp.com/channel/0029VbEIFVB5q08mEOf9a00G" target="_blank" rel="noopener noreferrer"
+           style="display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 16px;border-radius:12px;background:#16865b;color:#fff;text-decoration:none;font-weight:800">
+          <span style="font-size:20px">◉</span><span>زيارة قناة حاسب نفسك</span>
+        </a>
+      </div>
+      <button type="button" class="secondary" onclick="showInstallGuide()" style="width:100%">📲 طريقة إضافة حاسب نفسك إلى الشاشة الرئيسية</button>
+      <button type="button" class="secondary" onclick="go('guide')" style="width:100%">📘 دليل استخدام حاسب نفسك</button>
+    </div>
+    <div style="text-align:right;margin-top:18px">
+      <h3 style="margin-bottom:8px">💬 ملاحظاتكم واقتراحاتكم</h3>
+      <p class="muted" style="line-height:1.8">شاركنا رأيك باسم مستعار، ولا تحتاج إلى إنشاء حساب. ستظهر الملاحظة للزوار بعد إرسالها.</p>
+      <label for="supportNickname" style="display:block;font-weight:800;margin:10px 0 6px">اسمك المستعار</label>
+      <input id="supportNickname" type="text" maxlength="40" placeholder="مثال: محب الخير" autocomplete="nickname">
+      <label for="supportComment" style="display:block;font-weight:800;margin:10px 0 6px">تعليقك أو اقتراحك</label>
+      <textarea id="supportComment" maxlength="1000" placeholder="اكتب ملاحظتك أو اقتراحك هنا..." rows="3"></textarea>
+      <button type="button" class="secondary" onclick="saveSupportComment()">إرسال التعليق</button>
+      <p id="supportCommentStatus" class="muted" role="status" aria-live="polite"></p>
+    </div>
+    <div id="supportCommentsList" style="text-align:right;margin-top:18px">
+      <h3>💬 تعليقات المجتمع</h3><p class="muted">جاري تحميل التعليقات...</p>
+    </div>
+    <div id="supportAdminPanel" class="tile" style="display:none;text-align:right;margin-top:18px">
+      <h3>🛡️ إدارة التعليقات</h3>
+      <p class="muted">هذه اللوحة تظهر لحساب إدارة حاسب نفسك فقط.</p>
+      <div id="supportAdminComments"></div>
+    </div>
+  </div>
+</div>
+<div class="panel"><h2>نسخة احتياطية</h2><div class="row"><button onclick="exportData()">تصدير بياناتي</button><label class="btn secondary">استيراد نسخة<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div>
+</section>
+<section id="guide" class="view">
+  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('account')">← العودة إلى الحساب</button></div>
+  <div class="panel"><div class="challenge-kicker">📘 دليل المستخدم</div><h2 style="margin-top:7px">دليل استخدام حاسب نفسك</h2><p class="muted" style="line-height:1.9">مرحبًا بك! هذا الدليل يشرح أقسام الموقع وطريقة الاستفادة من أدواته خطوة بخطوة.</p></div>
+  <div class="panel"><h3>1. إنشاء حساب وتسجيل الدخول</h3><ol style="line-height:2"><li>افتح قسم «حسابي».</li><li>لأول مرة، أدخل اسمًا مستعارًا وبريدك الإلكتروني وكلمة مرور، ثم اضغط «إنشاء حساب».</li><li>افتح رسالة تأكيد البريد واضغط رابط التأكيد.</li><li>إذا كان لديك حساب سابق، أدخل البريد وكلمة المرور واضغط «تسجيل الدخول».</li><li>إذا نسيت كلمة المرور، استخدم «نسيت كلمة المرور؟». وإذا لم تصلك رسالة التأكيد، استخدم «إعادة إرسال رسالة تأكيد البريد».</li></ol></div>
+  <div class="panel"><h3>2. متابعة الصلوات</h3><p style="line-height:2">من قسم «الصلاة» اختر مدينتك لمشاهدة المواقيت، ثم سجّل الصلوات بعد أدائها وحدد طريقة ومكان الصلاة. يمكنك كذلك استخدام اتجاه القبلة بعد السماح للموقع بالوصول إلى موقعك.</p></div>
+  <div class="panel"><h3>3. القرآن الكريم والورد اليومي</h3><p style="line-height:2">من «العبادات» افتح القرآن الكريم، واختر السورة، واستخدم البحث عن آية عند الحاجة. سجّل الصفحات التي قرأتها من الورد اليومي، واحفظ موضع القراءة لتعود إليه لاحقًا.</p></div>
+  <div class="panel"><h3>4. الأذكار والتسبيح</h3><p style="line-height:2">اختر قسم الأذكار مثل الصباح أو المساء أو بعد الصلاة، واقرأ الذكر ثم اضغط «تمت القراءة». وفي قسم المسبحة اختر الإلكترونية أو اليدوية واضغط للعدّ.</p></div>
+  <div class="panel"><h3>5. سؤال اليوم والمسابقة</h3><p style="line-height:2">افتح تبويب «السؤال»، اقرأ سؤال اليوم واختر إجابتك. تتجدد المسابقة يوميًا، وتظهر نتيجة إجابتك ونقاط المسابقة في نفس القسم.</p></div>
+  <div class="panel"><h3>6. تحدي الأصدقاء</h3><ol style="line-height:2"><li>سجّل الدخول أولًا.</li><li>اضغط «إنشاء رمز دعوة» وشارك الرمز مع صديقك.</li><li>يدخل صديقك الرمز في خانة «عندك رمز من صديق؟» ثم يضغط «انضمام».</li><li>استخدم «تحديث الأصدقاء» لمشاهدة القائمة.</li></ol></div>
+  <div class="panel"><h3>7. الإنجازات ولوحة الصدارة</h3><p style="line-height:2">من «إنجازاتي» راجع إحصائياتك اليومية والأسبوعية والشهرية. ويمكنك فتح لوحة الصدارة للاطلاع على ترتيب المشاركين. الاشتراك في الصدارة يتطلب تسجيل الدخول والاتصال بالإنترنت.</p></div>
+  <div class="panel"><h3>8. النسخة الاحتياطية وتصدير البيانات</h3><p style="line-height:2">من قسم الحساب اختر «تصدير بياناتي» لحفظ نسخة من بياناتك على جهازك. ولإرجاع نسخة محفوظة، اختر «استيراد نسخة» وحدد ملف النسخة الاحتياطية الصحيح. احتفظ بالملف في مكان آمن.</p></div>
+  <div class="panel"><h3>9. إضافة الموقع إلى شاشة الآيفون الرئيسية</h3><ol style="line-height:2"><li>افتح الموقع من متصفح Safari.</li><li>اضغط زر المشاركة أسفل الشاشة.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». ستظهر أيقونة حاسب نفسك على الشاشة.</li></ol><p class="notice">للاستخدام دون اتصال، افتح الموقع أول مرة بالإنترنت وانتظر تحميله. بعض الخدمات مثل تسجيل الدخول والمزامنة والصدارة تحتاج اتصالًا.</p></div>
+  <div class="panel"><h3>10. التواصل والدعم</h3><p style="line-height:2">للتواصل مع المبدع أبو سعد أو إرسال اقتراح، ارجع إلى قسم الحساب واستخدم زر واتساب أو نموذج التعليقات والاقتراحات.</p><a href="https://whatsapp.com/channel/0029VbEIFVB5q08mEOf9a00G" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#16865b;color:white;text-decoration:none;font-weight:800">تابع قناة حاسب نفسك على واتساب</a></div>
+  <div class="panel"><p class="muted" style="line-height:1.9">نسأل الله أن يجعل هذا العمل نافعًا، وأن يعيننا وإياكم على ذكره وشكره وحسن عبادته 🤍</p><button type="button" class="gold" onclick="go('account')" style="width:100%">العودة إلى الحساب</button></div>
+</section>
+</main>
+
+<div id="avatarCropModal" class="crop-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="cropTitle">
+  <div class="crop-card">
+    <h2 id="cropTitle">قص صورة الحساب</h2>
+    <p class="muted">حرّك مستوى التكبير حتى تظهر الصورة بالشكل المناسب داخل الدائرة.</p>
+    <div class="crop-frame"><canvas id="avatarCropCanvas" width="320" height="320"></canvas></div>
+    <label for="avatarZoom">تكبير الصورة</label>
+    <input id="avatarZoom" type="range" min="1" max="3" step="0.05" value="1" oninput="drawAvatarCrop()">
+    <div class="row">
+      <button type="button" class="gold" onclick="applyAvatarCrop()">استخدام الصورة</button>
+      <button type="button" class="secondary" onclick="cancelAvatarCrop()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+<button type="button" class="active" data-view="home"><span class="tabicon">⌂</span>الرئيسية</button>
+<button type="button" data-view="prayers"><span class="tabicon">☾</span>الصلاة</button>
+<button type="button" data-view="worship"><span class="tabicon">📖</span>العبادات</button>
+<button type="button" data-view="stats"><span class="tabicon">🏆</span>إنجازاتي</button>
+<button type="button" data-view="quiz"><span class="tabicon">؟</span>السؤال</button>
+<button type="button" data-view="account"><span class="tabicon">♙</span>الحساب</button>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+
+function togglePasswordVisibility(inputId,button){
+  const field=$(inputId);if(!field)return;
+  const reveal=field.type==='password';
+  field.type=reveal?'text':'password';
+  if(button){
+    button.textContent=reveal?'🙈':'👁️';
+    button.setAttribute('aria-label',reveal?'إخفاء كلمة المرور':'إظهار كلمة المرور');
+    button.setAttribute('aria-pressed',reveal?'true':'false');
+  }
+}
+function showInstallGuide(){
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const message=isIOS
+    ?'لإضافة حاسب نفسك إلى شاشة الآيفون: افتح الموقع في Safari، اضغط زر المشاركة، اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».'
+    :'افتح الموقع من متصفح يدعم التثبيت، ثم افتح قائمة المتصفح واختر «إضافة إلى الشاشة الرئيسية» أو «تثبيت التطبيق» إذا ظهر الخيار.';
+  alert(message);
+}
+async function shareApp(){
+  const shareUrl=window.location.origin+window.location.pathname;
+  const shareData={title:'حاسب نفسك',text:'جرّب تطبيق حاسب نفسك — رفيقك اليومي للصلاة والقرآن والأذكار ومحاسبة النفس.',url:shareUrl};
+  const status=$('supportShareMessage');
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+      if(status)status.textContent='شكرًا لك، بارك الله فيك 🤍';
+    }else if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(shareUrl);
+      if(status)status.textContent='تم نسخ رابط التطبيق، أرسله لمن تحب 🤍';
+    }else{
+      window.prompt('انسخ رابط التطبيق وشاركه:',shareUrl);
+    }
+  }catch(error){
+    if(error?.name!=='AbortError' && status)status.textContent='تعذرت المشاركة تلقائيًا. يمكنك نسخ رابط التطبيق من شريط العنوان.';
+  }
+}
+
+function safeLoad(){try{const v=JSON.parse(localStorage.getItem('hasibNafsakData')||'null');return v&&typeof v==='object'?v:null}catch(e){console.warn('Local data could not be read',e);return null}}
+const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'سبحان الله',points:0,answers:{},reflections:{}});
+let db=Object.assign(blank(),safeLoad()||{});
+const todayKey=(()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')})();
+function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz')loadFriends()}
+// Direct click handlers for each navigation button (more reliable on iOS Safari).
+document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
+  b.addEventListener('click',function(ev){
+    ev.preventDefault();
+    go(this.getAttribute('data-view'));
+  },{passive:false});
+});
+const verses=[['إِنَّ مَعَ الْعُسْرِ يُسْرًا','سورة الشرح، آية ٦'],['فَاذْكُرُونِي أَذْكُرْكُمْ','سورة البقرة، آية ١٥٢'],['وَهُوَ مَعَكُمْ أَيْنَ مَا كُنْتُمْ','سورة الحديد، آية ٤'],['أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ','سورة الرعد، آية ٢٨']];
+const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textContent=v[0];$('verseSource').textContent=v[1];
+$('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
+function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
+function save(){persist();renderAll();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard()}
+
+const prayerCityNames={Dammam:'الدمام','Al Khobar':'الخبر',Dhahran:'الظهران',Jubail:'الجبيل',Hofuf:'الهفوف والأحساء','Hafar Al Batin':'حفر الباطن',Riyadh:'الرياض','Al Kharj':'الخرج',"Al Majma'ah":'المجمعة','Wadi Al Dawasir':'وادي الدواسر',Makkah:'مكة المكرمة',Jeddah:'جدة',Taif:'الطائف',Rabigh:'رابغ',Madinah:'المدينة المنورة',Yanbu:'ينبع',Tabuk:'تبوك',Hail:'حائل',Buraydah:'بريدة',Abha:'أبها','Khamis Mushait':'خميس مشيط',Jazan:'جازان',Najran:'نجران',Arar:'عرعر',Sakaka:'سكاكا'};
+const prayerNames=[['Fajr','الفجر'],['Sunrise','الشروق'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']];
+const salahKeys=[['Fajr','الفجر'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']];
+let prayerTimesData=null,prayerCountdownTimer=null;
+function saudiDateParts(date=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const o={};parts.forEach(p=>o[p.type]=p.value);return {year:+o.year,month:+o.month,day:+o.day}}
+function apiDate(parts){return String(parts.day).padStart(2,'0')+'-'+String(parts.month).padStart(2,'0')+'-'+parts.year}
+function timeMinutes(value){const m=String(value||'').match(/(\d{1,2}):(\d{2})/);return m?Number(m[1])*60+Number(m[2]):null}
+function saudiDateTime(parts,minutes){return new Date(Date.UTC(parts.year,parts.month-1,parts.day,Math.floor(minutes/60)-3,minutes%60))}
+function formatPrayerTime(value){const mins=timeMinutes(value);if(mins===null)return '—';const d=new Date(Date.UTC(2020,0,1,Math.floor(mins/60),mins%60));return new Intl.DateTimeFormat('ar-SA',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'UTC'}).format(d)}
+function changePrayerCity(city){if(!city)return;localStorage.setItem('hasibPrayerCity',city);loadPrayerTimes(true)}
+async function loadPrayerTimes(force=false){
+  const select=$('prayerCity'),status=$('prayerTimesStatus');if(!select||!status)return;
+  const saved=localStorage.getItem('hasibPrayerCity')||'Dammam';if(select.value!==saved)select.value=saved;
+  const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+saved+':'+date;
+  if(!force){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached?.timings){prayerTimesData=cached;renderPrayerTimes();return}}catch(e){}}
+  status.textContent='جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
+  try{
+    const url='https://api.aladhan.com/v1/timingsByCity/'+date+'?city='+encodeURIComponent(saved)+'&country=Saudi%20Arabia&method=4&school=0';
+    const response=await fetch(url);if(!response.ok)throw new Error('HTTP '+response.status);
+    const result=await response.json();if(result.code!==200||!result.data?.timings)throw new Error('Invalid prayer times response');
+    prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
+    localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));renderPrayerTimes();
+  }catch(error){console.error('Prayer times error:',error);status.textContent='تعذر تحميل المواقيت الآن. تحقق من اتصال الإنترنت ثم اضغط تحديث.';if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='تعذر تحميل الصلاة القادمة';if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent='—';if($('homePrayerCity'))$('homePrayerCity').textContent='· '+(prayerCityNames[saved]||saved)}
+}
+function renderPrayerTimes(){
+  if(!prayerTimesData)return;
+  const t=prayerTimesData.timings,city=prayerCityNames[prayerTimesData.city]||prayerTimesData.city;
+  $('prayerTimesStatus').textContent='مواقيت اليوم في '+city+' — '+new Intl.DateTimeFormat('ar-SA',{dateStyle:'full',timeZone:'Asia/Riyadh'}).format(new Date());
+  $('prayerTimesGrid').innerHTML=prayerNames.map(([key,label])=>`<div class="tile">${label}<strong style="display:block;margin-top:5px">${formatPrayerTime(t[key])}</strong></div>`).join('');
+  updateNextPrayer();
+}
+function updateNextPrayer(){
+  if(!prayerTimesData)return;
+  const now=Date.now(),parts=saudiDateParts(),timings=prayerTimesData.timings;
+  let upcoming=[];
+  salahKeys.forEach(([key,label])=>{const mins=timeMinutes(timings[key]);if(mins!==null){const at=saudiDateTime(parts,mins);if(at.getTime()>now)upcoming.push({key,label,at})}});
+  if(!upcoming.length){const tomorrow=new Date(Date.UTC(parts.year,parts.month-1,parts.day+1));const p={year:tomorrow.getUTCFullYear(),month:tomorrow.getUTCMonth()+1,day:tomorrow.getUTCDate()};const fajr=timeMinutes(timings.Fajr);if(fajr!==null)upcoming.push({key:'Fajr',label:'الفجر',at:saudiDateTime(p,fajr)})}
+  upcoming.sort((a,b)=>a.at-b.at);const next=upcoming[0];if(!next)return;
+  const diff=Math.max(0,next.at.getTime()-now),hours=Math.floor(diff/3600000),minutes=Math.floor(diff%3600000/60000),seconds=Math.floor(diff%60000/1000);
+  const countdown=[hours,minutes,seconds].map(n=>String(n).padStart(2,'0')).join(':');
+  $('nextPrayerName').textContent=next.label;
+  $('nextPrayerCountdown').textContent=countdown;
+  if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='صلاة '+next.label;
+  if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent=countdown;
+  if($('homePrayerCity'))$('homePrayerCity').textContent='· '+(prayerCityNames[prayerTimesData.city]||prayerTimesData.city);
+}
+
+function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
+function markPrayer(p,v){const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
+function changePages(n){day().pages=Math.max(0,day().pages+n);db.quranTotal=Math.max(0,(+db.quranTotal||0)+n);if(n>0)for(let i=0;i<n;i++)trackAppEvent('quran_page_added');save()}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
+const QURAN_APIS=['https://api.alquran.cloud/v1','https://alquran.api.islamic.network/v1'];
+let surahIndex=[],activeSurah=0,quranIndexLoaded=false,quranLoading=false;
+function cachedSurah(n){try{return JSON.parse(localStorage.getItem('hasibQuranSurah'+n)||'null')}catch(e){return null}}
+async function quranFetch(path){let lastError;for(const base of QURAN_APIS){try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);try{const response=await fetch(base+path,{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('HTTP '+response.status);const json=await response.json();if(json.code!==200||!json.data)throw new Error('Invalid Quran response');return json.data}finally{clearTimeout(timer)}}catch(err){lastError=err;console.warn('Quran source failed:',base,err)}}throw lastError||new Error('No Quran source available')}
+async function initQuran(force=false){if(quranLoading)return;if(quranIndexLoaded&&!force)return;quranLoading=true;const sel=$('surahSelect');$('quranStatus').textContent='جارٍ تجهيز فهرس القرآن الكريم...';sel.innerHTML='<option value="">جارٍ التحميل...</option>';try{surahIndex=await quranFetch('/surah');if(!Array.isArray(surahIndex)||surahIndex.length!==114)throw new Error('Surah list incomplete');sel.innerHTML=surahIndex.map(x=>`<option value="${x.number}">${x.number}. ${x.name} — ${x.numberOfAyahs} آية</option>`).join('');$('surahMeta').textContent='114 سورة';quranIndexLoaded=true;const last=+(db.quranBookmark?.surah||1);await loadSurah(last,false)}catch(e){console.error('Quran index:',e);sel.innerHTML='<option value="">تعذر تحميل الفهرس</option>';$('quranStatus').innerHTML='تعذر جلب بيانات القرآن من المصدرين. تأكد من اتصال الإنترنت ثم اضغط إعادة المحاولة.';const retry=document.createElement('button');retry.type='button';retry.className='secondary';retry.textContent='إعادة المحاولة';retry.onclick=()=>initQuran(true);$('quranStatus').appendChild(document.createTextNode(' '));$('quranStatus').appendChild(retry)}finally{quranLoading=false}}
+async function loadSurah(n,update=true){n=+n;if(!n||n<1||n>114)return;activeSurah=n;if(surahIndex.length)$('surahSelect').value=String(n);$('surahText').innerHTML='';$('surahHeading').style.display='block';$('surahHeading').textContent=surahIndex[n-1]?.name||('السورة رقم '+n);$('quranStatus').textContent='جارٍ تحميل السورة...';let data=cachedSurah(n);try{if(!data){data=await quranFetch('/surah/'+n+'/quran-uthmani');if(!data.ayahs||!data.ayahs.length)throw new Error('No verses');try{localStorage.setItem('hasibQuranSurah'+n,JSON.stringify(data))}catch(e){console.warn('تعذر حفظ نسخة السورة محلياً',e)}}$('surahHeading').textContent=data.name;$('quranStatus').textContent=`${data.englishName} • ${data.numberOfAyahs} آية • ${data.revelationType==='Meccan'?'مكية':'مدنية'}`;$('surahText').innerHTML=data.ayahs.map(a=>`<span class="quran-ayah">${escapeQuranText(a.text)} <small>﴿${a.numberInSurah}﴾</small></span>`).join('');if(update)saveQuranBookmark(false)}catch(e){console.error('Surah load:',e);$('quranStatus').textContent='تعذر تحميل هذه السورة. جرّب اختيارها مرة أخرى أو أعد تحميل الصفحة.'}}
+function escapeQuranText(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+async function searchAyah(){
+  const input=$('ayahSearchInput'),query=input.value.trim(),status=$('ayahSearchStatus'),box=$('ayahSearchResults');
+  if(!query){status.textContent='اكتب كلمة أو جزءًا من آية للبحث.';box.innerHTML='';return}
+  status.textContent='جارٍ البحث في آيات القرآن الكريم...';box.innerHTML='';
+  try{
+    const data=await quranFetch('/search/'+encodeURIComponent(query)+'/all/quran-uthmani');
+    const matches=data.matches||[];
+    if(!matches.length){status.textContent='ما لقينا نتائج. جرّب كلمة ثانية أو اكتب جزءًا أقصر من الآية.';return}
+    status.textContent='نتائج البحث: '+matches.length+' آية';
+    box.innerHTML=matches.slice(0,30).map((m,i)=>`<button type="button" class="secondary" style="display:block;width:100%;text-align:right;margin-top:7px;padding:11px" onclick="openAyahResult(${Number(m.surah.number)},${Number(m.numberInSurah)})"><div style="font-family:serif;font-size:18px;line-height:1.9">${escapeQuranText(m.text)}</div><small>${escapeQuranText(m.surah.name)} • الآية ${m.numberInSurah}</small></button>`).join('');
+  }catch(e){console.warn('Ayah search failed:',e);status.textContent='تعذر البحث الآن. تأكد من اتصال الإنترنت وحاول مرة أخرى.'}
+}
+async function openAyahResult(surahNo,ayahNo){
+  await loadSurah(surahNo);
+  const target=[...document.querySelectorAll('#surahText .quran-ayah')].find(el=>el.querySelector('small')?.textContent.includes('﴿'+ayahNo+'﴾'));
+  if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.style.background='#f4e7bd';target.style.borderRadius='10px';setTimeout(()=>{target.style.background='';},3500)}
+  $('quranStatus').textContent='وصلت إلى الآية '+ayahNo+' من '+(surahIndex[surahNo-1]?.name||'السورة');
+}
+
+function changeSurah(delta){loadSurah(Math.min(114,Math.max(1,activeSurah+delta)))}
+function saveQuranBookmark(show=true){if(!activeSurah)return;db.quranBookmark={surah:activeSurah,savedAt:new Date().toISOString()};persist();if(show)$('quranStatus').textContent='تم حفظ آخر سورة وصلت إليها.'}
+function resumeQuran(){loadSurah(+(db.quranBookmark?.surah||1))}
+function resetQuran(){if(confirm('بدء ختمة جديدة؟ سيتم تصفير إجمالي صفحات الختمة.')){db.quranTotal=0;db.currentPage=1;save()}}
+function renderQuran(){$('pagesToday').textContent=day().pages;$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`}
+const dhikr={
+morning:[['آية الكرسي','1'],['سورة الإخلاص','3'],['سورة الفلق','3'],['سورة الناس','3'],['أصبحنا وأصبح الملك لله','1'],['اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور','1'],['رضيت بالله ربًا وبالإسلام دينًا وبمحمد ﷺ نبيًا','3'],['سبحان الله وبحمده','100'],['اللهم إني أسألك العفو والعافية في الدنيا والآخرة','1']],
+evening:[['آية الكرسي','1'],['سورة الإخلاص','3'],['سورة الفلق','3'],['سورة الناس','3'],['أمسينا وأمسى الملك لله','1'],['اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير','1'],['رضيت بالله ربًا وبالإسلام دينًا وبمحمد ﷺ نبيًا','3'],['سبحان الله وبحمده','100'],['أعوذ بكلمات الله التامات من شر ما خلق','3']],
+sleep:[['آية الكرسي','1'],['آخر آيتين من سورة البقرة','1'],['سورة الإخلاص','3'],['سورة الفلق','3'],['سورة الناس','3'],['باسمك اللهم أموت وأحيا','1'],['سبحان الله','33'],['الحمد لله','33'],['الله أكبر','34']],
+afterPrayer:[['أستغفر الله','3'],['اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام','1'],['سبحان الله','33'],['الحمد لله','33'],['الله أكبر','33'],['لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير','1']],
+wake:[['الحمد لله الذي أحيانا بعدما أماتنا وإليه النشور','1'],['لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير','1']],
+misc:[['سبحان الله وبحمده','100'],['لا حول ولا قوة إلا بالله','10'],['اللهم صل وسلم على نبينا محمد','10'],['أستغفر الله وأتوب إليه','100']]
+};let dhikrType='morning';
+const dhikrNames={morning:'أذكار الصباح',evening:'أذكار المساء',sleep:'أذكار النوم',afterPrayer:'أذكار بعد الصلاة',wake:'أذكار الاستيقاظ',misc:'أذكار متنوعة'};
+function showDhikr(t){dhikrType=t;document.querySelectorAll('.dhikr-tab').forEach(b=>{const active=b.dataset.dhikr===t;b.classList.toggle('active',active);b.classList.toggle('secondary',!active)});renderDhikr()}
+const dhikrFullText={
+'morning:0':'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+'evening:0':'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+'sleep:0':'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+'sleep:1':'آمَنَ الرَّسُولُ بِمَا أُنْزِلَ إِلَيْهِ مِنْ رَبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِنْ رُسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ. لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِنْ نَسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِنْ قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنْتَ مَوْلَانَا فَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ',
+'morning:1':'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ',
+'morning:2':'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+'morning:3':'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
+'evening:1':'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ',
+'evening:2':'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+'evening:3':'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ'
+};
+function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);$('dhikrTitle').textContent=dhikrNames[dhikrType];$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;$('dhikrProgress').style.width=(completed/list.length*100)+'%';$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} style="flex:1;min-height:48px" onclick="incrementDhikr(${i})">${done?'اكتمل الذكر ✓':`اضغط بعد القراءة (${c}/${x[1]})`}</button><button class="secondary" onclick="resetDhikrItem(${i})">إعادة</button></div></div>`}).join('');$('dhikrStat').textContent=countDhikrToday()}
+function incrementDhikr(i){
+  const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};
+  const target=+dhikr[dhikrType][i][1],before=+d.adhkar[dhikrType][i]||0;
+  if(before>=target)return;
+  d.adhkar[dhikrType][i]=Math.min(target,before+1);
+  if(before+1>=target)trackAppEvent('dhikr_completed');
+  save();
+}
+function resetDhikrItem(i){day().adhkar[dhikrType]??={};day().adhkar[dhikrType][i]=0;save()}
+function countDhikrToday(){return Object.values(day().adhkar||{}).reduce((a,o)=>a+Object.values(o||{}).filter(v=>+v>0).length,0)}
+function adhkarPointsForDay(d){let total=0;for(const key of Object.keys(d.adhkar||{})){const list=dhikr[key]||[];let completed=0;list.forEach((x,i)=>{if((+d.adhkar[key][i]||0)>=+x[1])completed++});total+=completed*2;if(list.length&&completed===list.length)total+=5}return total}
+
+
+function renderRealTasbeeh(){
+  const group=$('realTasbeehBeads');if(!group)return;
+  const count=33,active=(+db.tasbeeh||0)%count,parts=[];
+  for(let i=0;i<count;i++){
+    const angle=(-90+i*360/count)*Math.PI/180;
+    const x=170+100*Math.cos(angle),y=145+106*Math.sin(angle);
+    const isActive=i===active;
+    const r=(i===10||i===21)?9:7.4;
+    parts.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r+1.6}" fill="#5e3d20" opacity=".22"/>`);
+    parts.push(`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r}" fill="url(#${isActive?'activeBead':'woodBead'})" stroke="${isActive?'#fff0bd':'#80552d'}" stroke-width="${isActive?2.5:1.2}" filter="url(#beadShadow)"/>`);
+    parts.push(`<ellipse cx="${(x-2).toFixed(2)}" cy="${(y-2.5).toFixed(2)}" rx="${(r*.28).toFixed(2)}" ry="${(r*.2).toFixed(2)}" fill="#fff7df" opacity=".7"/>`);
+  }
+  group.innerHTML=parts.join('');
+}
+function tapTasbeeh(){db.tasbeeh=(+db.tasbeeh||0)+1;trackAppEvent('tasbeeh_tap');if(navigator.vibrate)navigator.vibrate(12);renderRealTasbeeh();save()}function resetTasbeeh(){db.tasbeeh=0;save()}function setPhrase(p){db.phrase=p;save()}
+const dailyChallenges=[
+'اترك معصية اعتدت عليها اليوم، واحتسب تركها لله.',
+'قدّم عملًا خيريًا ولو بسيطًا، دون انتظار مقابل.',
+'حافظ على الصلاة في وقتها، واجتهد في أدائها جماعة.',
+'تصدّق بما تستطيع، ولو بالقليل.',
+'أحسن إلى والديك أو صِل رحمك بكلمة طيبة.',
+'امسك لسانك عن الغيبة، واستبدلها بذكر الله.',
+'اقرأ وردك من القرآن بتدبّر وهدوء.',
+'سامح شخصًا أو بادر بالاعتذار إن أخطأت.',
+'أدخل السرور على قلب شخص بكلمة أو مساعدة.',
+'أكثر من الاستغفار والصلاة على النبي ﷺ اليوم.'
+];
+function ensureDailyChallenge(){
+  if(db.challengeDate!==todayKey){
+    const idx=Math.floor(new Date(todayKey+'T12:00:00').getTime()/86400000)%dailyChallenges.length;
+    db.challengeDate=todayKey;db.challengeText=dailyChallenges[idx];db.challengeDone=false;persist();
+  }
+}
+function renderDailyChallenge(){
+  ensureDailyChallenge();
+  $('dailyChallengeText').textContent=db.challengeText;
+  $('challengeStatus').textContent=db.challengeDone?'أحسنت! أنجزت تحدي اليوم':'تحدٍّ جديد ينتظرك';
+  $('challengeDoneBtn').textContent=db.challengeDone?'تم إنجاز تحدي اليوم ✓':'أنجزت التحدي ✓';
+  $('challengeDoneBtn').disabled=!!db.challengeDone;
+  $('challengeDoneBtn').classList.toggle('challenge-done',!!db.challengeDone);
+}
+function completeDailyChallenge(){
+  ensureDailyChallenge();if(db.challengeDone)return;
+  db.challengeDone=true;day().challengeDone=true;trackAppEvent('reflection_saved');save();
+}
+function nextDailyChallenge(){
+  ensureDailyChallenge();
+  const current=dailyChallenges.indexOf(db.challengeText);
+  db.challengeText=dailyChallenges[(current+1)%dailyChallenges.length];
+  db.challengeDone=false;day().challengeDone=false;save();
+}
+function addGoal(){const x=$('goalInput').value.trim();if(!x)return;db.goals.push({text:x,done:false});trackAppEvent('goal_added');$('goalInput').value='';save()}function toggleGoal(i,v){db.goals[i].done=v;save()}function removeGoal(i){db.goals.splice(i,1);save()}
+const questions=[{q:'كم عدد أركان الإسلام؟',a:['أربعة','خمسة','ستة'],c:1},{q:'ما السورة التي لا تبدأ بالبسملة؟',a:['الأنفال','التوبة','يونس'],c:1},{q:'كم عدد الصلوات المفروضة؟',a:['ثلاث','خمس','سبع'],c:1},{q:'ما أول شهر في السنة الهجرية؟',a:['رمضان','محرم','صفر'],c:1}];let qi=Math.floor(Date.now()/86400000)%questions.length;
+function renderQuiz(){const q=questions[qi];$('question').textContent=q.q;$('answers').innerHTML=q.a.map((a,i)=>`<button class="secondary" style="display:block;width:100%;margin:7px 0;text-align:right" onclick="answerQuiz(${i})">${a}</button>`).join('');$('quizResult').textContent=db.answers[todayKey]!==undefined?'تم تسجيل إجابتك اليوم.':'';$('points').textContent=db.points||0}
+function answerQuiz(i){if(db.answers[todayKey]!==undefined)return;trackAppEvent('quiz_answered');const ok=i===questions[qi].c;db.answers[todayKey]=i;if(ok)db.points=(db.points||0)+10;save();$('quizResult').textContent=ok?'إجابة صحيحة! أضيفت 10 نقاط.':'إجابة غير صحيحة. حاول غداً.';$('answers').querySelectorAll('button').forEach(b=>b.disabled=true)}
+function renderStats(){const d=day(),n=prayers.filter(p=>d.prayers[p]?.done).length;$('sPrayerToday').textContent=n+' / 5';$('sPagesToday').textContent=d.pages||0;$('sPagesTotal').textContent=db.quranTotal||0;$('sTasbeeh').textContent=db.tasbeeh||0;$('sDhikr').textContent=countDhikrToday();$('sGoals').textContent=db.goals.filter(g=>g.done).length;if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();let prayerSum=0,pageSum=0,dhikrSum=0;for(let i=0;i<7;i++){const dt=new Date();dt.setDate(dt.getDate()-i);const k=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');const x=db.days[k]||{prayers:{},pages:0,adhkar:{}};prayerSum+=prayers.filter(p=>x.prayers?.[p]?.done).length;pageSum+=x.pages||0;dhikrSum+=Object.values(x.adhkar||{}).reduce((a,o)=>a+Object.values(o).filter(Boolean).length,0)}$('weeklyStats').textContent=`الصلوات: ${prayerSum} من 35 — صفحات القرآن: ${pageSum} — الأذكار المنجزة: ${dhikrSum}`;const now=new Date(),prefix=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0')].join('-');let mp=0,mq=0;Object.entries(db.days).forEach(([k,x])=>{if(k.startsWith(prefix)){mp+=prayers.filter(p=>x.prayers?.[p]?.done).length;mq+=x.pages||0}});$('monthlyStats').textContent=`الصلوات: ${mp} — صفحات القرآن: ${mq}`}
+
+const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
+function enterApp(){$('welcomeSplash').style.display='none';}
+function initWelcome(){const previous=localStorage.getItem('hasibWelcomePhrase');let choices=welcomePhrases.filter(x=>x!==previous);const phrase=choices[Math.floor(Math.random()*choices.length)];$('welcomePhrase').textContent='“'+phrase+'”';localStorage.setItem('hasibWelcomePhrase',phrase);}
+function setQuranGoal(v){if(v==='custom'){$('quranGoalCustom').style.display='block';$('quranGoalCustom').focus();return}let n=Math.max(1,Math.min(604,+v||5));day().quranGoal=n;persist();$('quranGoal').value=[3,5,10,20].includes(n)?String(n):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(n)?'none':'block';$('quranGoalCustom').value=n;renderDashboard()}
+function setTasbeehMode(mode){if(mode==='manual')renderRealTasbeeh();$('digitalTasbeeh').style.display=mode==='digital'?'block':'none';$('manualTasbeeh').style.display=mode==='manual'?'block':'none';$('digitalMode').classList.toggle('active',mode==='digital');$('digitalMode').classList.toggle('secondary',mode!=='digital');$('manualMode').classList.toggle('active',mode==='manual');$('manualMode').classList.toggle('secondary',mode!=='manual')}
+function createFriendInvite(){const invite='HN-'+Math.random().toString(36).slice(2,8).toUpperCase();$('friendInvite').textContent='رمز الدعوة: '+invite+' — شاركه مع صديقك.';if(navigator.clipboard?.writeText)navigator.clipboard.writeText('انضم لتحدي سؤال اليوم في حاسب نفسك. رمز الدعوة: '+invite).catch(()=>{});}
+function totalPoints(){let total=0;for(const d of Object.values(db.days||{})){total+=prayers.reduce((a,p)=>a+(d.prayers?.[p]?.done&&d.prayers?.[p]?.mode==='group'?(d.prayers?.[p]?.place==='المسجد'?10:5):0),0);total+=adhkarPointsForDay(d)}return total+(+db.points||0)}
+function todayPoints(){const d=day();return prayers.reduce((a,p)=>a+(d.prayers?.[p]?.done&&d.prayers?.[p]?.mode==='group'?(d.prayers?.[p]?.place==='المسجد'?10:5):0),0)+adhkarPointsForDay(d)+(+db.points||0)}
+function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const prayer=prayers.filter(p=>d.prayers?.[p]?.done).length/5;const quran=Math.min(1,(+d.pages||0)/goal);const allDhikr=Object.keys(dhikr).reduce((a,k)=>a+dhikr[k].length,0);let doneDhikr=0;Object.keys(dhikr).forEach(k=>dhikr[k].forEach((x,i)=>{if((+d.adhkar?.[k]?.[i]||0)>=+x[1])doneDhikr++}));const dh=doneDhikr/allDhikr;const tas=Math.min(1,(+db.tasbeeh||0)/100);const ref=d.challengeDone?1:0;const vals={prayer:prayer*30,quran:quran*25,dhikr:dh*20,tasbeeh:tas*10,reflection:ref*15};const total=Object.values(vals).reduce((a,b)=>a+b,0);$('dailyPercent').textContent=Math.round(total)+'%';$('dailyProgress').style.width=total+'%';$('weightPrayer').textContent=Math.round(vals.prayer)+' / 30';$('weightQuran').textContent=Math.round(vals.quran)+' / 25';$('weightDhikr').textContent=Math.round(vals.dhikr)+' / 20';$('weightTasbeeh').textContent=Math.round(vals.tasbeeh)+' / 10';$('weightReflection').textContent=Math.round(vals.reflection)+' / 15';if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();if($('quranGoal')){$('quranGoal').value=[3,5,10,20].includes(goal)?String(goal):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(goal)?'none':'block';$('quranGoalCustom').value=goal}if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${d.pages||0} من ${goal} صفحة اليوم.`}
+
+function renderAll(){renderRealTasbeeh();renderDailyChallenge();renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=db.tasbeeh||0;$('tasbeehStat').textContent=db.tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';renderDailyChallenge();$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
+const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
+
+// ===== إحصائيات حاسب نفسك =====
+function getAnalyticsId(key){
+  try{
+    let value=localStorage.getItem(key);
+    if(!value){
+      value=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+        'hn-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+      localStorage.setItem(key,value);
+    }
+    return value;
+  }catch(e){return 'temporary-'+Math.random().toString(36).slice(2);}
+}
+const analyticsVisitorId=getAnalyticsId('hasibAnalyticsVisitorId');
+const analyticsSessionId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():
+  'session-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+
+async function trackAppEvent(eventType){
+  if(!sb)return;
+  try{
+    const user=await currentUser();
+    const {error}=await sb.from('app_events').insert({
+      event_type:eventType,
+      visitor_id:analyticsVisitorId,
+      user_id:user?user.id:null
+    });
+    if(error)console.warn('تعذر تسجيل النشاط '+eventType+':',error.message);
+  }catch(e){console.warn('تعذر تسجيل النشاط:',e);}
+}
+async function trackVisit(){
+  if(!sb)return;
+  try{
+    const {error}=await sb.from('app_visits').insert({
+      visited_at:new Date().toISOString(),
+      visitor_id:analyticsVisitorId,
+      session_id:analyticsSessionId
+    });
+    if(error)console.warn('تعذر تسجيل الزيارة:',error.message);
+  }catch(e){console.warn('تعذر تسجيل الزيارة:',e);}
+}
+
+async function renderLeaderboard(){
+  const box=$('leaderboardList');if(!box)return;
+  if(!sb){box.textContent='تعذر الاتصال بالخدمة.';return}
+  box.textContent='جارٍ تحميل القائمة...';
+  try{
+    const {data,error}=await sb.from('leaderboard').select('user_id,nickname,total_points').order('total_points',{ascending:false}).limit(20);
+    if(error)throw error;
+    if(!data||!data.length){box.textContent='لا يوجد مشاركون حتى الآن. كن أول من يتصدر!';return}
+    box.innerHTML=data.map((u,i)=>`<div class="leader-row"><span class="leader-rank">${i+1}</span><span class="leader-name">${escapeQuranText(u.nickname||'مشارك')}</span><span class="leader-points">${Number(u.total_points)||0} نقطة</span></div>`).join('');
+  }catch(e){box.textContent='تعذر تحميل الصدارة بسبب صلاحيات جدول leaderboard في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة.';console.warn(e)}
+}
+async function joinLeaderboard(){
+  const u=await currentUser();
+  if(!u){$('leaderboardStatus').textContent='للمشاركة، سجّل الدخول أولًا من قسم حسابي.';return}
+  const nickname=$('nickname').value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
+  const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة بسبب صلاحيات جدول الصدارة في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة. ('+error.message+')';return}
+  localStorage.setItem('hasibLeaderboardJoined','yes');
+  $('leaderboardStatus').textContent='تم تفعيل مشاركتك! سيتم تحديث نقاطك مع أنشطتك القادمة.';
+  renderLeaderboard();
+}
+async function syncLeaderboard(){
+  const u=await currentUser();if(!u)return;
+  const nickname=$('nickname')?.value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
+  const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error)console.warn('Leaderboard sync failed:',error.message);
+}
+async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
+function msg(t){$('authMessage').textContent=t}
+async function syncNow(){if(!sb){msg('خدمة الحساب غير متاحة الآن');return}const u=await currentUser();if(!u){msg('سجّل الدخول أولاً');return}const {error}=await sb.from('user_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()});msg(error?'تعذرت المزامنة: '+error.message:'تمت مزامنة بياناتك')}
+
+let pendingAvatarData=null;
+let cropSourceImage=null;
+function currentProfileName(user){
+  return $('profileNickname')?.value.trim() ||
+    user?.user_metadata?.nickname ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split('@')[0] || 'مشارك';
+}
+function paintAvatar(dataUrl){
+  const headerImg=$('headerAvatar'),headerFallback=$('headerAvatarFallback');
+  const preview=$('accountAvatarPreview'),previewFallback=$('accountAvatarFallback');
+  [headerImg,preview].forEach(img=>{if(img){img.src=dataUrl||'';img.style.display=dataUrl?'block':'none'}});
+  if(headerFallback)headerFallback.style.display=dataUrl?'none':'inline-grid';
+  if(previewFallback)previewFallback.style.display=dataUrl?'none':'inline-grid';
+}
+function handleAvatarChange(event){
+  const file=event.target.files?.[0];if(!file)return;
+  if(!file.type.startsWith('image/')){msg('اختر ملف صورة صالحًا');return}
+  if(file.size>10*1024*1024){msg('حجم الصورة كبير. اختر صورة أقل من 10 ميجابايت');event.target.value='';return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      cropSourceImage=img;
+      $('avatarZoom').value='1';
+      $('avatarCropModal').style.display='flex';
+      drawAvatarCrop();
+    };
+    img.onerror=()=>msg('تعذر قراءة الصورة');
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function drawAvatarCrop(){
+  if(!cropSourceImage)return;
+  const canvas=$('avatarCropCanvas'),ctx=canvas.getContext('2d');
+  const zoom=Number($('avatarZoom').value)||1;
+  const side=Math.min(cropSourceImage.width,cropSourceImage.height)/zoom;
+  const sx=(cropSourceImage.width-side)/2,sy=(cropSourceImage.height-side)/2;
+  ctx.clearRect(0,0,320,320);
+  ctx.drawImage(cropSourceImage,sx,sy,side,side,0,0,320,320);
+}
+function applyAvatarCrop(){
+  if(!cropSourceImage)return;
+  const canvas=$('avatarCropCanvas');
+  pendingAvatarData=canvas.toDataURL('image/jpeg',0.86);
+  paintAvatar(pendingAvatarData);
+  $('avatarCropModal').style.display='none';
+  cropSourceImage=null;
+  msg('تم قص الصورة. اضغط حفظ الملف الشخصي لتثبيتها.');
+}
+function cancelAvatarCrop(){
+  $('avatarCropModal').style.display='none';
+  cropSourceImage=null;
+  $('avatarFile').value='';
+}
+function removeAvatar(){
+  pendingAvatarData='';
+  paintAvatar('');
+  msg('تم حذف الصورة مؤقتًا. اضغط حفظ الملف الشخصي للتأكيد.');
+}
+function clearProfileNickname(){
+  $('profileNickname').value='';
+  $('profileNickname').focus();
+}
+
+
+let pendingNicknameDelete=false;
+function showNicknameEditor(){
+  $('nicknameEditArea').style.display='block';
+  $('profileNickname').focus();
+}
+async function confirmNickname(){
+  const value=$('profileNickname').value.trim();
+  if(!value){msg('اكتب الاسم أولًا');return;}
+  $('nicknameDisplay').textContent=value;
+  $('nicknameEditArea').style.display='none';
+  $('headerNickname').textContent=value;
+  pendingNicknameDelete=false;
+  await saveProfile();
+}
+async function deleteNickname(){
+  $('profileNickname').value='';
+  $('nicknameDisplay').textContent='مشارك';
+  $('headerNickname').textContent='مشارك';
+  $('nicknameEditArea').style.display='none';
+  pendingNicknameDelete=true;
+  await saveProfile();
+}
+
+function showProfileEditor(){
+  $('profileEditArea').style.display='block';
+  $('editProfileButton').style.display='none';
+}
+
+// ===== اتجاه القبلة =====
+const KAABA_LAT=21.422487, KAABA_LON=39.826206;
+let qiblaBearingValue=null, qiblaHeadingValue=null, qiblaOrientationHandler=null;
+function calculateBearing(lat1,lon1,lat2,lon2){
+  const r=Math.PI/180, p1=lat1*r, p2=lat2*r, dl=(lon2-lon1)*r;
+  const y=Math.sin(dl)*Math.cos(p2);
+  const x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function updateQiblaDisplay(){
+  if(qiblaBearingValue===null)return;
+  $('qiblaBearing').textContent=Math.round(qiblaBearingValue)+'°';
+  const relative=(qiblaBearingValue-(qiblaHeadingValue||0)+360)%360;
+  $('qiblaNeedle').style.transform=`rotate(${relative}deg)`;
+  if(qiblaHeadingValue===null)$('qiblaStatus').textContent='الاتجاه محسوب من الشمال. فعّل البوصلة لمعرفة الاتجاه أثناء تحريك الهاتف.';
+  else $('qiblaStatus').textContent='تم تفعيل البوصلة؛ وجّه السهم إلى القبلة.';
+}
+function locateQibla(){
+  if(!navigator.geolocation){$('qiblaStatus').textContent='المتصفح لا يدعم تحديد الموقع.';return}
+  $('qiblaStatus').textContent='جارٍ تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    qiblaBearingValue=calculateBearing(pos.coords.latitude,pos.coords.longitude,KAABA_LAT,KAABA_LON);
+    updateQiblaDisplay();
+  },err=>{
+    $('qiblaStatus').textContent=err.code===1?'اسمح للموقع بالوصول إلى موقعك من إعدادات المتصفح.':'تعذر تحديد الموقع. تحقق من تشغيل خدمة الموقع وحاول مجددًا.';
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
+function handleQiblaOrientation(event){
+  let heading=null;
+  if(typeof event.webkitCompassHeading==='number')heading=event.webkitCompassHeading;
+  else if(typeof event.alpha==='number')heading=(360-event.alpha)%360;
+  if(heading!==null){qiblaHeadingValue=heading;updateQiblaDisplay()}
+}
+async function enableQiblaCompass(){
+  try{
+    if(typeof DeviceOrientationEvent==='undefined'){$('qiblaStatus').textContent='البوصلة غير مدعومة في هذا الجهاز أو المتصفح.';return}
+    if(typeof DeviceOrientationEvent.requestPermission==='function'){
+      const permission=await DeviceOrientationEvent.requestPermission();
+      if(permission!=='granted'){$('qiblaStatus').textContent='لم يتم السماح باستخدام البوصلة.';return}
+    }
+    if(qiblaOrientationHandler)window.removeEventListener('deviceorientation',qiblaOrientationHandler);
+    qiblaOrientationHandler=handleQiblaOrientation;
+    window.addEventListener('deviceorientation',qiblaOrientationHandler,true);
+    $('qiblaStatus').textContent='حرّك الهاتف ببطء بشكل أفقي لمعايرة البوصلة.';
+  }catch(e){$('qiblaStatus').textContent='تعذر تفعيل البوصلة. تحقق من أذونات الجهاز.'}
+}
+
+// ===== تحدي الأصدقاء (يتطلب تشغيل SQL المرفق مرة واحدة في Supabase) =====
+async function createFriendInvite(){
+  const user=await currentUser();
+  if(!user){$('friendStatus').textContent='سجّل الدخول من قسم الحساب أولًا.';return}
+  if(!sb){$('friendStatus').textContent='الخدمة غير متاحة حاليًا.';return}
+  $('friendStatus').textContent='جارٍ إنشاء رمز الدعوة...';
+  try{
+    const {data,error}=await sb.rpc('hn_create_friend_invite');
+    if(error)throw error;
+    const code=typeof data==='string'?data:(data?.invite_code||data?.code);
+    if(!code)throw new Error('لم يصل رمز الدعوة من الخادم.');
+    const shareText='انضم إليّ في تحدي الأصدقاء بتطبيق حاسب نفسك. رمز الدعوة: '+code+'\\n'+window.location.origin;
+    $('friendInvite').style.display='block';
+    $('friendInvite').textContent='رمز دعوتك: '+code+' — شاركه مع صديقك.';
+    try{
+      if(navigator.share)await navigator.share({title:'تحدي الأصدقاء - حاسب نفسك',text:shareText});
+      else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(shareText);$('friendStatus').textContent='تم نسخ الدعوة. أرسلها لصديقك.'}
+      else $('friendStatus').textContent='انسخ رمز الدعوة وشاركه مع صديقك.';
+    }catch(e){if(e?.name!=='AbortError')$('friendStatus').textContent='تم إنشاء الرمز. يمكنك مشاركته يدويًا.'}
+  }catch(e){$('friendStatus').textContent='تعذر إنشاء الدعوة. تأكد من تنفيذ ملف SQL المرفق في Supabase. '+(e.message||'')}
+}
+async function acceptFriendInvite(){
+  const user=await currentUser(),code=$('friendCodeInput').value.trim().toUpperCase();
+  if(!user){$('friendStatus').textContent='سجّل الدخول أولًا.';return}
+  if(!code){$('friendStatus').textContent='اكتب رمز الدعوة أولًا.';return}
+  $('friendStatus').textContent='جارٍ التحقق من الرمز...';
+  try{
+    const {data,error}=await sb.rpc('hn_accept_friend_invite',{p_code:code});
+    if(error)throw error;
+    $('friendCodeInput').value='';
+    $('friendStatus').textContent='تمت إضافة صديقك بنجاح! بارك الله فيكما.';
+    await loadFriends();
+  }catch(e){$('friendStatus').textContent='تعذر قبول الدعوة: '+(e.message||'تحقق من الرمز أو اطلب رمزًا جديدًا.')}
+}
+async function loadFriends(){
+  const user=await currentUser();
+  if(!user){$('friendsList').textContent='سجّل الدخول لعرض قائمة أصدقائك.';return}
+  $('friendsList').textContent='جارٍ تحميل الأصدقاء...';
+  try{
+    const {data,error}=await sb.rpc('hn_get_my_friends');
+    if(error)throw error;
+    if(!data?.length){$('friendsList').textContent='ما عندك أصدقاء مضافين حتى الآن. أنشئ رمز دعوة وشاركه مع صديقك.';return}
+    $('friendsList').innerHTML=data.map((f,i)=>`<div class="friend-item"><span class="friend-avatar">👤</span><span style="flex:1;font-weight:800">${escapeQuranText(f.nickname||'مشارك')}</span><span class="pill">${Number(f.total_points)||0} نقطة</span></div>`).join('');
+  }catch(e){$('friendsList').textContent='تعذر تحميل الأصدقاء. تأكد من تنفيذ ملف SQL المرفق في Supabase.';console.warn('Friends load failed',e)}
+}
+
+const translations = {
+'حاسب نفسك':'Hasib Nafsaka','حاسب نفسك قبل أن تحاسب':'Hold yourself accountable before you are held accountable',
+'الرئيسية':'Home','الصلاة':'Prayer','العبادات':'Worship','إنجازاتي':'My Progress','السؤال':'Daily Question','الحساب':'Account','الدعم':'Support',
+'أعن نفسك على طاعة الله، واجعل لكل يوم وقفة، ولكل عمل أثرًا.':'Help yourself obey Allah. Pause each day and make every deed meaningful.',
+'ابدأ رحلتك':'Begin your journey','ابدأ يومك بخطوة':'Start your day with one step','رحلتك الإيمانية':'Your spiritual journey',
+'حسابك في حاسب نفسك':'Your Hasib Nafsaka Account','أدخل بريدك وكلمة المرور. إذا كان لديك حساب سيتم تسجيل دخولك، وإذا لم يكن لديك حساب سننشئ لك حسابًا جديدًا.':'Enter your email and password. Sign in if you already have an account, or create a new one.',
+'جارٍ التحقق من حالة الحساب...':'Checking account status...','اسمك أو اسم مستعار (عند إنشاء الحساب)':'Your name or nickname (when creating an account)',
+'البريد الإلكتروني':'Email address','كلمة المرور (6 أحرف على الأقل)':'Password (at least 6 characters)','تسجيل الدخول':'Sign in','إنشاء حساب':'Create account','نسيت كلمة المرور؟':'Forgot password?','إعادة إرسال تأكيد البريد':'Resend confirmation email','كلمة المرور الجديدة':'New password','أدخل كلمة مرور جديدة (6 أحرف على الأقل)':'Enter a new password (at least 6 characters)','حفظ كلمة المرور الجديدة':'Save new password',
+'الاسم المستعار':'Nickname','اكتب الاسم الذي سيظهر للآخرين':'Enter the name others will see','تغيير صورة الحساب':'Change profile picture',
+'إزالة الصورة':'Remove picture','حفظ الملف الشخصي':'Save profile','تعديل الملف الشخصي':'Edit profile',
+'تم تسجيل الدخول بنجاح. بياناتك مرتبطة بحسابك.':'Signed in successfully. Your data is linked to your account.',
+'مزامنة الآن':'Sync now','نسخة احتياطية':'Backup','تصدير بياناتي':'Export my data','استيراد نسخة':'Import backup',
+'ادعم المطوّر أبو سعد':'Support the developer, Abu Saad','دعم ومساندة':'Support',
+'أجمل دعم تقدمه لنا هو أن تساعد في نشر تطبيق «حاسب نفسك»؛':'The best way to support us is to share the Hasib Nafsaka app;',
+'لعلّ شخصًا ينتفع به، ويكون لك وله الأجر بإذن الله.':'someone may benefit from it, and you may share in the reward, God willing.',
+'ساهم في نشر الخير':'Help spread goodness','شارك التطبيق':'Share the app',
+'شارك التطبيق مع أهلك وأصدقائك، وعرّفهم على الصلاة والقرآن والأذكار ومحاسبة النفس.':'Share the app with family and friends, and introduce them to prayer, the Quran, remembrance, and self-accountability.',
+'دعمك بنشر التطبيق يكفينا ويسعدنا. شكرًا لكل من ساهم في نشر الخير 🤍':'Sharing the app is a wonderful support. Thank you for helping spread goodness 🤍',
+'اكتب تعليقك':'Write a comment','اكتب تعليقك أو اقتراحك هنا...':'Write your comment or suggestion here...',
+'حفظ التعليق':'Save comment','صلوات اليوم':'Today’s prayers','صفحات اليوم':'Pages today','إجمالي صفحات الختمة':'Total Quran pages',
+'التسبيحات':'Dhikr repetitions','الأذكار المحددة':'Completed adhkar','الأهداف المكتملة':'Completed goals','نقاط اليوم':'Today’s points',
+'إجمالي النقاط':'Total points','ملخص آخر 7 أيام':'Last 7 days','ملخص هذا الشهر':'This month’s summary',
+'لوحة الصدارة':'Leaderboard','أفضل المشاركين':'Top participants','تابع ترتيبك ونافس المشاركين في أعمال الخير.':'Track your rank and compete with others in good deeds.',
+'منافسة الأصدقاء':'Friends challenge','اتجاه القبلة':'Qibla direction','حدد موقعك لمعرفة اتجاه الكعبة المشرفة، ثم وجّه الهاتف حسب البوصلة.':'Set your location to find the direction of the Kaaba, then align your phone using the compass.','اتجاه القبلة من الشمال':'Qibla direction from north','اضغط تحديد موقعي لبدء الحساب.':'Tap Locate me to calculate the direction.','تحديد موقعي':'Locate me','تفعيل البوصلة':'Enable compass','لأفضل دقة، فعّل الموقع والبوصلة وابتعد عن الأجهزة والمعادن التي قد تؤثر في المجال المغناطيسي. قد تحتاج إلى معايرة بوصلة الهاتف.':'For best accuracy, enable location and compass, and move away from devices or metal that may affect the magnetic field. You may need to calibrate your phone compass.','كوّن قائمة أصدقائك وتابعوا نقاطكم في أعمال الخير وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.':'Build your friends list and follow each other’s points from good deeds and the daily question. Participation is optional and requires sign-in.','إنشاء رمز دعوة':'Create invite code','تحديث الأصدقاء':'Refresh friends','عندك رمز من صديق؟':'Have a friend’s code?','انضمام':'Join','أصدقائي':'My friends','سجّل الدخول أولًا لتبدأ تحدي الأصدقاء.':'Sign in first to start the friends challenge.','سجّل الدخول لعرض قائمة أصدقائك.':'Sign in to view your friends.','إنشاء رمز دعوة':'Create invitation code','اشترك في لوحة الصدارة':'Join the leaderboard',
+'جارٍ تحميل لوحة الصدارة...':'Loading leaderboard...','تحديث القائمة':'Refresh list','رجوع إلى إنجازاتي':'Back to My Progress',
+'مسابقة سؤال اليوم':'Question of the day','أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.':'Answer today’s question and earn points. A new question appears every day.',
+'ثقافة إسلامية':'Islamic knowledge','نقاطك في المسابقة':'Your quiz points','صفحة القرآن الكريم':'Quran','الأذكار':'Adhkar',
+'المسبحة':'Tasbeeh counter','تصفير العداد':'Reset counter','سبحان الله':'Glory be to Allah','الحمد لله':'Praise be to Allah','الله أكبر':'Allah is the Greatest',
+'الفجر':'Fajr','الشروق':'Sunrise','الظهر':'Dhuhr','العصر':'Asr','المغرب':'Maghrib','العشاء':'Isha',
+'اختر المدينة':'Choose city','المدينة':'City','الدمام':'Dammam','الخبر':'Al Khobar','الرياض':'Riyadh','جدة':'Jeddah','مكة':'Makkah','المدينة المنورة':'Madinah',
+'التالي':'Next','السابق':'Previous','حفظ':'Save','إلغاء':'Cancel','رجوع':'Back','تم':'Done','اليوم':'Today','غدًا':'Tomorrow',
+'غير مسجل الدخول':'Not signed in','خروج':'Sign out','حسابي':'My account','ابدأ يومك بخطوة 🌿':'Start your day with one step 🌿',
+'القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.':'A small consistent deed is better than a large interrupted one. Choose a good deed, seek Allah’s help, and begin again.',
+'سجّل الدخول أولًا للمشاركة في لوحة الصدارة.':'Sign in first to join the leaderboard.',
+'سجّل الدخول من قسم «حسابي» لتجهيز دعوة المنافسة.':'Sign in from the Account section to create a challenge invitation.',
+'تبغى تتحدى صديقك في سؤال اليوم؟ سجّل الدخول، وأنشئ رمز دعوة وشاركه معه.':'Want to challenge a friend with today’s question? Sign in, create an invitation code, and share it.',
+'هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.':'These figures are stored on this device and are based on your activity in the app.',
+'اكتب اسمًا مستعارًا أولًا':'Please enter a nickname first','أدخل البريد الإلكتروني وكلمة المرور':'Enter your email address and password',
+'كلمة المرور يجب أن تكون 6 أحرف على الأقل':'Password must be at least 6 characters','جارٍ إنشاء الحساب...':'Creating account...',
+'تم حفظ الملف الشخصي بنجاح':'Profile saved successfully','تعذر حفظ الملف الشخصي: ':'Could not save profile: ','سجّل الدخول أولًا':'Please sign in first',
+'تم اختيار الصورة. اضغط حفظ الملف الشخصي لتثبيتها.':'Image selected. Press Save Profile to apply it.',
+'تعذر قراءة الصورة':'Could not read the image','تمت إزالة الصورة مؤقتًا. اضغط حفظ الملف الشخصي للتأكيد.':'Image removed temporarily. Press Save Profile to confirm.',
+'اكتب تعليقك أولًا':'Please write a comment first','تم حفظ تعليقك على هذا الجهاز، شكرًا لك 🤍':'Your comment was saved on this device. Thank you 🤍'
+,
+'العربية':'Arabic',
+'English':'English',
+'حسابي':'My Account',
+'خروج':'Sign out',
+'الصلاة القادمة':'Next prayer',
+'جارٍ تحديد الصلاة القادمة...':'Finding the next prayer...',
+'الوقت المتبقي':'Time remaining',
+'اضغط لعرض مواقيت الصلاة ومتابعتها':'Tap to view and follow prayer times',
+'✦ تحدّي اليوم':'✦ Daily challenge',
+'تحدّى نفسك بخطوة صالحة':'Challenge yourself with a good deed',
+'تحدٍّ جديد ينتظرك':'A new challenge awaits',
+'كل يوم بداية جديدة':'Every day is a new beginning',
+'أنجزت التحدي ✓':'Challenge completed ✓',
+'تحدٍّ آخر':'Another challenge',
+'أهلاً بك 🌿':'Welcome 🌿',
+'خطوات صغيرة وثابتة تقرّبك من الله':'Small, steady steps bring you closer to Allah',
+'بداية جديدة':'A fresh start',
+'سورة الشرح، آية ٦':'Surah Ash-Sharh, verse 6',
+'الصلوات اليوم':'Today’s prayers',
+'ورد القرآن':'Quran reading',
+'0 صفحة':'0 pages',
+'الأذكار المكتملة':'Completed adhkar',
+'رحلتك اليوم':'Your day',
+'محاسبة النفس':'Self-accountability',
+'أهدافي':'My goals',
+'إضافة':'Add',
+'مواقيت الصلاة 🕌':'Prayer times 🕌',
+'اختر مدينتك لعرض المواقيت اليومية':'Choose your city to view daily prayer times',
+'تحديث ↻':'Refresh ↻',
+'الظهران':'Dhahran',
+'الجبيل':'Jubail',
+'الهفوف والأحساء':'Hofuf and Al-Ahsa',
+'حفر الباطن':'Hafar Al-Batin',
+'الخرج':'Al-Kharj',
+'المجمعة':'Al-Majma’ah',
+'وادي الدواسر':'Wadi Al-Dawasir',
+'مكة المكرمة':'Makkah',
+'الطائف':'Taif',
+'رابغ':'Rabigh',
+'ينبع':'Yanbu',
+'تبوك':'Tabuk',
+'حائل':'Hail',
+'بريدة':'Buraidah',
+'أبها':'Abha',
+'خميس مشيط':'Khamis Mushait',
+'جازان':'Jazan',
+'نجران':'Najran',
+'عرعر':'Arar',
+'سكاكا':'Sakaka',
+'جارٍ تحميل مواقيت الصلاة...':'Loading prayer times...',
+'متابعة الصلوات':'Track prayers',
+'نقاط الصلاة اليوم':'Prayer points today',
+'إنجاز اليوم':'Today’s achievement',
+'العبادات 🌿':'Worship 🌿',
+'اختر العبادة التي تريد البدء بها.':'Choose the act of worship you want to begin.',
+'القرآن الكريم':'The Holy Quran',
+'قراءة وبحث وورد يومي':'Read, search, and set a daily portion',
+'أذكار الصباح والمساء وغيرها':'Morning, evening, and other adhkar',
+'تسبيح إلكتروني ويدوي':'Digital and manual tasbeeh',
+'← رجوع إلى العبادات':'← Back to Worship',
+'المصحف الشريف':'The Holy Quran',
+'🔎 البحث عن آية':'🔎 Search for an ayah',
+'بحث':'Search',
+'اختر السورة':'Choose a surah',
+'جارٍ تحميل فهرس السور...':'Loading surah index...',
+'السورة السابقة':'Previous surah',
+'114 سورة':'114 surahs',
+'السورة التالية':'Next surah',
+'اختر سورة للبدء بالقراءة.':'Choose a surah to start reading.',
+'حفظ موضع القراءة':'Save reading position',
+'متابعة آخر موضع':'Continue from last position',
+'ورد القرآن الكريم':'Daily Quran portion',
+'سجّل الصفحات التي قرأتها وتابع تقدم ختمتك.':'Record the pages you read and track your Quran completion.',
+'اختر وردك اليومي':'Choose your daily portion',
+'3 صفحات':'3 pages',
+'5 صفحات':'5 pages',
+'10 صفحات':'10 pages',
+'20 صفحة':'20 pages',
+'عدد آخر…':'Other amount…',
+'اختر عدد الصفحات المناسب لك.':'Choose the number of pages that suits you.',
+'+ سجّل صفحة قرأتها':'+ Record a page you read',
+'تراجع':'Undo',
+'الأذكار 🌿':'Adhkar 🌿',
+'اختر القسم، واقرأ الذكر ثم اضغط «تمت القراءة».':'Choose a section, read the dhikr, then tap “Completed”.',
+'كل ذكر مكتمل = 2 نقطة، وإكمال القسم = 5 نقاط إضافية.':'Each completed dhikr = 2 points; completing a section = 5 extra points.',
+'الصباح':'Morning',
+'المساء':'Evening',
+'النوم':'Sleep',
+'بعد الصلاة':'After prayer',
+'الاستيقاظ':'Waking up',
+'متنوعة':'Various',
+'أذكار الصباح':'Morning adhkar',
+'السبحة':'Tasbeeh',
+'السبحة الإلكترونية':'Digital tasbeeh',
+'المسبحة اليدوية':'Manual tasbeeh',
+'اضغط للتسبيح':'Tap to count',
+'المسبحة الخشبية • ٣٣ حبة':'Wooden prayer beads • 33 beads',
+'حرّك الحبة بلمسة، وتابع عدد التسبيحات بالأعلى':'Move a bead with a touch and follow the count above',
+'تصفير العداد':'Reset counter',
+'🏆 مسابقة سؤال اليوم':'🏆 Question of the day',
+'أجب عن سؤال اليوم واجمع النقاط. تتجدد المسابقة يوميًا.':'Answer today’s question and earn points. A new question appears daily.',
+'ثقافة إسلامية':'Islamic knowledge',
+'نقاطك في المسابقة':'Your quiz points',
+'منافسة الأصدقاء':'Friends challenge',
+'تبغى تتحدى صديقك في سؤال اليوم؟ سجّل الدخول، وأنشئ رمز دعوة وشاركه معه.':'Want to challenge a friend with today’s question? Sign in, create an invitation code, and share it.',
+'سجّل الدخول من قسم «حسابي» لتجهيز دعوة المنافسة.':'Sign in from the Account section to create a challenge invitation.',
+'إنشاء رمز دعوة':'Create invitation code',
+'إحصائياتي الشخصية':'My statistics',
+'هذه الأرقام خاصة بهذا الجهاز وتعتمد على ما سجلته في التطبيق.':'These figures are stored on this device and are based on your activity in the app.',
+'صفحات اليوم':'Pages today',
+'إجمالي صفحات الختمة':'Total Quran pages',
+'التسبيحات':'Tasbeeh counts',
+'الأذكار المحددة':'Completed adhkar',
+'الأهداف المكتملة':'Completed goals',
+'نقاط اليوم':'Today’s points',
+'إجمالي النقاط':'Total points',
+'ملخص آخر 7 أيام':'Last 7 days',
+'ملخص هذا الشهر':'This month',
+'لوحة الصدارة':'Leaderboard',
+'تابع ترتيبك ونافس المشاركين في أعمال الخير.':'Track your ranking and compete with others in good deeds.',
+'عرض لوحة الصدارة 🏆':'View leaderboard 🏆',
+'← رجوع إلى إنجازاتي':'← Back to My Progress',
+'🏆 مجتمع حاسب نفسك':'🏆 Hasib Nafsaka Community',
+'نافس بالخير، واجمع نقاطك من أعمالك اليومية وسؤال اليوم. المشاركة اختيارية وتتطلب تسجيل الدخول.':'Compete through good deeds and earn points from daily activities and the daily question. Participation is optional and requires an account.',
+'سجّل الدخول أولًا للمشاركة في لوحة الصدارة.':'Sign in first to join the leaderboard.',
+'اشترك في لوحة الصدارة':'Join the leaderboard',
+'أفضل المشاركين':'Top participants',
+'جارٍ تحميل لوحة الصدارة...':'Loading leaderboard...',
+'تحديث القائمة':'Refresh list',
+'تعديل الاسم':'Edit name',
+'موافق':'Confirm',
+'قص صورة الحساب':'Crop profile picture',
+'تكبير الصورة':'Zoom image',
+'استخدام الصورة':'Use image',
+'إلغاء':'Cancel',
+'اكتب تعليقك أو اقتراحك هنا...':'Write your comment or suggestion here...',
+'حفظ التعليق':'Save comment'
+};
+function translateTextNode(node,en){
+  const parent=node.parentElement;
+  if(!parent||parent.closest('script,style,textarea,input,select,option'))return;
+  if(!Object.prototype.hasOwnProperty.call(node,'__originalText'))node.__originalText=node.nodeValue;
+  const original=node.__originalText;
+  if(!en){node.nodeValue=original;return;}
+  let result=original;
+  for(const key of Object.keys(translations).sort((a,b)=>b.length-a.length)){
+    if(result.includes(key))result=result.split(key).join(translations[key]);
+  }
+  node.nodeValue=result;
+}
+function applyCurrentLanguage(){
+  const en=localStorage.getItem('hasibLanguage')==='en';
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>translateTextNode(node,en));
+  document.querySelectorAll('[placeholder]').forEach(el=>{
+    if(!el.dataset.originalPlaceholder)el.dataset.originalPlaceholder=el.getAttribute('placeholder');
+    const original=el.dataset.originalPlaceholder;
+    el.setAttribute('placeholder',en?(translations[original]||original):original);
+  });
+}
+function setLanguage(lang){
+  const en=lang==='en';
+  document.documentElement.lang=en?'en':'ar';
+  document.documentElement.dir=en?'ltr':'rtl';
+  document.querySelectorAll('.language-switch button').forEach(btn=>btn.classList.toggle('active',btn.id===(en?'langEn':'langAr')));
+  document.title=en?'Hasib Nafsaka':'حاسب نفسك';
+  localStorage.setItem('hasibLanguage',lang);
+  applyCurrentLanguage();
+}
+
+const SUPPORT_ADMIN_ID='b8999022-3244-4c28-9957-35ae17675670';
+function escapeSupportText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function saveSupportComment(){
+  const nickname=$('supportNickname')?.value.trim()||'';
+  const body=$('supportComment')?.value.trim()||'';
+  const status=$('supportCommentStatus');
+  if(!nickname){status.textContent='اكتب اسمًا مستعارًا أولًا';$('supportNickname').focus();return;}
+  if(nickname.length>40){status.textContent='الاسم المستعار يجب ألا يتجاوز 40 حرفًا';return;}
+  if(!body){status.textContent='اكتب تعليقك أولًا';$('supportComment').focus();return;}
+  if(body.length>1000){status.textContent='التعليق طويل جدًا؛ اختصره إلى 1000 حرف';return;}
+  if(!sb){status.textContent='تعذر الاتصال بالخدمة حاليًا';return;}
+  status.textContent='جارٍ إرسال تعليقك...';
+  const {error}=await sb.from('support_comments').insert({author_name:nickname,body});
+  if(error){console.warn('Support comment insert:',error);status.textContent='تعذر إرسال التعليق. تأكد من تنفيذ كود إعداد التعليقات في Supabase.';return;}
+  $('supportComment').value='';
+  status.textContent='وصل تعليقك بنجاح، شكرًا لمشاركتك 🤍';
+  await loadSupportComments();
+}
+async function loadSupportComments(){
+  const box=$('supportCommentsList');if(!box||!sb)return;
+  const {data,error}=await sb.from('support_comments').select('id,author_name,body,created_at,admin_reply,replied_at').order('created_at',{ascending:false}).limit(100);
+  if(error){box.innerHTML='<h3>💬 تعليقات المجتمع</h3><p class="muted">تعذر تحميل التعليقات. تأكد من إعداد جدول التعليقات في Supabase.</p>';console.warn('Load comments:',error.message);return;}
+  const comments=data||[];
+  box.innerHTML='<h3>💬 تعليقات المجتمع ('+comments.length+')</h3>'+(comments.length?comments.map(c=>`<article class="tile" style="margin:10px 0;text-align:right"><strong>${escapeSupportText(c.author_name)}</strong><p style="white-space:pre-wrap;line-height:1.8;margin:8px 0">${escapeSupportText(c.body)}</p><small class="muted">${new Date(c.created_at).toLocaleString('ar-SA')}</small>${c.admin_reply?`<div style="margin-top:12px;padding:10px;border-right:3px solid #16865b;background:rgba(22,134,91,.08);border-radius:8px"><strong>رد إدارة حاسب نفسك</strong><p style="white-space:pre-wrap;margin:6px 0">${escapeSupportText(c.admin_reply)}</p></div>`:''}</article>`).join(''):'<p class="muted">لا توجد تعليقات حتى الآن. كن أول من يشاركنا رأيه.</p>');
+  const user=await currentUser();
+  const adminPanel=$('supportAdminPanel');
+  if(user?.id===SUPPORT_ADMIN_ID){
+    adminPanel.style.display='block';
+    $('supportAdminComments').innerHTML=comments.length?comments.map(c=>`<article class="tile" style="margin:10px 0"><strong>${escapeSupportText(c.author_name)}</strong><p style="white-space:pre-wrap">${escapeSupportText(c.body)}</p><textarea id="supportReply_${c.id}" rows="2" maxlength="1000" placeholder="اكتب رد الإدارة...">${escapeSupportText(c.admin_reply||'')}</textarea><div class="row" style="gap:8px;margin-top:8px"><button type="button" onclick="replySupportComment(${c.id})">حفظ الرد</button><button type="button" class="secondary" onclick="deleteSupportComment(${c.id})">حذف التعليق</button></div></article>`).join(''):'<p class="muted">لا توجد تعليقات لإدارتها.</p>';
+  }else if(adminPanel){adminPanel.style.display='none';}
+}
+async function replySupportComment(id){
+  const user=await currentUser();if(user?.id!==SUPPORT_ADMIN_ID){alert('غير مصرح لك بهذا الإجراء');return;}
+  const reply=$('supportReply_'+id)?.value.trim()||'';
+  const {error}=await sb.from('support_comments').update({admin_reply:reply,replied_at:reply?new Date().toISOString():null}).eq('id',id);
+  if(error){alert('تعذر حفظ الرد: '+error.message);return;}
+  await loadSupportComments();
+}
+async function deleteSupportComment(id){
+  const user=await currentUser();if(user?.id!==SUPPORT_ADMIN_ID){alert('غير مصرح لك بهذا الإجراء');return;}
+  if(!confirm('هل تريد حذف هذا التعليق نهائيًا؟'))return;
+  const {error}=await sb.from('support_comments').delete().eq('id',id);
+  if(error){alert('تعذر حذف التعليق: '+error.message);return;}
+  await loadSupportComments();
+}
+
+async function saveProfile(){
+  const user=await currentUser();if(!user)return msg('سجّل الدخول أولًا');
+  const nickname=$('profileNickname').value.trim();
+  if(!nickname)return msg('اكتب اسمًا مستعارًا أولًا');
+  const updates={nickname};
+  if(pendingAvatarData!==null)updates.avatar_data=pendingAvatarData;
+  const {data,error}=await sb.auth.updateUser({data:updates});
+  if(error)return msg('تعذر حفظ الملف الشخصي: '+error.message);
+  const profileRow={id:user.id,nickname};
+  if(pendingAvatarData!==null)profileRow.avatar_url=pendingAvatarData||null;
+  const {error:profileError}=await sb.from('profiles').upsert(profileRow);
+  if(profileError)console.warn('Profile table update:',profileError.message);
+  pendingAvatarData=null;
+  pendingNicknameDelete=false;
+  await updateAccount();
+  $('profileEditArea').style.display='none';
+  $('editProfileButton').style.display='inline-flex';
+  msg('تم حفظ الملف الشخصي بنجاح');
+}
+
+async function signUp(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim(),password=$('password').value,nick=$('nickname').value.trim();
+  if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
+  if(password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  const button=$('signUpButton');button.disabled=true;button.textContent='جارٍ إنشاء الحساب...';
+  try{
+    const redirectUrl=window.location.origin+window.location.pathname;
+    const {data,error}=await sb.auth.signUp({
+      email,password,
+      options:{emailRedirectTo:redirectUrl,data:nick?{nickname:nick}:{}}
+    });
+    if(error){msg('تعذر إنشاء الحساب: '+error.message);return}
+    if(data.session&&data.user){
+      await finishAccountLogin(data.user);
+      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح');
+    }else{
+      showResendConfirmation(true);msg('تم إنشاء الحساب. تحقق من بريدك لتأكيد الحساب، وإذا لم تصلك الرسالة اضغط «إعادة إرسال تأكيد البريد».');
+    }
+  }catch(error){console.error('Sign up:',error);msg('حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.')}
+  finally{button.disabled=false;button.textContent='إنشاء حساب'}
+}
+async function signIn(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim(),password=$('password').value;
+  if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
+  const button=$('signInButton');button.disabled=true;button.textContent='جارٍ تسجيل الدخول...';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){
+      const em=String(error.message||'').toLowerCase();
+      if(em.includes('email not confirmed')){showResendConfirmation(true);msg('البريد الإلكتروني غير مؤكد. أعد إرسال رسالة التأكيد من الرابط الظاهر أسفل الأزرار.');}
+      else msg('تعذر تسجيل الدخول: '+error.message);
+      return;
+    }
+    await finishAccountLogin(data.user);
+    msg('تم تسجيل الدخول بنجاح');
+  }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
+  finally{button.disabled=false;button.textContent='تسجيل الدخول'}
+}
+function showResendConfirmation(show){
+  const button=$('resendConfirmButton');
+  if(button)button.style.display=show?'inline-flex':'none';
+}
+async function sendPasswordReset(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim();
+  if(!email)return msg('اكتب بريدك الإلكتروني أولًا، ثم اضغط نسيت كلمة المرور.');
+  try{
+    const redirectUrl=window.location.origin+window.location.pathname;
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl});
+    if(error)throw error;
+    msg('إذا كان البريد مسجلًا لدينا، فستصلك رسالة لإعادة تعيين كلمة المرور. افتح الرابط من نفس الجهاز.');
+  }catch(error){
+    console.error('Password reset:',error);
+    msg('تعذر إرسال رابط استعادة كلمة المرور: '+(error.message||'حاول مرة أخرى'));
+  }
+}
+async function resendConfirmationEmail(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const email=$('email').value.trim();
+  if(!email)return msg('اكتب البريد الإلكتروني الذي سجلت به أولًا.');
+  try{
+    const redirectUrl=window.location.origin+window.location.pathname;
+    const {error}=await sb.auth.resend({
+      type:'signup',
+      email,
+      options:{emailRedirectTo:redirectUrl}
+    });
+    if(error)throw error;
+    msg('تم طلب إعادة إرسال رسالة التأكيد. تحقق من صندوق الوارد والرسائل غير المرغوب فيها.');
+  }catch(error){
+    console.error('Resend confirmation:',error);
+    msg('تعذر إعادة إرسال رسالة التأكيد: '+(error.message||'تحقق من البريد وحاول لاحقًا'));
+  }
+}
+async function saveRecoveredPassword(){
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
+  const password=$('newPassword').value;
+  if(!password||password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  try{
+    const {error}=await sb.auth.updateUser({password});
+    if(error)throw error;
+    $('newPassword').value='';
+    $('passwordRecoveryArea').style.display='none';
+    msg('تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.');
+  }catch(error){
+    console.error('Password update:',error);
+    msg('تعذر تغيير كلمة المرور: '+(error.message||'حاول مرة أخرى'));
+  }
+}
+
+async function finishAccountLogin(user){
+  if(!user)return;
+  const nick=$('nickname')?.value.trim()||user.user_metadata?.nickname||user.email?.split('@')[0]||'مشارك';
+  if(nick){
+    const profile=await sb.from('profiles').upsert({id:user.id,nickname:nick});
+    if(profile.error)console.warn('Profile update:',profile.error.message);
+    if(!user.user_metadata?.nickname){
+      const updated=await sb.auth.updateUser({data:{nickname:nick}});
+      if(updated.error)console.warn('Nickname metadata update:',updated.error.message);
+    }
+  }
+  const saved=await sb.from('user_data').select('data').eq('user_id',user.id).maybeSingle();
+  if(saved.error){
+    console.warn('Could not load user data:',saved.error.message);
+    msg('تعذر تحميل بيانات حسابك من السحابة: '+saved.error.message);
+  }else if(saved.data?.data){
+    // استعادة بيانات هذا الحساب فقط من Supabase
+    db=Object.assign(blank(),saved.data.data);
+    persist();
+    renderAll();
+  }else{
+    // الحساب جديد ولا يملك سجلًا بعد: أنشئ له سجلًا مستقلًا ببيانات ابتدائية فارغة
+    // ولا تنسخ بيانات localStorage المشتركة من حساب آخر.
+    db=blank();
+    persist();
+    renderAll();
+    const {error:insertError}=await sb.from('user_data').insert({user_id:user.id,data:db});
+    if(insertError){
+      console.error('Could not initialize user data:',insertError.message);
+      msg('تم تسجيل الدخول، لكن تعذر إنشاء مساحة بيانات الحساب: '+insertError.message);
+    }
+  }
+  await updateAccount();
+}
+async function signOut(){
+  if(!sb)return;
+  const {error}=await sb.auth.signOut();
+  if(error){msg('تعذر تسجيل الخروج: '+error.message);return}
+  msg('تم تسجيل الخروج');
+  await updateAccount();
+}
+async function updateAccount(){
+  const u=await currentUser(),loggedIn=!!u;
+  $('accountStatus').style.display='none';
+  $('loggedOutArea').style.display=loggedIn?'none':'block';
+  $('loggedInArea').style.display=loggedIn?'block':'none';
+  $('syncButton').style.display=loggedIn?'inline-flex':'none';
+  if($('headerProfile'))$('headerProfile').style.display='flex';
+  if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
+  if(loggedIn){
+    const nickname=u.user_metadata?.nickname||u.user_metadata?.full_name||u.email?.split('@')[0]||'مشارك';
+    $('headerNickname').textContent=nickname;
+    $('nicknameDisplay').textContent=nickname;
+    $('profileNickname').value=nickname;
+    paintAvatar(u.user_metadata?.avatar_data||'');
+    if($('profileEditArea')&&$('editProfileButton')){
+      $('profileEditArea').style.display='none';
+      $('editProfileButton').style.display='inline-flex';
+    }
+    $('nicknameEditArea').style.display='none';
+  }else{
+    $('headerNickname').textContent='حسابي';
+    paintAvatar('');
+  }
+}
+function exportData(){
+  const backup={app:'hasib-nafsak',version:1,exportedAt:new Date().toISOString(),data:db};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='hasib-nafsak-backup.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
+initWelcome();renderAll();updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();loadPrayerTimes();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);prayerCountdownTimer=setInterval(updateNextPrayer,1000);
+if(sb){
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    await updateAccount();
+    if(event==='SIGNED_IN'&&session?.user){
+      await finishAccountLogin(session.user);
+      await loadSupportComments();
+      msg('تم تأكيد البريد وتسجيل الدخول بنجاح');
+    }
+    if(event==='PASSWORD_RECOVERY'){
+      $('passwordRecoveryArea').style.display='block';
+      msg('أدخل كلمة مرور جديدة لحسابك ثم اضغط حفظ كلمة المرور الجديدة.');
+    }
+    if(event==='SIGNED_OUT')msg('تم تسجيل الخروج');
+  });
+  sb.auth.getSession().then(async({data,error})=>{
+    if(error)console.warn('Session restore:',error.message);
+    if(data?.session?.user){await finishAccountLogin(data.session.user);await updateAccount();loadFriends();renderLeaderboard();loadSupportComments()}
+  });
+}
+</script></body></html>
