@@ -303,7 +303,7 @@ header{position:relative;padding-top:76px!important}
 <h3 style="margin-top:18px">أصدقائي</h3>
 <div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
 </div></div></section>
-<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>تابع إنجازاتك وشارك في الإحصائيات 🌿</h2><p>إذا كنت تريد مشاهدة الإحصائيات، عليك بتسجيل الدخول.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول / إنشاء حساب</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
+<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>تابع إنجازاتك وشارك في الإحصائيات 🌿</h2><p>إذا كنت تريد المشاركة في الإحصائيات، عليك بتسجيل الدخول.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول / إنشاء حساب</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
 <div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted">سيظهر ملخص الأسبوع بعد اكتمال أول 7 أيام من استخدامك للتطبيق.</div></div><div class="panel"><h2>ملخص الشهر</h2><div id="monthlyStats" class="muted">سيظهر ملخص الشهر بعد اكتمال الشهر الأول.</div></div></div><div class="panel" id="publicLeaderboardEntry"><h2>🏆 لوحة الصدارة والإحصائيات العامة</h2><p class="muted">شاهد أفضل المشاركين وترتيبهم. يمكنك الاطلاع دون حساب، أما إضافة إنجازاتك ونقاطك إلى الإحصائيات فتتطلب تسجيل الدخول.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
 <section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
@@ -1009,9 +1009,8 @@ function renderStats(){
   const signedIn=!!window.__hasibSignedIn;
   const notice=$('statsLoginNotice'),privateContent=$('statsPrivateContent');
   if(notice)notice.style.display=signedIn?'none':'block';
-  if(privateContent)privateContent.style.display=signedIn?'block':'none';
-  // الزائر يرى التوضيح ومدخل لوحة الصدارة، بينما تبقى بياناته الشخصية مخفية حتى يسجل الدخول.
-  if(!signedIn)return;
+  // اعرض جميع أقسام الإنجازات والإحصائيات للزائر والمسجل؛ التسجيل مطلوب للمشاركة وحفظ الإنجازات بالحساب.
+  if(privateContent)privateContent.style.display='block';
 
   const d=day();
   const prayerCount=prayers.filter(p=>d.prayers?.[p]?.done).length;
