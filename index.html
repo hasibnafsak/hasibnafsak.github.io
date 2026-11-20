@@ -105,6 +105,23 @@ header{position:relative;padding-top:76px!important}
 .qibla-kaaba{position:absolute;bottom:25px;font-size:24px}
 .friend-entry{display:flex;gap:8px;align-items:center}.friend-entry input{flex:1;min-width:0}.friend-item{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}.friend-avatar{width:36px;height:36px;border-radius:50%;background:#edf3ee;display:grid;place-items:center;font-size:18px}
 
+
+.expanded-intro{background:linear-gradient(135deg,#0b4a3c,#16745c);color:#fff;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 8px 22px #0d5b481c}
+.expanded-intro h3{color:#f4dfaa;font-size:17px;margin:0 0 7px}.expanded-intro p{color:#eaf2eb;line-height:1.8;font-size:13px;margin:0}
+.expanded-group{margin-top:15px;padding:14px;border:1px solid #e7dfcd;border-radius:17px;background:linear-gradient(160deg,#fffefa,#f8f4e9)}
+.expanded-group-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}.expanded-group-icon{width:38px;height:38px;border-radius:12px;background:#e9f1e9;display:grid;place-items:center;font-size:20px}
+.expanded-item{border:1px solid #e8e1d2;border-radius:15px;background:#fffefa;padding:12px;margin:9px 0;box-shadow:0 3px 10px #213c2c08}
+.expanded-item-title{font-weight:800;font-size:14px;color:#23483a}.expanded-item-meta{font-size:11px;color:var(--muted);margin-top:4px}
+.expanded-prayer-options{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:11px}
+.expanded-prayer-option{padding:9px 3px!important;border:1px solid #dfe7dc!important;background:#f5f7f1!important;color:#315341!important;border-radius:11px!important;font-size:12px!important}
+.expanded-prayer-option.selected{background:#0d5b48!important;color:#fff!important;border-color:#0d5b48!important;box-shadow:0 3px 8px #0d5b4825}
+.expanded-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:10px 12px!important;background:#f2f5ef!important;color:#315341!important;border:1px solid #dfe7dc!important;text-align:right}
+.expanded-toggle.selected{background:#e3f1e5!important;color:#14583c!important;border-color:#9fc8a8!important}
+.expanded-toggle .toggle-mark{font-size:18px;font-weight:900}
+.expanded-stepper{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:8px;background:#f7f4eb;border-radius:12px}.expanded-stepper button{width:38px;height:36px;padding:0;font-size:19px}.expanded-stepper strong{font-size:17px;color:var(--g)}
+.expanded-total{background:linear-gradient(135deg,#f3ead5,#edf3e9);border:1px solid #e1d2ad;border-radius:15px;padding:14px;margin:12px 0;text-align:center}
+@media(max-width:380px){.expanded-prayer-options{gap:4px}.expanded-prayer-option{font-size:11px!important;padding:8px 1px!important}}
+
 </style></head>
 <body>
 
@@ -258,14 +275,14 @@ header{position:relative;padding-top:76px!important}
   <div class="panel">
     <div class="challenge-kicker">📚 المسار الموسّع</div>
     <h2 style="margin-top:7px">سجل المتابعة التفصيلي</h2>
-    <p class="muted">سجل موسّع لمتابعة الأعمال اليومية والإضافية، مع إدخال الدرجة التي حققتها في كل معيار ومراجعة مجموعك. هذا سجل شخصي للتشجيع والتنظيم، وليس مقياسًا لقبول العبادة.</p>
+    <div class="expanded-intro"><h3>🌿 متابعة مفصّلة خطوة بخطوة</h3><p>اختر ما أنجزته بالضغط على البطاقات، وحدد الصلوات التي أديتها. ما تحتاج تكتب درجات أو ملاحظات؛ مجموعك يتحدث تلقائيًا.</p></div>
     <div class="row" style="gap:8px;margin:12px 0">
       <button type="button" id="fiqh1Button" class="gold" onclick="setExpandedCourse('fiqh1')">المجموعة الأولى</button>
       <button type="button" id="fiqh2Button" class="secondary" onclick="setExpandedCourse('fiqh2')">المجموعة الثانية</button>
     </div>
     <p class="muted" id="expandedCourseDescription">اختر مجموعة المعايير لعرض تفاصيلها ودرجاتها.</p>
-    <div class="notice" style="margin:10px 0">طريقة الاستخدام: أدخل الدرجة التي حققتها في كل معيار من صفر حتى الدرجة القصوى الموضحة بجانبه. بعض المعايير إضافية أو مرتبطة بمواسم ومناسبات محددة.</div>
-    <div class="tile"><div class="muted">إنجازات اليوم في المجموعة المحددة</div><strong id="expandedDoneCount">0</strong><div class="muted" id="expandedScore">0 نقطة</div></div>
+    <div class="notice" style="margin:10px 0">طريقة الاستخدام: اضغط على الصلاة أو بطاقة العمل عند إنجازها، واضغط مرة ثانية لإلغاء التحديد. المعايير الموسمية تبقى في قسمها الخاص.</div>
+    <div class="expanded-total"><div class="muted">إنجازك في المجموعة المحددة</div><strong id="expandedDoneCount" style="display:block;font-size:25px;color:var(--g);margin:5px">0 من 0 درجة</strong><div class="muted" id="expandedScore">0 معيارًا مكتملًا</div></div>
     <div id="expandedTrackerList"></div>
     <div class="row between" style="margin-top:12px">
       <button type="button" class="secondary" onclick="resetExpandedToday()">إعادة ضبط سجل اليوم</button>
@@ -654,31 +671,47 @@ function expandedSeasonal(){
   if(!db.expandedSeasonal[course])db.expandedSeasonal[course]={};
   return db.expandedSeasonal[course];
 }
+function expandedPrayerNames(){return [['Fajr','الفجر'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']]}
+function expandedValue(record,key){return record[key]&&typeof record[key]==='object'?record[key]:{}}
 function renderExpandedTracker(){
   const root=$('expandedTrackerList');if(!root)return;
   const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record={...expandedDay(),...expandedSeasonal()};let html='';
   const b1=$('fiqh1Button'),b2=$('fiqh2Button');
   if(b1)b1.className=course==='fiqh1'?'gold':'secondary';if(b2)b2.className=course==='fiqh2'?'gold':'secondary';
-  const desc=$('expandedCourseDescription');if(desc)desc.textContent=course==='fiqh1'?'المجموعة الأولى: متابعة تكبيرة الإحرام والصلوات والسنن والأذكار، مع معايير الأذان والإقامة والإمامة والخطبة.':'المجموعة الثانية: متابعة الصلوات والسنن والجمعة والتراويح، إضافة إلى أعمال البر المتعلقة بالمرضى والجنائز والمعايير الموسمية للقرآن والعيد.';
+  const desc=$('expandedCourseDescription');if(desc)desc.textContent=course==='fiqh1'?'متابعة الصلاة والسنن والأذكار، مع أعمال الأذان والإقامة والإمامة والخطبة.':'متابعة العبادات والجمعة والتراويح، وأعمال البر، ومعايير رمضان والعيد.';
+  const prayerKeys=['takbeer','fardMosque','afterPrayer'];
   criteria.forEach((group,gi)=>{
-    html+='<div class="panel" style="margin-top:14px"><h3>'+group.group+'</h3><p class="muted" style="margin:4px 0 10px">'+(group.note||'')+'</p>';
+    const seasonalGroup=group.group.includes('موسمية');
+    html+='<div class="expanded-group"><div class="expanded-group-head"><span class="expanded-group-icon">'+(seasonalGroup?'🌙':gi===0?'🕌':'✨')+'</span><div><h3 style="margin:0">'+group.group+'</h3><div class="muted">'+(group.note||'')+'</div></div></div>';
     group.items.forEach(([key,label,max])=>{
-      const old=record[key]===true?max:(Number(record[key])||0);
       const seasonal=['ramadanKhatmah','ramadanExtraKhatmah','eidClothes','eidEarly','eidPrayer'].includes(key);
-      html+='<div class="prayer" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:7px 0;padding:10px;border:1px solid var(--line,#ddd);border-radius:12px"><span style="flex:1;min-width:190px">'+label+'</span><label style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span class="muted">درجتك</span><input type="number" inputmode="numeric" min="0" max="'+max+'" step="1" value="'+old+'" data-expanded-key="'+key+'" data-expanded-max="'+max+'" data-expanded-seasonal="'+(seasonal?'yes':'no')+'" onchange="updateExpandedItem(this)" style="width:68px;padding:7px;text-align:center"><span class="pill">من '+max+'</span></label></div>';
+      html+='<div class="expanded-item"><div class="expanded-item-title">'+label+'</div><div class="expanded-item-meta">الدرجة: '+max+' نقاط'+(seasonal?' · معيار موسمي':'')+'</div>';
+      if(prayerKeys.includes(key)){
+        const picked=expandedValue(record,key);html+='<div class="expanded-prayer-options">';
+        expandedPrayerNames().forEach(([id,name])=>{const on=!!picked[id];html+='<button type="button" class="expanded-prayer-option '+(on?'selected':'')+'" aria-pressed="'+on+'" onclick="toggleExpandedPrayer(\''+key+'\',\''+id+'\')">'+(on?'✓ ':'')+name+'</button>';});
+        html+='</div><div class="expanded-item-meta">اختر الصلوات التي أنجزت فيها هذا المعيار</div>';
+      }else if(key==='ramadanKhatmah'||key==='ramadanExtraKhatmah'){
+        const value=Math.max(0,Number(record[key])||0);html+='<div class="expanded-stepper"><button type="button" class="secondary" onclick="changeExpandedCount(\''+key+'\',-1,true)">−</button><strong>'+value+' ختمة</strong><button type="button" onclick="changeExpandedCount(\''+key+'\',1,true)">+</button></div>';
+      }else{
+        const on=!!record[key];html+='<button type="button" class="expanded-toggle '+(on?'selected':'')+'" aria-pressed="'+on+'" onclick="toggleExpandedItem(\''+key+'\', '+(seasonal?'true':'false')+')"><span>'+(on?'تم الإنجاز':'اضغط عند الإنجاز')+'</span><span class="toggle-mark">'+(on?'✓':'＋')+'</span></button>';
+      }
+      html+='</div>';
     });
     html+='</div>';
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function updateExpandedItem(input){
-  const max=Number(input.dataset.expandedMax)||0;let value=Math.floor(Number(input.value)||0);value=Math.max(0,Math.min(max,value));input.value=value;(input.dataset.expandedSeasonal==='yes'?expandedSeasonal():expandedDay())[input.dataset.expandedKey]=value;persist();updateExpandedSummary();syncUserDataSilently();
+function toggleExpandedPrayer(key,prayer){
+  const record=expandedDay();if(!record[key]||typeof record[key]!=='object')record[key]={};record[key][prayer]=!record[key][prayer];
+  if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();syncUserDataSilently();
 }
+function toggleExpandedItem(key,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();syncUserDataSilently()}
+function changeExpandedCount(key,delta,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();syncUserDataSilently()}
 function updateExpandedSummary(){
-  const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0;
-  criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;const value=record[key]===true?max:(Number(record[key])||0);earned+=value;total+=max;}));
+  const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0,done=0;
+  criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;let value=0;if(['takbeer','fardMosque','afterPrayer'].includes(key)){const picked=expandedValue(record,key);value=Object.keys(picked).filter(k=>picked[k]).length*(max/5)}else if(key==='ramadanKhatmah'){value=(Number(record[key])||0)>0?max:0}else if(key==='ramadanExtraKhatmah'){value=(Number(record[key])||0)*max}else{value=record[key]?max:0}earned+=value;total+=max;if(value>0)done++;}));
   if($('expandedDoneCount'))$('expandedDoneCount').textContent=earned+' من '+total+' درجة';
-  if($('expandedScore'))$('expandedScore').textContent='إجمالي المعايير: '+count+' معيارًا';
+  if($('expandedScore'))$('expandedScore').textContent=done+' من '+count+' معيارًا تم إنجازه';
 }
 function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل اليوم للمجموعة المحددة.';syncUserDataSilently()}
 function resetExpandedToday(){
