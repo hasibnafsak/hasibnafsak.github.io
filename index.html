@@ -334,7 +334,7 @@ header{position:relative;padding-top:76px!important}
     <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email">
     <label for="password">كلمة المرور</label>
     <div class="password-field" style="display:flex;align-items:center;gap:7px">
-      <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" style="flex:1;min-width:0">
+      <input id="password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password" minlength="6" maxlength="72" style="flex:1;min-width:0">
       <button type="button" class="secondary password-toggle" onclick="togglePasswordVisibility('password',this)" aria-label="إظهار كلمة المرور" aria-pressed="false" style="padding:10px 12px;flex:0 0 auto">👁️</button>
     </div>
     <div class="first-time-account-note" id="authModeNote" style="margin:18px 0 12px;padding:14px 16px;border:1px solid #d9e7df;border-radius:16px;background:#edf4ef;color:#155b49;text-align:right;line-height:1.8">
@@ -1690,35 +1690,79 @@ function setAuthMode(mode){
   $('signupModeButton').classList.toggle('secondary',!signup);
   $('password').autocomplete=signup?'new-password':'current-password';
   $('authModeNote').innerHTML=signup
-    ? '<strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 إنشاء حساب جديد</strong><span>اكتب اسمك وبريدك الإلكتروني وكلمة المرور. ستُحفظ إنجازاتك في حسابك المرتبط ببريدك.</span>'
+    ? '<strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 إنشاء حساب جديد</strong><span>اكتب اسمك وبريدك الإلكتروني واختر كلمة مرور من 6 أحرف أو أكثر. استخدم أي كلمة مرور تتذكرها؛ لا تحتاج رموزًا خاصة ما لم يفرض مشروع الحسابات ذلك.</span>'
     : '<strong style="display:block;font-size:1.02em;margin-bottom:3px">🌿 أهلًا بعودتك</strong><span>أدخل بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك واستعادة بياناتك.</span>';
 }
 
 async function signUp(){
-  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
-  const email=$('email').value.trim().toLowerCase(),password=$('password').value,nick=$('nickname').value.trim();
-  if(!nick)return msg('اكتب اسمك أولًا');
-  if(!email||!password)return msg('أدخل البريد الإلكتروني وكلمة المرور');
-  if(password.length<6)return msg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-  const button=$('signUpButton');button.disabled=true;button.textContent='جارٍ إنشاء الحساب...';
+  if(!sb)return msg('خدمة الحساب غير متاحة الآن. حاول لاحقًا.');
+  const email=$('email').value.trim().toLowerCase();
+  const password=$('password').value;
+  const nick=$('nickname').value.trim();
+  if(!nick)return msg('اكتب اسمك أولًا.');
+  if(!email)return msg('أدخل بريدك الإلكتروني.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return msg('تأكد من كتابة بريد إلكتروني صحيح.');
+  // Supabase enforces its configured minimum password length (commonly 6).
+  // No uppercase, number, or symbol is required by this form.
+  if(password.length<6)return msg('اختر كلمة مرور من 6 أحرف على الأقل. يمكنك استخدام حروف أو أرقام فقط.');
+  if(password.length>72)return msg('كلمة المرور طويلة جدًا. اختر كلمة أقصر من 73 حرفًا.');
+
+  const button=$('signUpButton');
+  if(button.disabled)return;
+  button.disabled=true;
+  button.textContent='جارٍ إنشاء الحساب...';
   try{
     const redirectUrl=window.location.origin+window.location.pathname;
     const {data,error}=await sb.auth.signUp({
-      email,password,
-      options:{emailRedirectTo:redirectUrl,data:nick?{nickname:nick}:{}}
+      email,
+      password,
+      options:{
+        emailRedirectTo:redirectUrl,
+        data:{nickname:nick}
+      }
     });
-    if(error){msg('تعذر إنشاء الحساب: '+error.message);return}
-    if(data.session&&data.user){
+    if(error){
+      const raw=String(error.message||'');
+      const em=raw.toLowerCase();
+      if(em.includes('email rate limit')||em.includes('rate limit exceeded')||em.includes('too many requests')){
+        msg('وصلنا حد إرسال رسائل التفعيل من خدمة البريد. المشكلة ليست من كلمة المرور. انتظر حتى يُرفع الحد، أو اطلب من مسؤول الموقع تفعيل SMTP مخصص في Supabase ثم جرّب مرة أخرى.');
+      }else if(em.includes('password')&&(em.includes('length')||em.includes('characters')||em.includes('weak'))){
+        msg('خدمة الحسابات تفرض كلمة مرور أقوى أو أطول. جرّب كلمة من 6 أحرف أو أكثر، وإذا استمر الخطأ يلزم تعديل سياسة كلمة المرور في Supabase.');
+      }else if(em.includes('already registered')||em.includes('user already')||em.includes('already been registered')){
+        msg('هذا البريد مسجل من قبل. اختر «تسجيل الدخول» أو استخدم «نسيت كلمة المرور؟».');
+      }else{
+        console.warn('Supabase sign-up error:',raw);
+        msg('تعذر إنشاء الحساب: '+raw);
+      }
+      return;
+    }
+
+    if(data?.session&&data?.user){
       await finishAccountLogin(data.user);
       await updateAccount(data.user);
-      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح، أهلًا بك.');
-      if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
+      renderStats();
+      msg('تم إنشاء الحساب وتسجيل الدخول بنجاح، أهلًا '+nick+'.');
+      if(pendingAccountReturnView){
+        const target=pendingAccountReturnView;
+        pendingAccountReturnView='';
+        go(target);
+      }
       await resumePendingAccountAction();
+    }else if(data?.user){
+      showResendConfirmation(true);
+      msg('تم إرسال طلب إنشاء الحساب. افتح رسالة تأكيد البريد لإكمال التسجيل. إذا لم تصلك الرسالة، لا تكرر المحاولة بسرعة؛ انتظر قليلًا ثم أعد الإرسال.');
     }else{
-      showResendConfirmation(true);msg('تم إنشاء الحساب. تحقق من بريدك لتأكيد الحساب، وإذا لم تصلك الرسالة اضغط «إعادة إرسال تأكيد البريد».');
+      msg('لم تكتمل عملية إنشاء الحساب. تحقق من البريد وحاول مرة أخرى.');
     }
-  }catch(error){console.error('Sign up:',error);msg('حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.')}
-  finally{button.disabled=false;button.textContent='إنشاء حساب'}
+  }catch(error){
+    console.error('Sign up:',error);
+    const em=String(error?.message||'').toLowerCase();
+    if(em.includes('rate limit'))msg('تم تجاوز حد رسائل التفعيل مؤقتًا من خدمة Supabase. انتظر قبل إعادة المحاولة؛ تغيير كلمة المرور لن يحل هذه المشكلة.');
+    else msg('حدث خطأ أثناء إنشاء الحساب. تحقق من اتصالك وحاول مرة أخرى.');
+  }finally{
+    button.disabled=false;
+    button.textContent='إنشاء حساب';
+  }
 }
 async function signIn(){
   if(!sb)return msg('خدمة الحساب غير متاحة الآن');
@@ -1830,6 +1874,7 @@ async function finishAccountLogin(user){
   await loadDailyQuizAnswer();
   renderQuiz();
   window.__hasibSignedIn=true;
+  renderStats();
   })();
   try{return await accountHydrationPromise;}
   finally{accountHydrationPromise=null;accountHydrationUserId=null;}
