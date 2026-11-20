@@ -579,7 +579,7 @@ let pendingAccountNotice='';
 let pendingAccountReturnView='';
 let pendingAccountAction='';
 let lastCreatedFriendCode='';
-function go(id){if(id==='expanded'&&!window.__hasibSignedIn){requireAccountForFeature('المسار الموسّع', 'expanded');return;}const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh','expanded'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh','expanded'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
 function requireAccountForFeature(feature,returnView=''){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';pendingAccountReturnView=returnView;go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
@@ -674,20 +674,21 @@ function renderExpandedTracker(){
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function toggleExpandedRawatib(id){const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function toggleExpandedRawatib(id){if(!requireExpandedLogin())return;const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function toggleExpandedPrayer(key,prayer){
+  if(!requireExpandedLogin())return;
   const record=expandedDay();if(!record[key]||typeof record[key]!=='object')record[key]={};record[key][prayer]=!record[key][prayer];
   if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently();
 }
-function toggleExpandedItem(key,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
-function changeExpandedCount(key,delta,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function toggleExpandedItem(key,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function changeExpandedCount(key,delta,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function updateExpandedSummary(){
   const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0,done=0;
   criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;let value=0;if(['takbeer','fardMosque','afterPrayer'].includes(key)){const picked=expandedValue(record,key);value=Object.keys(picked).filter(k=>picked[k]).length*(max/5)}else if(key==='rawatib'){const picked=expandedValue(record,key);const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};value=Object.keys(picked).reduce((sum,k)=>sum+(picked[k]?(weights[k]||0):0),0)}else if(key==='ramadanKhatmah'){value=(Number(record[key])||0)>0?max:0}else if(key==='ramadanExtraKhatmah'){value=(Number(record[key])||0)*max}else{value=record[key]?max:0}earned+=value;total+=max;if(value>0)done++;}));
   if($('expandedDoneCount'))$('expandedDoneCount').textContent=earned+' من '+total+' درجة';
   if($('expandedScore'))$('expandedScore').textContent=done+' من '+count+' معيارًا تم إنجازه';
 }
-function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ إنجازات المسار الموسّع لهذا اليوم.';if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function saveExpandedToday(){if(!requireExpandedLogin())return;persist();$('expandedSaveStatus').textContent='تم حفظ إنجازات المسار الموسّع لهذا اليوم.';if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function resetExpandedToday(){
   if(!confirm('هل تريد مسح سجل اليوم للمجموعة المحددة فقط؟'))return;
   const course=selectedExpandedCourse();if(db.expandedDays?.[todayKey])delete db.expandedDays[todayKey][course];
@@ -1227,17 +1228,17 @@ function renderStats(){
 }
 
 const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
-async function enterApp(path='simple'){
-  if(path==='expanded'){
-    const user=await currentUser();
-    if(!user){pendingAccountReturnView='worship';requireAccountForFeature('اختيار المسار الموسّع','worship');return;}
-  }
+function enterApp(path='simple'){
   setUserPath(path);$('welcomeSplash').style.display='none';
   if(path==='expanded'){go('worship');}else{go('home');}
 }
 function openExpandedPath(){
-  if(!window.__hasibSignedIn){requireAccountForFeature('المسار الموسّع','expanded');return;}
   go('expanded');renderExpandedTracker();
+}
+function requireExpandedLogin(){
+  if(window.__hasibSignedIn)return true;
+  requireAccountForFeature('تسجيل إنجازات المسار الموسّع وحفظ نقاطها','expanded');
+  return false;
 }
 function initWelcome(){const previous=localStorage.getItem('hasibWelcomePhrase');let choices=welcomePhrases.filter(x=>x!==previous);const phrase=choices[Math.floor(Math.random()*choices.length)];$('welcomePhrase').textContent='“'+phrase+'”';localStorage.setItem('hasibWelcomePhrase',phrase);}
 function setQuranGoal(v){if(v==='custom'){$('quranGoalCustom').style.display='block';$('quranGoalCustom').focus();return}let n=Math.max(1,Math.min(604,+v||5));day().quranGoal=n;persist();$('quranGoal').value=[3,5,10,20].includes(n)?String(n):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(n)?'none':'block';$('quranGoalCustom').value=n;renderDashboard()}
@@ -1908,7 +1909,7 @@ async function signUp(){
       if(pendingAccountReturnView){
         const target=pendingAccountReturnView;
         pendingAccountReturnView='';
-        go(target);
+        go(target);if(target==='expanded')renderExpandedTracker();
       }
       await resumePendingAccountAction();
     }else if(data?.user){
