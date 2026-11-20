@@ -131,7 +131,7 @@ header{position:relative;padding-top:76px!important}
 <p style="color:#e8dfc8;line-height:1.9">أعن نفسك على طاعة الله، واجعل لكل يوم وقفة، ولكل عمل أثرًا.</p>
 <div style="margin-top:22px">
   <h2 style="color:#f3dfad;margin:0 0 8px">اختر مسارك</h2>
-  <p style="color:#e8dfc8;font-size:13px;line-height:1.8;margin:0 0 14px">اختر الطريقة التي تناسبك للمتابعة. المسار الموسّع يتطلب تسجيل الدخول، ويبقى مدخله داخل قسم العبادات.</p>
+  <p style="color:#e8dfc8;font-size:13px;line-height:1.8;margin:0 0 14px">اختر الطريقة التي تناسبك للمتابعة.</p>
   <div style="display:grid;grid-template-columns:1fr;gap:10px">
     <button type="button" onclick="enterApp('simple')">🕌 المسار المبسّط</button>
     <button type="button" class="secondary" style="background:#f5edda;color:#174334" onclick="enterApp('expanded')">📚 المسار الموسّع</button>
@@ -277,7 +277,7 @@ header{position:relative;padding-top:76px!important}
     <div class="challenge-kicker">📚 المسار الموسّع</div>
     <h2 style="margin-top:7px">سجل المتابعة التفصيلي</h2>
     <div class="expanded-intro"><h3>🌿 متابعة مفصّلة خطوة بخطوة</h3><p>اختر ما أنجزته بالضغط على البطاقات، وحدد الصلوات التي أديتها. ما تحتاج تكتب درجات أو ملاحظات؛ مجموعك يتحدث تلقائيًا.</p></div>
-    <p class="muted" id="expandedCourseDescription">كل معايير المتابعة في سجل واحد. اختر الصلوات التي أديتها واضغط على البطاقات عند الإنجاز.</p>
+    <p class="muted" id="expandedCourseDescription">اختر الصلوات التي أديتها واضغط على البطاقات عند الإنجاز.</p>
     <div class="notice" style="margin:10px 0">طريقة الاستخدام: اختر الصلوات الخمس لكل معيار يحتاج تحديدًا، واضغط على البطاقة لتسجيل الإنجاز أو إلغاء تحديده. لا تحتاج إلى كتابة أي درجات.</div>
     <div class="expanded-total"><div class="muted">إنجازك في سجل اليوم</div><strong id="expandedDoneCount" style="display:block;font-size:25px;color:var(--g);margin:5px">0 من 0 درجة</strong><div class="muted" id="expandedScore">0 معيارًا مكتملًا</div></div>
     <div id="expandedTrackerList"></div>
@@ -359,6 +359,29 @@ header{position:relative;padding-top:76px!important}
 </section>
 
 <section id="account" class="view">
+<div class="panel" id="reminderSettingsPanel">
+  <div class="challenge-kicker">🔔 تذكيرات حاسب نفسك</div>
+  <h2 style="margin-top:7px">التذكيرات</h2>
+  <p class="muted">فعّل التذكيرات ليصلك تنبيه الصلاة عند دخول وقتها، وتذكيرات القرآن والأذكار والعبادات.</p>
+  <button type="button" id="enableRemindersButton" onclick="enableHasibReminders()">🔔 فعّل التذكيرات</button>
+  <div id="reminderPermissionStatus" class="notice" style="margin-top:10px">التذكيرات متوقفة حتى تختار تفعيلها.</div>
+  <div style="margin-top:14px">
+    <label for="reminderCity" style="display:block;font-weight:700;margin-bottom:6px">مدينة مواقيت الصلاة</label>
+    <div class="row" style="gap:8px">
+      <select id="reminderCity" onchange="changePrayerCity(this.value)" style="flex:1;min-width:0;margin:0"></select>
+      <button type="button" class="secondary" onclick="detectReminderCity()" style="white-space:nowrap">تحديد تلقائي</button>
+    </div>
+    <p class="muted" style="margin:6px 0 0">تُستخدم المدينة لحساب مواقيت الصلوات الخمس.</p>
+  </div>
+  <div style="margin-top:14px;display:grid;gap:10px">
+    <label><input type="checkbox" id="reminderPrayer" checked onchange="updateReminderPreference('prayers',this.checked)"> 🕌 تنبيه الصلوات الخمس عند دخول وقتها</label>
+    <label><input type="checkbox" id="reminderMorning" checked onchange="updateReminderPreference('morning',this.checked)"> 🌅 أذكار الصباح</label>
+    <label><input type="checkbox" id="reminderEvening" checked onchange="updateReminderPreference('evening',this.checked)"> 🌙 أذكار المساء بعد المغرب</label>
+    <label><input type="checkbox" id="reminderQuran" checked onchange="updateReminderPreference('quran',this.checked)"> 📖 تذكير يومي بقراءة القرآن</label>
+    <label><input type="checkbox" id="reminderDailyReview" checked onchange="updateReminderPreference('review',this.checked)"> ⭐ مراجعة إنجازات اليوم</label>
+  </div>
+  <p class="muted" style="margin:12px 0 0">ملاحظة: في هذه النسخة تصل التذكيرات أثناء فتح الموقع أو بقائه نشطًا. وصولها بعد إغلاق الموقع بالكامل يحتاج إعداد إشعارات خلفية وخدمة دفع على الاستضافة.</p>
+</div>
 <div class="panel">
   <h2>حسابك في حاسب نفسك</h2>
   <p class="muted">بياناتك وإنجازاتك مرتبطة بحسابك عبر بريدك الإلكتروني. سجّل الدخول ببريدك وكلمة المرور، أو أنشئ حسابًا جديدًا بإضافة اسمك.</p>
@@ -646,7 +669,7 @@ function expandedValue(record,key){return record[key]&&typeof record[key]==='obj
 function renderExpandedTracker(){
   const root=$('expandedTrackerList');if(!root)return;
   const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record={...expandedDay(),...expandedSeasonal()};let html='';
-  const desc=$('expandedCourseDescription');if(desc)desc.textContent='كل معايير المتابعة في سجل واحد، بدون تكرار أو معايير موسمية مؤقتة.';
+  const desc=$('expandedCourseDescription');if(desc)desc.textContent='اختر الصلوات التي أديتها واضغط على البطاقات عند الإنجاز.';
   const prayerKeys=['takbeer','fardMosque','afterPrayer'];
   const rawatibOptions=[['fajr','ركعتا سنة الفجر',2],['beforeDhuhr','أربع ركعات قبل الظهر',4],['afterDhuhr','ركعتان بعد الظهر',2],['afterMaghrib','ركعتان بعد المغرب',2],['afterIsha','ركعتان بعد العشاء',2]];
   criteria.forEach((group,gi)=>{
@@ -718,6 +741,7 @@ function changePrayerCity(city){
   db.settings.prayerCity=city;
   if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=city;
   if($('prayerCity'))$('prayerCity').value=city;
+  if($('reminderCity'))$('reminderCity').value=city;
   persist();syncUserDataSilently();loadPrayerTimes(true);
 }
 function localPrayerTimesForCity(city,parts){
@@ -1225,6 +1249,97 @@ function renderStats(){
   }else{
     $('monthlyStats').textContent='سيظهر ملخص الشهر بعد اكتمال الشهر الحالي.';
   }
+}
+
+
+// تذكيرات الموقع: تعمل أثناء بقاء الصفحة مفتوحة/نشطة. الإشعارات بعد إغلاق الموقع
+// تتطلب Service Worker وخدمة Push خلفية على الاستضافة.
+const reminderDefaults={enabled:false,prayers:true,morning:true,evening:true,quran:true,review:true};
+function getReminderSettings(){
+  try{return {...reminderDefaults,...JSON.parse(localStorage.getItem('hasibReminderSettings')||'{}')}}catch(e){return {...reminderDefaults}}
+}
+let reminderSettings=getReminderSettings();
+function saveReminderSettings(){try{localStorage.setItem('hasibReminderSettings',JSON.stringify(reminderSettings))}catch(e){}}
+function initReminderControls(){
+  const map={prayers:'reminderPrayer',morning:'reminderMorning',evening:'reminderEvening',quran:'reminderQuran',review:'reminderDailyReview'};
+  Object.entries(map).forEach(([key,id])=>{const el=$(id);if(el)el.checked=!!reminderSettings[key]});
+  const city=$('reminderCity');
+  if(city){
+    city.innerHTML=Object.entries(prayerCityNames).map(([key,label])=>'<option value="'+key.replace(/"/g,'&quot;')+'">'+label+'</option>').join('');
+    city.value=getSavedPrayerCity();
+  }
+  const status=$('reminderPermissionStatus'),button=$('enableRemindersButton');
+  if(status){
+    status.textContent=reminderSettings.enabled
+      ?(('Notification' in window && Notification.permission==='granted')?'التذكيرات مفعّلة على هذا الجهاز.':'التذكيرات محفوظة؛ فعّل إذن الإشعارات من الزر إذا لزم.')
+      :'التذكيرات متوقفة حتى تختار تفعيلها.';
+  }
+  if(button)button.textContent=reminderSettings.enabled?'✓ التذكيرات مفعّلة':'🔔 فعّل التذكيرات';
+}
+async function enableHasibReminders(){
+  if(!('Notification' in window)){
+    const status=$('reminderPermissionStatus');if(status)status.textContent='هذا المتصفح لا يدعم إشعارات الويب. جرّب فتح الموقع من متصفح مدعوم.';
+    return;
+  }
+  try{
+    const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;
+    if(permission!=='granted'){
+      const status=$('reminderPermissionStatus');if(status)status.textContent='لم يتم السماح بالإشعارات. يمكنك تفعيلها من إعدادات المتصفح.';
+      return;
+    }
+    reminderSettings.enabled=true;saveReminderSettings();initReminderControls();
+    notifyHasib('حاسب نفسك','تم تفعيل التذكيرات. نسأل الله أن يعينك على ذكره وشكره وحسن عبادته.');
+    checkHasibReminders();
+  }catch(error){console.warn('Notification permission:',error)}
+}
+function updateReminderPreference(key,value){reminderSettings[key]=!!value;saveReminderSettings()}
+function notifyHasib(title,body,tag){
+  if(!reminderSettings.enabled||!('Notification' in window)||Notification.permission!=='granted')return;
+  try{const n=new Notification(title,{body,tag:tag||'hasib-'+Date.now(),icon:'',silent:false});n.onclick=()=>{window.focus();go(title.includes('الصلاة')?'prayers':'worship');n.close()}}catch(e){console.warn('Notification failed:',e)}
+}
+function reminderWasSent(key){try{return localStorage.getItem('hasibReminderSent:'+key)==='yes'}catch(e){return false}}
+function markReminderSent(key){try{localStorage.setItem('hasibReminderSent:'+key,'yes')}catch(e){}}
+function nearestReminderCity(lat,lon){
+  let best='Dammam',bestDistance=Infinity;
+  Object.entries(prayerCityCoords).forEach(([city,coords])=>{const d=(coords[0]-lat)**2+(Math.cos(lat*Math.PI/180)*(coords[1]-lon))**2;if(d<bestDistance){bestDistance=d;best=city}});
+  return best;
+}
+function detectReminderCity(){
+  if(!navigator.geolocation){alert('تحديد الموقع غير متاح في هذا المتصفح. اختر المدينة يدويًا.');return}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const city=nearestReminderCity(pos.coords.latitude,pos.coords.longitude);
+    changePrayerCity(city);
+    if($('reminderCity'))$('reminderCity').value=city;
+    const status=$('reminderPermissionStatus');if(status)status.textContent='تم تحديد أقرب مدينة متاحة: '+(prayerCityNames[city]||city)+'. يمكنك تغييرها يدويًا.';
+  },()=>{alert('تعذر تحديد موقعك. اختر المدينة يدويًا من القائمة.')},{enableHighAccuracy:false,timeout:10000,maximumAge:600000});
+}
+function checkHasibReminders(){
+  if(!reminderSettings.enabled||!prayerTimesData?.timings||!('Notification' in window)||Notification.permission!=='granted')return;
+  const parts=saudiDateParts(),dateKey=parts.year+'-'+String(parts.month).padStart(2,'0')+'-'+String(parts.day).padStart(2,'0');
+  const now=new Date(),nowMins=parts.hour===undefined?(()=>{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);const x={};p.forEach(y=>x[y.type]=y.value);return +x.hour*60 + +x.minute})():parts.hour*60+parts.minute;
+  if(reminderSettings.prayers){
+    salahKeys.forEach(([key,label])=>{
+      const at=timeMinutes(prayerTimesData.timings[key]);if(at===null)return;
+      const sentKey=dateKey+'-prayer-'+key;
+      if(nowMins>=at&&nowMins<at+2&&!reminderWasSent(sentKey)){
+        notifyHasib('حان وقت صلاة '+label,'حيّ على الصلاة، لا تنسَ الصلاة على وقتها.','hasib-prayer-'+key);
+        markReminderSent(sentKey);
+      }
+    });
+  }
+  const sendAt=(key,hour,minute,title,body)=>{
+    const sentKey=dateKey+'-'+key;
+    if(nowMins>=hour*60+minute&&nowMins<hour*60+minute+3&&!reminderWasSent(sentKey)){
+      notifyHasib(title,body,'hasib-'+key);markReminderSent(sentKey);
+    }
+  };
+  if(reminderSettings.morning)sendAt('morning',7,0,'أذكار الصباح','ابدأ يومك بذكر الله وأذكار الصباح 🌅');
+  if(reminderSettings.evening){
+    const maghrib=timeMinutes(prayerTimesData.timings.Maghrib);
+    if(maghrib!==null)sendAt('evening',Math.floor((maghrib+10)/60),(maghrib+10)%60,'أذكار المساء','حافظ على أذكار المساء بعد المغرب 🌙');
+  }
+  if(reminderSettings.quran)sendAt('quran',11,0,'وردك من القرآن','اجعل لك نصيبًا من القرآن اليوم، ولو صفحات يسيرة 📖');
+  if(reminderSettings.review)sendAt('review',20,0,'راجع إنجازاتك','خذ دقيقة لمراجعة عباداتك وإنجازاتك لهذا اليوم ⭐');
 }
 
 const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
@@ -2099,10 +2214,10 @@ function importData(e){
   };
   r.onerror=()=>alert('تعذر قراءة الملف.');r.readAsText(f);
 }
-window.__hasibSignedIn=false;setAuthMode('login');renderPathChoice();renderExpandedTracker();initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
+window.__hasibSignedIn=false;initReminderControls();setAuthMode('login');renderPathChoice();renderExpandedTracker();initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
 function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
-bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
+bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();checkHasibReminders();setInterval(checkHasibReminders,15000);let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();checkHasibReminders();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
