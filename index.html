@@ -22,6 +22,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px
 .ayah{font-family:serif;font-size:21px;line-height:2;text-align:center;background:#f7f2e5;padding:15px;border-radius:13px}.pill{display:inline-block;background:#edf3ee;color:var(--g);padding:5px 9px;border-radius:20px;font-size:11px}
 .quran-ayah{padding:12px 4px;border-bottom:1px solid var(--line);font-family:serif;font-size:23px;line-height:2.15;text-align:justify}.quran-ayah small{display:inline-block;color:var(--gold);font-family:Arial;font-size:12px;margin:0 5px}hr{border:0;border-top:1px solid var(--line);margin:13px 0}.notice{padding:10px;border-radius:11px;background:#f6efdd;color:#6e5526;font-size:12px;line-height:1.7}
 
+#prayerLocationSetup .crop-card{max-height:90vh;overflow:auto}
 .splash{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#073d32eF,#0d5b48eF),url('https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1600&q=85') center/cover;color:#fff;text-align:center}
 .splash-card{width:min(560px,100%);padding:30px 22px;border:1px solid #d7bd7a88;border-radius:26px;background:linear-gradient(160deg,#0b493ddd,#082f29ee);box-shadow:0 20px 70px #0005}
 .splash-mark{font-size:42px;margin-bottom:12px}.splash h1{font-size:30px;margin:5px 0;color:#f3dfad}.splash-phrase{font-size:19px;line-height:2;margin:22px 0;min-height:82px}.splash button{background:linear-gradient(120deg,#d7b66c,#b88936);color:#17382e;padding:14px 28px;font-size:16px}
@@ -108,6 +109,7 @@ header{position:relative;padding-top:76px!important}
 </style></head>
 <body>
 
+<div id="prayerLocationSetup" class="crop-modal" style="display:none;z-index:25000"><div class="crop-card" style="text-align:center"><div style="font-size:34px">📍</div><h2>حدد موقعك لمواقيت الصلاة</h2><p class="muted" style="line-height:1.9">اسمح للموقع بتحديد مكانك تلقائيًا لتظهر مواقيت الصلاة حسب موقعك أينما كنت. سيتم حفظ اختيارك على جهازك ولن تحتاج لإعادته عند تحديث الصفحة.</p><button type="button" id="detectPrayerLocationButton" onclick="detectPrayerLocation()">تحديد موقعي تلقائيًا</button><p id="prayerLocationSetupStatus" class="muted" role="status" aria-live="polite" style="margin:10px 0"></p><hr><label for="initialPrayerCity">أو اختر المدينة يدويًا</label><select id="initialPrayerCity"><option value="Dammam">الدمام</option><option value="Al Khobar">الخبر</option><option value="Riyadh">الرياض</option><option value="Makkah">مكة المكرمة</option><option value="Madinah">المدينة المنورة</option><option value="Jeddah">جدة</option><option value="Tabuk">تبوك</option><option value="Buraydah">بريدة</option><option value="Abha">أبها</option></select><button type="button" class="gold" style="width:100%;margin-top:8px" onclick="finishPrayerLocationSetup()">خلاص، اعتمد الموقع</button></div></div>
 <div class="splash" id="welcomeSplash"><div class="splash-card">
 <div class="splash-mark">☾ ✦</div><h1>حاسب نفسك</h1><div class="tag">حاسب نفسك قبل أن تحاسب</div>
 <div class="splash-phrase" id="welcomePhrase"></div>
@@ -303,7 +305,7 @@ header{position:relative;padding-top:76px!important}
 <h3 style="margin-top:18px">أصدقائي</h3>
 <div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
 </div></div></section>
-<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>إنجازاتك محفوظة لك</h2><p>سجّل الدخول لعرض إحصائياتك الشخصية.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
+<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:block;text-align:center;padding:14px">سيتم احتساب إنجازاتك عند تسجيل الدخول.</div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
 <div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted">سيظهر ملخص الأسبوع بعد اكتمال أول 7 أيام من استخدامك للتطبيق.</div></div><div class="panel"><h2>ملخص الشهر</h2><div id="monthlyStats" class="muted">سيظهر ملخص الشهر بعد اكتمال الشهر الأول.</div></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></div></section>
 <section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
@@ -563,9 +565,16 @@ function timeMinutes(value){const m=String(value||'').match(/(\d{1,2}):(\d{2})/)
 function saudiDateTime(parts,minutes){return new Date(Date.UTC(parts.year,parts.month-1,parts.day,Math.floor(minutes/60)-3,minutes%60))}
 function formatPrayerTime(value){const mins=timeMinutes(value);if(mins===null)return '—';const d=new Date(Date.UTC(2020,0,1,Math.floor(mins/60),mins%60));return new Intl.DateTimeFormat('ar-SA',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'UTC'}).format(d)}
 function validPrayerCity(city){const select=$('prayerCity');return !!city&&!!select&&Array.from(select.options).some(o=>o.value===city)}
+function getSavedPrayerLocation(){try{const v=JSON.parse(localStorage.getItem('hasibPrayerLocation')||'null');return v&&Number.isFinite(+v.lat)&&Number.isFinite(+v.lon)?{lat:+v.lat,lon:+v.lon,label:String(v.label||'موقعك الحالي')}:null}catch(e){return null}}
+function savePrayerLocation(lat,lon,label='موقعك الحالي'){const value={lat:+lat,lon:+lon,label:String(label||'موقعك الحالي')};localStorage.setItem('hasibPrayerLocation',JSON.stringify(value));localStorage.setItem('hasibPrayerLocationSetupDone','yes');if(!db.settings)db.settings={};db.settings.prayerCity='Dammam';persist();if($('prayerLocationSetup'))$('prayerLocationSetup').style.display='none';loadPrayerTimes(true)}
+function detectPrayerLocation(){const status=$('prayerLocationSetupStatus'),button=$('detectPrayerLocationButton');if(!navigator.geolocation){if(status)status.textContent='المتصفح لا يدعم تحديد الموقع. اختر مدينتك يدويًا.';return}if(status)status.textContent='بانتظار إذن الموقع...';if(button)button.disabled=true;navigator.geolocation.getCurrentPosition(pos=>{savePrayerLocation(pos.coords.latitude,pos.coords.longitude,'موقعك الحالي');if(status)status.textContent='تم تحديد موقعك وحفظه بنجاح.';if(button)button.disabled=false},err=>{if(status)status.textContent=err.code===1?'لم تسمح بالوصول للموقع. اختر مدينتك يدويًا أو فعّل إذن الموقع من إعدادات المتصفح.':'تعذر تحديد الموقع الآن. جرّب مرة أخرى أو اختر مدينتك يدويًا.';if(button)button.disabled=false},{enableHighAccuracy:true,timeout:15000,maximumAge:300000})}
+function finishPrayerLocationSetup(){const city=$('initialPrayerCity')?.value||'Dammam';try{localStorage.removeItem('hasibPrayerLocation')}catch(e){}localStorage.setItem('hasibPrayerLocationSetupDone','yes');localStorage.setItem('hasibPrayerCity',city);if(!db.settings)db.settings={};db.settings.prayerCity=city;persist();if($('prayerLocationSetup'))$('prayerLocationSetup').style.display='none';if($('prayerCity'))$('prayerCity').value=city;if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=city;loadPrayerTimes(true)}
+function maybeShowPrayerLocationSetup(){try{if(!localStorage.getItem('hasibPrayerLocationSetupDone')&&!getSavedPrayerLocation()&&$('prayerLocationSetup'))$('prayerLocationSetup').style.display='flex'}catch(e){}}
+
 function getSavedPrayerCity(){let fromLocal='';try{fromLocal=localStorage.getItem('hasibPrayerCity')||''}catch(e){}const fromDb=db?.settings?.prayerCity;const city=validPrayerCity(fromLocal)?fromLocal:(validPrayerCity(fromDb)?fromDb:'Dammam');try{localStorage.setItem('hasibPrayerCity',city)}catch(e){}if(!db.settings)db.settings={};db.settings.prayerCity=city;return city}
 function changePrayerCity(city){
   if(!validPrayerCity(city))return;
+  try{localStorage.removeItem('hasibPrayerLocation');localStorage.setItem('hasibPrayerLocationSetupDone','yes')}catch(e){}
   localStorage.setItem('hasibPrayerCity',city);
   if(!db.settings)db.settings={};
   db.settings.prayerCity=city;
@@ -573,9 +582,9 @@ function changePrayerCity(city){
   if($('prayerCity'))$('prayerCity').value=city;
   persist();syncUserDataSilently();loadPrayerTimes(true);
 }
-function localPrayerTimesForCity(city,parts){
+function localPrayerTimesForCity(city,parts,customCoords=null){
   // حساب محلي احتياطي: Umm Al-Qura تقريبًا (الفجر 18.5° والعشاء 90 دقيقة بعد المغرب)
-  const coords=prayerCityCoords[city]||prayerCityCoords.Dammam,lat=coords[0],lon=coords[1];
+  const coords=customCoords||prayerCityCoords[city]||prayerCityCoords.Dammam,lat=coords[0],lon=coords[1];
   const rad=Math.PI/180,deg=180/Math.PI;
   const aa=Math.floor((14-parts.month)/12),yy=parts.year+4800-aa,mm=parts.month+12*aa-3;
   const jdn=parts.day+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;
@@ -605,19 +614,21 @@ function localPrayerTimesForCity(city,parts){
 }
 async function loadPrayerTimes(force=false){
   const select=$('prayerCity'),status=$('prayerTimesStatus'),homeSelect=$('homePrayerCitySelect');
-  const saved=getSavedPrayerCity();
-  if(homeSelect)homeSelect.value=saved;
-  if(select)select.value=saved;
-  if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+(prayerCityNames[saved]||saved);
+  const saved=getSavedPrayerCity(),savedLocation=getSavedPrayerLocation(),locationMode=!!savedLocation;
+  const locationKey=locationMode?'gps-'+savedLocation.lat.toFixed(3)+'-'+savedLocation.lon.toFixed(3):saved;
+  const displayName=locationMode?savedLocation.label:(prayerCityNames[saved]||saved);
+  if(homeSelect&&!locationMode)homeSelect.value=saved;
+  if(select&&!locationMode)select.value=saved;
+  if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='مواقيت '+displayName;
   if(!status||!select)return;
-  const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+saved+':'+date;
+  const parts=saudiDateParts(),date=apiDate(parts),cacheKey='hasibPrayerTimes:'+locationKey+':'+date;
   // اعرض آخر مواقيت محفوظة فور فتح الصفحة، قبل انتظار الشبكة، حتى لا يختفي العداد بعد تحديث Safari.
   let sameDayCache=null,latestCityCache=null;
   try{
     sameDayCache=JSON.parse(localStorage.getItem(cacheKey)||'null');
-    latestCityCache=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+saved)||'null');
+    latestCityCache=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+locationKey)||'null');
     if(!latestCityCache){
-      const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
+      const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+locationKey+':')).sort().reverse();
       if(keys.length)latestCityCache=JSON.parse(localStorage.getItem(keys[0])||'null');
     }
   }catch(e){}
@@ -625,24 +636,20 @@ async function loadPrayerTimes(force=false){
   const verifiedLatest=latestCityCache?.timings&&!latestCityCache?.calculatedLocally?latestCityCache:null;
   const instantCache=verifiedSameDay||verifiedLatest;
   if(instantCache?.timings){
-    prayerTimesData={...instantCache,city:saved,date};
+    prayerTimesData={...instantCache,city:locationMode?'__location__':saved,locationLabel:displayName,date};
     renderPrayerTimes();
   }else{
-    prayerTimesData=localPrayerTimesForCity(saved,parts);
+    prayerTimesData=localPrayerTimesForCity(saved,parts,locationMode?[savedLocation.lat,savedLocation.lon]:null);
+    if(locationMode){prayerTimesData.city='__location__';prayerTimesData.locationLabel=displayName;}
     renderPrayerTimes();
   }
-  status.textContent=instantCache?.timings
-    ? 'نعرض مواقيت '+(prayerCityNames[saved]||saved)+' المحفوظة، ونتحقق من تحديثها...'
-    : 'جارٍ تحميل مواقيت '+(prayerCityNames[saved]||saved)+'...';
+  status.textContent=instantCache?.timings?'نعرض مواقيت '+displayName+' المحفوظة، ونتحقق من تحديثها...':'جارٍ تحميل مواقيت '+displayName+'...';
   try{
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
     let result=null,lastError=null;
-    const urls=[
-      'https://api.aladhan.com/v1/timingsByCity/'+encodeURIComponent(date)+'?city='+encodeURIComponent(saved)+'&country='+encodeURIComponent('Saudi Arabia')+'&method=4&school=0'
-    ];
-    const coords=prayerCityCoords[saved]||prayerCityCoords.Dammam;
+    const coords=locationMode?[savedLocation.lat,savedLocation.lon]:(prayerCityCoords[saved]||prayerCityCoords.Dammam);
     const localNoon=Date.UTC(parts.year,parts.month-1,parts.day,12,0,0)/1000;
-    urls.push('https://api.aladhan.com/v1/timings/'+Math.floor(localNoon)+'?latitude='+coords[0]+'&longitude='+coords[1]+'&method=4&school=0');
+    const urls=locationMode?['https://api.aladhan.com/v1/timings/'+Math.floor(localNoon)+'?latitude='+coords[0]+'&longitude='+coords[1]+'&method=4&school=0']:['https://api.aladhan.com/v1/timingsByCity/'+encodeURIComponent(date)+'?city='+encodeURIComponent(saved)+'&country='+encodeURIComponent('Saudi Arabia')+'&method=4&school=0','https://api.aladhan.com/v1/timings/'+Math.floor(localNoon)+'?latitude='+coords[0]+'&longitude='+coords[1]+'&method=4&school=0'];
     try{
       for(const url of urls){
         try{
@@ -655,18 +662,18 @@ async function loadPrayerTimes(force=false){
       }
       if(!result)throw lastError||new Error('تعذر جلب مواقيت الصلاة');
     }finally{clearTimeout(timer);}
-    prayerTimesData={timings:result.data.timings,city:saved,date,meta:result.data.meta||{}};
+    prayerTimesData={timings:result.data.timings,city:locationMode?'__location__':saved,locationLabel:displayName,date,meta:result.data.meta||{}};
     localStorage.setItem(cacheKey,JSON.stringify(prayerTimesData));
-    localStorage.setItem('hasibPrayerTimesLatest:'+saved,JSON.stringify(prayerTimesData));
+    localStorage.setItem('hasibPrayerTimesLatest:'+locationKey,JSON.stringify(prayerTimesData));
     renderPrayerTimes();
     }catch(error){
     console.error('Prayer times error:',error);
     let fallback=null;
     try{
-      fallback=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+saved)||'null');
+      fallback=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+locationKey)||'null');
       if(fallback?.calculatedLocally)fallback=null;
       if(!fallback?.timings){
-        const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+saved+':')).sort().reverse();
+        const keys=Object.keys(localStorage).filter(k=>k.startsWith('hasibPrayerTimes:'+locationKey+':')).sort().reverse();
         for(const key of keys){
           const candidate=JSON.parse(localStorage.getItem(key)||'null');
           if(candidate?.timings&&!candidate?.calculatedLocally){fallback=candidate;break;}
@@ -674,25 +681,25 @@ async function loadPrayerTimes(force=false){
       }
     }catch(e){}
     if(fallback?.timings){
-      prayerTimesData={...fallback,city:saved};renderPrayerTimes();
-      status.textContent=(fallback.date===date?'نعرض مواقيت اليوم المحفوظة':'تعذر الاتصال؛ نعرض آخر مواقيت محفوظة مؤقتًا')+' لمدينة '+(prayerCityNames[saved]||saved)+'. ستتحدث تلقائيًا عند عودة الاتصال.';
+      prayerTimesData={...fallback,city:locationMode?'__location__':saved,locationLabel:displayName};renderPrayerTimes();
+      status.textContent=(fallback.date===date?'نعرض مواقيت اليوم المحفوظة':'تعذر الاتصال؛ نعرض آخر مواقيت محفوظة مؤقتًا')+' في '+displayName+'. ستتحدث تلقائيًا عند عودة الاتصال.';
     }else{
       // لا تترك العداد فارغًا: احتفظ بالحساب المحلي لليوم واعرض توضيحًا مختصرًا.
-      prayerTimesData=localPrayerTimesForCity(saved,parts);
+      prayerTimesData=localPrayerTimesForCity(saved,parts,locationMode?[savedLocation.lat,savedLocation.lon]:null);
+      if(locationMode){prayerTimesData.city='__location__';prayerTimesData.locationLabel=displayName;}
       renderPrayerTimes();
-      status.textContent='مواقيت محسوبة محليًا لمدينة '+(prayerCityNames[saved]||saved)+' عند تعذر الاتصال بالمصدر.';
+      status.textContent='مواقيت محسوبة محليًا في '+displayName+' عند تعذر الاتصال بالمصدر.';
     }
-    if(homeSelect)homeSelect.value=saved;
+    if(homeSelect&&!locationMode)homeSelect.value=saved;
   }
 }
 function renderPrayerTimes(){
   if(!prayerTimesData?.timings)return;
-  const t=prayerTimesData.timings,city=prayerCityNames[prayerTimesData.city]||prayerTimesData.city;
+  const t=prayerTimesData.timings,city=prayerTimesData.locationLabel||(prayerCityNames[prayerTimesData.city]||prayerTimesData.city);
   const status=$('prayerTimesStatus'),grid=$('prayerTimesGrid');
   if(status)status.textContent='مواقيت اليوم في '+city+' — '+new Intl.DateTimeFormat('ar-SA',{dateStyle:'full',timeZone:'Asia/Riyadh'}).format(new Date());
   if(grid)grid.innerHTML=prayerNames.map(([key,label])=>`<div class="tile">${label}<strong style="display:block;margin-top:5px">${formatPrayerTime(t[key])}</strong></div>`).join('');
-  if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=prayerTimesData.city;
-  if($('prayerCity'))$('prayerCity').value=prayerTimesData.city;
+  if(prayerTimesData.city!=='__location__'){if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=prayerTimesData.city;if($('prayerCity'))$('prayerCity').value=prayerTimesData.city;}
   updateNextPrayer();
 }
 function updateNextPrayer(){
@@ -708,7 +715,7 @@ function updateNextPrayer(){
   if($('nextPrayerCountdown'))$('nextPrayerCountdown').textContent=countdown;
   if($('homeNextPrayerName'))$('homeNextPrayerName').textContent='صلاة '+next.label;
   if($('homeNextPrayerCountdown'))$('homeNextPrayerCountdown').textContent=countdown;
-  if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=prayerTimesData.city;if($('prayerCity'))$('prayerCity').value=prayerTimesData.city;
+  if(prayerTimesData.city!=='__location__'){if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=prayerTimesData.city;if($('prayerCity'))$('prayerCity').value=prayerTimesData.city;}
 }
 
 function renderPrayers(){const d=day();$('prayerList').innerHTML=prayers.map(p=>`<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${d.prayers[p]?.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${d.prayers[p]?.done?((d.prayers[p]?.mode==='group')?(d.prayers[p]?.place==='المسجد'?'10 نقاط':'5 نقاط'):'0 نقطة'):'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${d.prayers[p]?.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${d.prayers[p]?.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${d.prayers[p]?.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${d.prayers[p]?.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${d.prayers[p]?.mode==='group'?'selected':''}>جماعة</option><option value="alone" ${d.prayers[p]?.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`).join('');const n=prayers.filter(p=>d.prayers[p]?.done).length;const pts=prayers.reduce((a,p)=>a+(d.prayers[p]?.done&&d.prayers[p]?.mode==='group'?(d.prayers[p]?.place==='المسجد'?10:5):0),0);$('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);$('prayerEncouragement').textContent=modes.includes('alone')?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.includes('group')?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.'}
@@ -950,9 +957,8 @@ async function answerQuiz(i){
 function renderStats(){
   const signedIn=!!window.__hasibSignedIn;
   const notice=$('statsLoginNotice'),privateContent=$('statsPrivateContent');
-  if(notice)notice.style.display=signedIn?'none':'block';
-  if(privateContent)privateContent.style.display=signedIn?'block':'none';
-  if(!signedIn)return;
+  if(notice){notice.style.display='block';notice.textContent='سيتم احتساب إنجازاتك عند تسجيل الدخول.';}
+  if(privateContent)privateContent.style.display='block';
 
   const d=day();
   const prayerCount=prayers.filter(p=>d.prayers?.[p]?.done).length;
@@ -1832,8 +1838,8 @@ function exportData(){
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
 window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
-function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
-bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
+function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity(),gps=getSavedPrayerLocation(),parts=saudiDateParts(),keyCity=gps?'gps-'+gps.lat.toFixed(3)+'-'+gps.lon.toFixed(3):initialPrayerCity,display=gps?gps.label:(prayerCityNames[initialPrayerCity]||initialPrayerCity);if(!gps){if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity}const key='hasibPrayerTimes:'+keyCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+keyCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:gps?'__location__':initialPrayerCity,locationLabel:display,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts,gps?[gps.lat,gps.lon]:null);if(gps){prayerTimesData.city='__location__';prayerTimesData.locationLabel=display}renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
+bootPrayerWidget();maybeShowPrayerLocationSetup();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
