@@ -347,7 +347,6 @@ header{position:relative;padding-top:76px!important}
     </div>
     <div class="auth-links" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px">
       <button type="button" class="text-button" onclick="sendPasswordReset()" style="background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">نسيت كلمة المرور؟</button>
-      <button type="button" id="resendConfirmButton" class="text-button" onclick="resendConfirmationEmail()" style="display:inline-flex;background:none;border:0;padding:6px 0;color:var(--green,#0d5b48);text-decoration:underline">إعادة إرسال رسالة تأكيد البريد</button>
     </div>
     <div id="passwordRecoveryArea" style="display:none;margin-top:14px">
       <label for="newPassword">كلمة المرور الجديدة</label>
@@ -449,7 +448,7 @@ header{position:relative;padding-top:76px!important}
 <section id="guide" class="view">
   <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('account')">← العودة إلى الحساب</button></div>
   <div class="panel"><div class="challenge-kicker">📘 دليل المستخدم</div><h2 style="margin-top:7px">دليل استخدام حاسب نفسك</h2><p class="muted" style="line-height:1.9">مرحبًا بك! هذا الدليل يشرح أقسام الموقع وطريقة الاستفادة من أدواته خطوة بخطوة.</p></div>
-  <div class="panel"><h3>1. إنشاء حساب وتسجيل الدخول</h3><ol style="line-height:2"><li>افتح قسم «حسابي».</li><li>لأول مرة، أدخل اسمًا مستعارًا وبريدك الإلكتروني وكلمة مرور، ثم اضغط «إنشاء حساب».</li><li>افتح رسالة تأكيد البريد واضغط رابط التأكيد.</li><li>إذا كان لديك حساب سابق، أدخل البريد وكلمة المرور واضغط «تسجيل الدخول».</li><li>إذا نسيت كلمة المرور، استخدم «نسيت كلمة المرور؟». وإذا لم تصلك رسالة التأكيد، استخدم «إعادة إرسال رسالة تأكيد البريد».</li></ol></div>
+  <div class="panel"><h3>1. إنشاء حساب وتسجيل الدخول</h3><ol style="line-height:2"><li>افتح قسم «حسابي».</li><li>لأول مرة، أدخل اسمًا مستعارًا وبريدك الإلكتروني وكلمة مرور، ثم اضغط «إنشاء حساب».</li><li>افتح رسالة تأكيد البريد واضغط رابط التأكيد.</li><li>إذا كان لديك حساب سابق، أدخل البريد وكلمة المرور واضغط «تسجيل الدخول».</li><li>إذا نسيت كلمة المرور، استخدم «نسيت كلمة المرور؟»..</li></ol></div>
   <div class="panel"><h3>2. متابعة الصلوات</h3><p style="line-height:2">من قسم «الصلاة» اختر مدينتك لمشاهدة المواقيت، ثم سجّل الصلوات بعد أدائها وحدد طريقة ومكان الصلاة. يمكنك كذلك استخدام اتجاه القبلة بعد السماح للموقع بالوصول إلى موقعك.</p></div>
   <div class="panel"><h3>3. القرآن الكريم والورد اليومي</h3><p style="line-height:2">من «العبادات» افتح القرآن الكريم، واختر السورة، واستخدم البحث عن آية عند الحاجة. سجّل الصفحات التي قرأتها من الورد اليومي، واحفظ موضع القراءة لتعود إليه لاحقًا.</p></div>
   <div class="panel"><h3>4. الأذكار والتسبيح</h3><p style="line-height:2">اختر قسم الأذكار مثل الصباح أو المساء أو بعد الصلاة، واقرأ الذكر ثم اضغط «تمت القراءة». وفي قسم المسبحة اختر الإلكترونية أو اليدوية واضغط للعدّ.</p></div>
@@ -1749,8 +1748,7 @@ async function signUp(){
       }
       await resumePendingAccountAction();
     }else if(data?.user){
-      showResendConfirmation(true);
-      msg('تم إرسال طلب إنشاء الحساب. افتح رسالة تأكيد البريد لإكمال التسجيل. إذا لم تصلك الرسالة، لا تكرر المحاولة بسرعة؛ انتظر قليلًا ثم أعد الإرسال.');
+      msg('تم إنشاء الحساب. يمكنك تسجيل الدخول الآن.');
     }else{
       msg('لم تكتمل عملية إنشاء الحساب. تحقق من البريد وحاول مرة أخرى.');
     }
@@ -1773,7 +1771,7 @@ async function signIn(){
     const {data,error}=await sb.auth.signInWithPassword({email,password});
     if(error){
       const em=String(error.message||'').toLowerCase();
-      if(em.includes('email not confirmed')){showResendConfirmation(true);msg('البريد الإلكتروني غير مؤكد. أعد إرسال رسالة التأكيد من الرابط الظاهر أسفل الأزرار.');}
+      if(em.includes('email not confirmed'))msg('هذا الحساب لم يكتمل تفعيله سابقًا. تواصل مع إدارة الموقع للمساعدة.');
       else msg('تعذر تسجيل الدخول: '+error.message);
       return;
     }
@@ -1784,10 +1782,6 @@ async function signIn(){
     await resumePendingAccountAction();
   }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='تسجيل الدخول'}
-}
-function showResendConfirmation(show){
-  const button=$('resendConfirmButton');
-  if(button)button.style.display=show?'inline-flex':'none';
 }
 async function sendPasswordReset(){
   if(!sb)return msg('خدمة الحساب غير متاحة الآن');
@@ -1801,24 +1795,6 @@ async function sendPasswordReset(){
   }catch(error){
     console.error('Password reset:',error);
     msg('تعذر إرسال رابط استعادة كلمة المرور: '+(error.message||'حاول مرة أخرى'));
-  }
-}
-async function resendConfirmationEmail(){
-  if(!sb)return msg('خدمة الحساب غير متاحة الآن');
-  const email=$('email').value.trim();
-  if(!email)return msg('اكتب البريد الإلكتروني الذي سجلت به أولًا.');
-  try{
-    const redirectUrl=window.location.origin+window.location.pathname;
-    const {error}=await sb.auth.resend({
-      type:'signup',
-      email,
-      options:{emailRedirectTo:redirectUrl}
-    });
-    if(error)throw error;
-    msg('تم طلب إعادة إرسال رسالة التأكيد. تحقق من صندوق الوارد والرسائل غير المرغوب فيها.');
-  }catch(error){
-    console.error('Resend confirmation:',error);
-    msg('تعذر إعادة إرسال رسالة التأكيد: '+(error.message||'تحقق من البريد وحاول لاحقًا'));
   }
 }
 async function saveRecoveredPassword(){
