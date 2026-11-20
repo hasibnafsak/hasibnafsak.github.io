@@ -257,13 +257,14 @@ header{position:relative;padding-top:76px!important}
   <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('home')">← رجوع</button></div>
   <div class="panel">
     <div class="challenge-kicker">📚 المسار الموسّع</div>
-    <h2 style="margin-top:7px">سجل إنجازاتي التعبدي</h2>
-    <p class="muted">علّم ما أنجزته اليوم. هذا سجل متابعة ذاتي، وليس مقياسًا لقبول العبادة.</p>
+    <h2 style="margin-top:7px">سجل المتابعة التفصيلي</h2>
+    <p class="muted">سجل موسّع لمتابعة الأعمال اليومية والإضافية، مع إدخال الدرجة التي حققتها في كل معيار ومراجعة مجموعك. هذا سجل شخصي للتشجيع والتنظيم، وليس مقياسًا لقبول العبادة.</p>
     <div class="row" style="gap:8px;margin:12px 0">
       <button type="button" id="fiqh1Button" class="gold" onclick="setExpandedCourse('fiqh1')">المجموعة الأولى</button>
       <button type="button" id="fiqh2Button" class="secondary" onclick="setExpandedCourse('fiqh2')">المجموعة الثانية</button>
     </div>
-    <p class="muted" id="expandedCourseDescription">المجموعة الأولى من معايير المتابعة اليومية.</p>
+    <p class="muted" id="expandedCourseDescription">اختر مجموعة المعايير لعرض تفاصيلها ودرجاتها.</p>
+    <div class="notice" style="margin:10px 0">طريقة الاستخدام: أدخل الدرجة التي حققتها في كل معيار من صفر حتى الدرجة القصوى الموضحة بجانبه. بعض المعايير إضافية أو مرتبطة بمواسم ومناسبات محددة.</div>
     <div class="tile"><div class="muted">إنجازات اليوم في المجموعة المحددة</div><strong id="expandedDoneCount">0</strong><div class="muted" id="expandedScore">0 نقطة</div></div>
     <div id="expandedTrackerList"></div>
     <div class="row between" style="margin-top:12px">
@@ -579,42 +580,49 @@ const prayers=['الفجر','الظهر','العصر','المغرب','العشا
 
 const expandedCriteriaByCourse = {
   fiqh1: [
-    {group:'معايير المتابعة الأساسية',items:[
+    {group:'المعايير الأساسية',note:'تُسجّل درجات هذه المعايير بحسب إنجازك اليومي.',items:[
       ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
-      ['fardMosque','الصلوات المفروضة جماعة في المسجد',10],
-      ['rawatib','السنن الرواتب (12 ركعة)',12],
+      ['fardMosque','أداء الصلوات المفروضة جماعة في المسجد',10],
+      ['rawatib','المحافظة على السنن الرواتب (12 ركعة)',12],
       ['duha','صلاة الضحى',2],
       ['witr','صلاة الوتر',2],
       ['afterPrayer','أذكار ما بعد الصلاة',5]
     ]},
-    {group:'معايير المتابعة الإضافية',items:[
+    {group:'المعايير الإضافية',note:'أعمال إضافية تُحتسب عند القيام بها.',items:[
       ['adhan','الأذان والإقامة',10],
       ['imamah','الإمامة',10],
-      ['khutbah','الخطبة',20]
+      ['khutbah','إلقاء الخطبة',20]
     ]}
   ],
   fiqh2: [
-    {group:'معايير المتابعة الأساسية',items:[
+    {group:'المعايير الأساسية',note:'تشمل العبادات والمتابعة المرتبطة بالصلوات وأيام الجمعة.',items:[
       ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
-      ['fardMosque','الصلوات المفروضة جماعة في المسجد',10],
-      ['rawatib','السنن الرواتب (12 ركعة)',12],
+      ['fardMosque','أداء الصلوات المفروضة جماعة في المسجد',10],
+      ['rawatib','المحافظة على السنن الرواتب (12 ركعة)',12],
       ['duha','صلاة الضحى',2],
       ['tarawih','صلاة التراويح',2],
-      ['shafWitr','الشفع والوتر (كل تسليمة أو ما يعادلها بدرجة)',4],
+      ['shafWitr','صلاة الشفع والوتر (كل تسليمة أو ما يعادلها بدرجة)',4],
       ['jumuahPrayer','صلاة الجمعة',5],
       ['jumuahDhikr','أذكار ما بعد صلاة الجمعة',3],
       ['jumuahEarly','التبكير لصلاة الجمعة',7],
       ['kahf','قراءة سورة الكهف يوم الجمعة',2]
     ]},
-    {group:'معايير المتابعة الإضافية',items:[
+    {group:'المعايير الإضافية',note:'تُحتسب عند تحقق العمل، ولا يلزم إنجازها كل يوم.',items:[
       ['adhan','الأذان والإقامة في المسجد',10],
-      ['imamah','الإمامة',20],
-      ['khutbah','تولي خطبة الجمعة',10],
+      ['imamah','الإمامة في المسجد',20],
+      ['khutbah','تولي خطبة الجمعة في المسجد',10],
       ['visitSick','عيادة مريض',5],
-      ['washDead','المساهمة في غسل الميت',20],
-      ['condolence','تعزية أهل الميت',10],
+      ['washDead','المساهمة في غسل الميت (في المقبرة أو المنزل)',20],
+      ['condolence','تعزية أهل الميت (في المقبرة أو المنزل)',10],
       ['funeralPrayer','صلاة الجنازة',10],
       ['burial','حضور محل الجنازة ودفنها',10]
+    ]},
+    {group:'معايير موسمية ومناسبات',note:'تظهر هنا لتسجيلها عند حلول موسمها أو المناسبة، وليست أعمالًا يومية.',items:[
+      ['ramadanKhatmah','ختم القرآن في رمضان — الختمة الأولى (أساسي)',20],
+      ['ramadanExtraKhatmah','كل ختمة إضافية في رمضان',10],
+      ['eidClothes','لبس أجمل الثياب في صلاة العيد',3],
+      ['eidEarly','التبكير لصلاة العيد',2],
+      ['eidPrayer','أداء صلاة العيد',5]
     ]}
   ]
 };
@@ -640,33 +648,43 @@ function expandedDay(){
   if(!db.expandedDays[todayKey][course])db.expandedDays[todayKey][course]={};
   return db.expandedDays[todayKey][course];
 }
+function expandedSeasonal(){
+  if(!db.expandedSeasonal)db.expandedSeasonal={};
+  const course=selectedExpandedCourse();
+  if(!db.expandedSeasonal[course])db.expandedSeasonal[course]={};
+  return db.expandedSeasonal[course];
+}
 function renderExpandedTracker(){
   const root=$('expandedTrackerList');if(!root)return;
-  const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record=expandedDay();let html='';
+  const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record={...expandedDay(),...expandedSeasonal()};let html='';
   const b1=$('fiqh1Button'),b2=$('fiqh2Button');
   if(b1)b1.className=course==='fiqh1'?'gold':'secondary';if(b2)b2.className=course==='fiqh2'?'gold':'secondary';
-  const desc=$('expandedCourseDescription');if(desc)desc.textContent=course==='fiqh1'?'المجموعة الأولى من معايير المتابعة اليومية.':'المجموعة الثانية من معايير المتابعة اليومية.';
-  criteria.forEach(group=>{
-    html+='<div class="panel" style="margin-top:12px"><h3>'+group.group+'</h3>';
-    group.items.forEach(([key,label,score])=>{
-      html+='<label class="prayer" style="justify-content:flex-start"><input class="check" type="checkbox" data-expanded-key="'+key+'" '+(record[key]?'checked':'')+' onchange="updateExpandedItem(this)" style="width:20px;margin:0"><span style="flex:1">'+label+'</span><span class="pill">'+score+' درجات</span></label>';
+  const desc=$('expandedCourseDescription');if(desc)desc.textContent=course==='fiqh1'?'المجموعة الأولى: متابعة تكبيرة الإحرام والصلوات والسنن والأذكار، مع معايير الأذان والإقامة والإمامة والخطبة.':'المجموعة الثانية: متابعة الصلوات والسنن والجمعة والتراويح، إضافة إلى أعمال البر المتعلقة بالمرضى والجنائز والمعايير الموسمية للقرآن والعيد.';
+  criteria.forEach((group,gi)=>{
+    html+='<div class="panel" style="margin-top:14px"><h3>'+group.group+'</h3><p class="muted" style="margin:4px 0 10px">'+(group.note||'')+'</p>';
+    group.items.forEach(([key,label,max])=>{
+      const old=record[key]===true?max:(Number(record[key])||0);
+      const seasonal=['ramadanKhatmah','ramadanExtraKhatmah','eidClothes','eidEarly','eidPrayer'].includes(key);
+      html+='<div class="prayer" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:7px 0;padding:10px;border:1px solid var(--line,#ddd);border-radius:12px"><span style="flex:1;min-width:190px">'+label+'</span><label style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span class="muted">درجتك</span><input type="number" inputmode="numeric" min="0" max="'+max+'" step="1" value="'+old+'" data-expanded-key="'+key+'" data-expanded-max="'+max+'" data-expanded-seasonal="'+(seasonal?'yes':'no')+'" onchange="updateExpandedItem(this)" style="width:68px;padding:7px;text-align:center"><span class="pill">من '+max+'</span></label></div>';
     });
     html+='</div>';
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function updateExpandedItem(input){expandedDay()[input.dataset.expandedKey]=input.checked;persist();updateExpandedSummary();syncUserDataSilently()}
-function updateExpandedSummary(){
-  const record=expandedDay(),criteria=currentExpandedCriteria();let total=0,done=0,count=0;
-  criteria.forEach(g=>g.items.forEach(([key,label,score])=>{count++;if(record[key]){done++;total+=score}}));
-  if($('expandedDoneCount'))$('expandedDoneCount').textContent=done+' من '+count;
-  if($('expandedScore'))$('expandedScore').textContent=total+' نقطة متابعة';
+function updateExpandedItem(input){
+  const max=Number(input.dataset.expandedMax)||0;let value=Math.floor(Number(input.value)||0);value=Math.max(0,Math.min(max,value));input.value=value;(input.dataset.expandedSeasonal==='yes'?expandedSeasonal():expandedDay())[input.dataset.expandedKey]=value;persist();updateExpandedSummary();syncUserDataSilently();
 }
-function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل اليوم للمقرر المحدد.';syncUserDataSilently()}
+function updateExpandedSummary(){
+  const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0;
+  criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;const value=record[key]===true?max:(Number(record[key])||0);earned+=value;total+=max;}));
+  if($('expandedDoneCount'))$('expandedDoneCount').textContent=earned+' من '+total+' درجة';
+  if($('expandedScore'))$('expandedScore').textContent='إجمالي المعايير: '+count+' معيارًا';
+}
+function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل اليوم للمجموعة المحددة.';syncUserDataSilently()}
 function resetExpandedToday(){
-  if(!confirm('هل تريد مسح سجل اليوم للمقرر المحدد فقط؟'))return;
+  if(!confirm('هل تريد مسح سجل اليوم للمجموعة المحددة فقط؟'))return;
   const course=selectedExpandedCourse();if(db.expandedDays?.[todayKey])delete db.expandedDays[todayKey][course];
-  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم لهذا المقرر فقط.';
+  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم لهذه المجموعة فقط.';
 }
 
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
