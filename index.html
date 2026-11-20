@@ -304,7 +304,7 @@ header{position:relative;padding-top:76px!important}
 <div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
 </div></div></section>
 <section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>إنجازاتك محفوظة لك</h2><p>سجّل الدخول لعرض إحصائياتك الشخصية.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
-<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted">سيظهر ملخص الأسبوع بعد اكتمال أول 7 أيام من استخدامك للتطبيق.</div></div><div class="panel"><h2>ملخص الشهر</h2><div id="monthlyStats" class="muted">سيظهر ملخص الشهر بعد اكتمال الشهر الأول.</div></div><div class="panel"><h2>لوحة الصدارة</h2><p class="muted">تابع ترتيبك ونافس المشاركين في أعمال الخير.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></div></section>
+<div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted">سيظهر ملخص الأسبوع بعد اكتمال أول 7 أيام من استخدامك للتطبيق.</div></div><div class="panel"><h2>ملخص الشهر</h2><div id="monthlyStats" class="muted">سيظهر ملخص الشهر بعد اكتمال الشهر الأول.</div></div></div><div class="panel" id="publicLeaderboardEntry"><h2>🏆 لوحة الصدارة</h2><p class="muted">شاهد أفضل المشاركين وترتيبهم. تسجيل الدخول مطلوب فقط للاشتراك وإضافة نقاطك.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
 <section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
   <div class="challenge-kicker">🏆 مجتمع حاسب نفسك</div>
@@ -751,8 +751,8 @@ const QURAN_APIS=['https://api.alquran.cloud/v1','https://alquran.api.islamic.ne
 let surahIndex=[],activeSurah=0,quranIndexLoaded=false,quranLoading=false;
 function cachedSurah(n){try{return JSON.parse(localStorage.getItem('hasibQuranSurah'+n)||'null')}catch(e){return null}}
 async function quranFetch(path){let lastError;for(const base of QURAN_APIS){try{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);try{const response=await fetch(base+path,{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('HTTP '+response.status);const json=await response.json();if(json.code!==200||!json.data)throw new Error('Invalid Quran response');return json.data}finally{clearTimeout(timer)}}catch(err){lastError=err;console.warn('Quran source failed:',base,err)}}throw lastError||new Error('No Quran source available')}
-async function initQuran(force=false){if(quranLoading)return;if(quranIndexLoaded&&!force)return;quranLoading=true;const sel=$('surahSelect');$('quranStatus').textContent='جارٍ تجهيز فهرس القرآن الكريم...';sel.innerHTML='<option value="">جارٍ التحميل...</option>';try{surahIndex=await quranFetch('/surah');if(!Array.isArray(surahIndex)||surahIndex.length!==114)throw new Error('Surah list incomplete');sel.innerHTML=surahIndex.map(x=>`<option value="${x.number}">${x.number}. ${x.name} — ${x.numberOfAyahs} آية</option>`).join('');$('surahMeta').textContent='114 سورة';quranIndexLoaded=true;const last=+(db.quranBookmark?.surah||1);await loadSurah(last,false)}catch(e){console.error('Quran index:',e);sel.innerHTML='<option value="">تعذر تحميل الفهرس</option>';$('quranStatus').innerHTML='تعذر جلب بيانات القرآن من المصدرين. تأكد من اتصال الإنترنت ثم اضغط إعادة المحاولة.';const retry=document.createElement('button');retry.type='button';retry.className='secondary';retry.textContent='إعادة المحاولة';retry.onclick=()=>initQuran(true);$('quranStatus').appendChild(document.createTextNode(' '));$('quranStatus').appendChild(retry)}finally{quranLoading=false}}
-async function loadSurah(n,update=true){n=+n;if(!n||n<1||n>114)return;activeSurah=n;if(surahIndex.length)$('surahSelect').value=String(n);$('surahText').innerHTML='';$('surahHeading').style.display='block';$('surahHeading').textContent=surahIndex[n-1]?.name||('السورة رقم '+n);$('quranStatus').textContent='جارٍ تحميل السورة...';let data=cachedSurah(n);try{if(!data){data=await quranFetch('/surah/'+n+'/quran-uthmani');if(!data.ayahs||!data.ayahs.length)throw new Error('No verses');try{localStorage.setItem('hasibQuranSurah'+n,JSON.stringify(data))}catch(e){console.warn('تعذر حفظ نسخة السورة محلياً',e)}}$('surahHeading').textContent=data.name;$('quranStatus').textContent=`${data.englishName} • ${data.numberOfAyahs} آية • ${data.revelationType==='Meccan'?'مكية':'مدنية'}`;$('surahText').innerHTML=data.ayahs.map(a=>`<span class="quran-ayah">${escapeQuranText(a.text)} <small>﴿${a.numberInSurah}﴾</small></span>`).join('');if(update)saveQuranBookmark(false)}catch(e){console.error('Surah load:',e);$('quranStatus').textContent='تعذر تحميل هذه السورة. جرّب اختيارها مرة أخرى أو أعد تحميل الصفحة.'}}
+async function initQuran(force=false){if(quranLoading)return;if(quranIndexLoaded&&!force)return;quranLoading=true;const sel=$('surahSelect');$('quranStatus').textContent='جارٍ تجهيز فهرس القرآن الكريم...';sel.innerHTML='<option value="">جارٍ التحميل...</option>';try{surahIndex=await quranFetch('/surah');if(!Array.isArray(surahIndex)||surahIndex.length!==114)throw new Error('Surah list incomplete');sel.innerHTML=surahIndex.map(x=>`<option value="${x.number}">${x.number}. ${x.name} — ${x.numberOfAyahs} آية</option>`).join('');$('surahMeta').textContent='114 سورة';quranIndexLoaded=true;const last=+(getQuranBookmark()?.surah||1);await loadSurah(last,false)}catch(e){console.error('Quran index:',e);sel.innerHTML='<option value="">تعذر تحميل الفهرس</option>';$('quranStatus').innerHTML='تعذر جلب بيانات القرآن من المصدرين. تأكد من اتصال الإنترنت ثم اضغط إعادة المحاولة.';const retry=document.createElement('button');retry.type='button';retry.className='secondary';retry.textContent='إعادة المحاولة';retry.onclick=()=>initQuran(true);$('quranStatus').appendChild(document.createTextNode(' '));$('quranStatus').appendChild(retry)}finally{quranLoading=false}}
+async function loadSurah(n,update=true){n=+n;if(!n||n<1||n>114)return;activeSurah=n;if(surahIndex.length)$('surahSelect').value=String(n);$('surahText').innerHTML='';$('surahHeading').style.display='block';$('surahHeading').textContent=surahIndex[n-1]?.name||('السورة رقم '+n);$('quranStatus').textContent='جارٍ تحميل السورة...';let data=cachedSurah(n);try{if(!data){data=await quranFetch('/surah/'+n+'/quran-uthmani');if(!data.ayahs||!data.ayahs.length)throw new Error('No verses');try{localStorage.setItem('hasibQuranSurah'+n,JSON.stringify(data))}catch(e){console.warn('تعذر حفظ نسخة السورة محلياً',e)}}$('surahHeading').textContent=data.name;$('quranStatus').textContent=`${data.englishName} • ${data.numberOfAyahs} آية • ${data.revelationType==='Meccan'?'مكية':'مدنية'}`;$('surahText').innerHTML=data.ayahs.map(a=>`<span class="quran-ayah" id="quranAyah-${a.numberInSurah}" data-ayah="${a.numberInSurah}">${escapeQuranText(a.text)} <small>﴿${a.numberInSurah}﴾</small></span>`).join('');if(update){const bookmark={surah:n,ayah:1,savedAt:new Date().toISOString()};db.quranBookmark=bookmark;persist();try{localStorage.setItem('hasibQuranBookmark',JSON.stringify(bookmark))}catch(e){}}}catch(e){console.error('Surah load:',e);$('quranStatus').textContent='تعذر تحميل هذه السورة. جرّب اختيارها مرة أخرى أو أعد تحميل الصفحة.'}}
 function escapeQuranText(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
 async function searchAyah(){
@@ -775,8 +775,26 @@ async function openAyahResult(surahNo,ayahNo){
 }
 
 function changeSurah(delta){loadSurah(Math.min(114,Math.max(1,activeSurah+delta)))}
-function saveQuranBookmark(show=true){if(!activeSurah)return;db.quranBookmark={surah:activeSurah,savedAt:new Date().toISOString()};persist();if(show)$('quranStatus').textContent='تم حفظ آخر سورة وصلت إليها.'}
-function resumeQuran(){loadSurah(+(db.quranBookmark?.surah||1))}
+function getQuranBookmark(){
+  try{const local=JSON.parse(localStorage.getItem('hasibQuranBookmark')||'null');return local||db.quranBookmark||{surah:1,ayah:1}}
+  catch(e){return db.quranBookmark||{surah:1,ayah:1}}
+}
+function saveQuranBookmark(show=true){
+  if(!activeSurah)return;
+  const ayahs=[...document.querySelectorAll('#surahText .quran-ayah')];
+  let currentAyah=1,bestDistance=Infinity;
+  const referenceY=Math.min(window.innerHeight*.42,260);
+  for(const el of ayahs){const rect=el.getBoundingClientRect();const distance=Math.abs(rect.top-referenceY);if(rect.bottom>0&&rect.top<window.innerHeight&&distance<bestDistance){bestDistance=distance;currentAyah=Number(el.dataset.ayah)||1}}
+  const bookmark={surah:activeSurah,ayah:currentAyah,savedAt:new Date().toISOString()};
+  db.quranBookmark=bookmark;persist();
+  try{localStorage.setItem('hasibQuranBookmark',JSON.stringify(bookmark))}catch(e){}
+  if(show)$('quranStatus').textContent='تم حفظ موضع القراءة: الآية '+currentAyah+'.';
+}
+async function resumeQuran(){
+  const bookmark=getQuranBookmark(),surah=Number(bookmark.surah)||1,ayah=Number(bookmark.ayah)||1;
+  await loadSurah(surah,false);
+  requestAnimationFrame(()=>{const target=$('quranAyah-'+ayah);if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.style.background='#f4e7bd';target.style.borderRadius='10px';setTimeout(()=>{target.style.background=''},2500)}$('quranStatus').textContent='تمت العودة إلى موضع القراءة: '+(surahIndex[surah-1]?.name||'السورة')+'، الآية '+ayah+'.'});
+}
 function resetQuran(){if(confirm('بدء ختمة جديدة؟ سيتم تصفير إجمالي صفحات الختمة.')){db.quranTotal=0;db.currentPage=1;save()}}
 function renderQuran(){if($('pagesToday'))$('pagesToday').textContent=day().pages||0;if($('quranStat'))$('quranStat').textContent=(day().pages||0)+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`}
 const dhikr={
@@ -1130,7 +1148,7 @@ async function trackVisit(){
 async function renderLeaderboard(){
   const box=$('leaderboardList');if(!box)return;
   const signedUser=await currentUser();
-  if(!signedUser){$('leaderboardStatus').textContent='🔐 سجّل الدخول أولًا للاشتراك في لوحة الصدارة.';}
+  if(!signedUser){$('leaderboardStatus').textContent='يمكنك مشاهدة ترتيب المشاركين دون تسجيل الدخول. سجّل الدخول فقط إذا رغبت بالاشتراك وإضافة نقاطك.';const join=$('joinLeaderboardBtn');if(join)join.textContent='سجّل الدخول للاشتراك';}
   if(!sb){box.textContent='تعذر الاتصال بالخدمة.';return}
   box.textContent='جارٍ تحميل القائمة...';
   try{
