@@ -256,7 +256,7 @@ header{position:relative;padding-top:76px!important}
   <p class="notice" style="margin-top:10px">لأفضل دقة، فعّل الموقع والبوصلة وابتعد عن الأجهزة والمعادن التي قد تؤثر في المجال المغناطيسي. قد تحتاج إلى معايرة بوصلة الهاتف.</p>
 </div>
 
-<div class="panel"><h2>متابعة الصلوات</h2><div class="notice">النقاط: الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط (5 إضافية للمسجد)، والمنفرد 0.</div><p class="muted">علّم الصلاة بعد أدائها وحدد مكانها وطريقة أدائها.</p><div id="prayerList"></div><div class="notice" id="prayerEncouragement" style="margin-top:12px">اختر طريقة أداء الصلاة لعرض رسالة التشجيع والنقاط.</div><div class="tile" style="margin-top:10px">نقاط الصلاة اليوم<strong id="prayerPoints">0 / 50</strong></div></div><div class="panel"><h2>إنجاز اليوم</h2><div class="progress"><span id="prayerProgress"></span></div><div id="prayerProgressText" class="muted"></div></div></section>
+<div class="panel"><h2>متابعة الصلوات</h2><div class="notice">النقاط: الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط (5 إضافية للمسجد)، والمنفرد 0.</div><p class="muted">علّم الصلاة بعد أدائها وحدد مكانها وطريقة أدائها.</p><div id="prayerLoginNotice" class="notice" style="display:none">🔒 سجّل الدخول أولًا حتى تتمكن من اختيار الصلوات وتسجيل إنجازك.</div><div id="prayerList"></div><div class="notice" id="prayerEncouragement" style="margin-top:12px">اختر طريقة أداء الصلاة لعرض رسالة التشجيع والنقاط.</div><div class="tile" style="margin-top:10px">نقاط الصلاة اليوم<strong id="prayerPoints">0 / 50</strong></div></div><div class="panel"><h2>إنجاز اليوم</h2><div class="progress"><span id="prayerProgress"></span></div><div id="prayerProgressText" class="muted"></div></div></section>
 <section id="worship" class="view">
 <div class="panel">
   <h2>العبادات 🌿</h2>
@@ -275,7 +275,7 @@ header{position:relative;padding-top:76px!important}
     <div class="challenge-kicker">📚 المسار الموسّع</div>
     <h2 style="margin-top:7px">سجل المتابعة التفصيلي</h2>
     <div class="expanded-intro"><h3>🌿 متابعة مفصّلة خطوة بخطوة</h3></div>
-    <div class="notice" style="margin:10px 0">طريقة الاستخدام: سجّل الصلاة بعد دخول وقتها، ثم اضغط على بطاقتها. لا تحتاج إلى كتابة درجات أو ملاحظات.</div>
+    <div class="notice" style="margin:10px 0">طريقة الاستخدام: اختر الصلوات الخمس لكل معيار يحتاج تحديدًا، واضغط على البطاقة لتسجيل الإنجاز أو إلغاء تحديده. لا تحتاج إلى كتابة أي درجات.</div>
     <div class="expanded-total"><div class="muted">إنجازك في سجل اليوم</div><strong id="expandedDoneCount" style="display:block;font-size:25px;color:var(--g);margin:5px">0 من 0 درجة</strong><div class="muted" id="expandedScore">0 معيارًا مكتملًا</div></div>
     <div id="expandedTrackerList"></div>
     <div class="row between" style="margin-top:12px">
@@ -640,27 +640,6 @@ function expandedSeasonal(){
 }
 function expandedPrayerNames(){return [['Fajr','الفجر'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']]}
 function expandedValue(record,key){return record[key]&&typeof record[key]==='object'?record[key]:{}}
-function currentSaudiMinutes(){
-  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Riyadh',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
-  const values={};parts.forEach(p=>values[p.type]=p.value);
-  return Number(values.hour)*60+Number(values.minute);
-}
-function prayerStartMinute(prayer){
-  const parts=saudiDateParts();
-  let timings=prayerTimesData?.timings;
-  if(!timings || prayerTimesData.date!==apiDate(parts)){
-    timings=localPrayerTimesForCity(getSavedPrayerCity(),parts).timings;
-  }
-  return timeMinutes(timings?.[prayer]);
-}
-function canRecordPrayer(prayer){
-  const start=prayerStartMinute(prayer);
-  return start!==null && currentSaudiMinutes()>=start;
-}
-function prayerUnavailableMessage(prayer){
-  const start=prayerStartMinute(prayer);
-  return start===null?'تعذر تحديد وقت الصلاة حاليًا':'يتاح التسجيل بعد دخول وقت '+(expandedPrayerNames().find(x=>x[0]===prayer)?.[1]||'الصلاة');
-}
 function renderExpandedTracker(){
   const root=$('expandedTrackerList');if(!root)return;
   const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record={...expandedDay(),...expandedSeasonal()};let html='';
@@ -678,7 +657,7 @@ function renderExpandedTracker(){
         html+='</div><div class="expanded-item-meta">اختر السنن التي أديتها، ومجموعها 12 ركعة</div>';
       }else if(prayerKeys.includes(key)){
         const picked=expandedValue(record,key);html+='<div class="expanded-prayer-options">';
-        expandedPrayerNames().forEach(([id,name])=>{const on=!!picked[id],allowed=canRecordPrayer(id);html+='<button type="button" class="expanded-prayer-option '+(on?'selected':'')+'" '+(!allowed?'disabled title="'+prayerUnavailableMessage(id)+'"':'')+' aria-pressed="'+on+'" onclick="toggleExpandedPrayer(\''+key+'\',\''+id+'\')">'+(on?'✓ ':'')+name+(!allowed?' 🔒':'')+'</button>';});
+        expandedPrayerNames().forEach(([id,name])=>{const on=!!picked[id];html+='<button type="button" class="expanded-prayer-option '+(on?'selected':'')+'" aria-pressed="'+on+'" onclick="toggleExpandedPrayer(\''+key+'\',\''+id+'\')">'+(on?'✓ ':'')+name+'</button>';});
         html+='</div><div class="expanded-item-meta">اختر الصلوات التي أنجزت فيها هذا المعيار</div>';
       }else if(key==='ramadanKhatmah'||key==='ramadanExtraKhatmah'){
         const value=Math.max(0,Number(record[key])||0);html+='<div class="expanded-stepper"><button type="button" class="secondary" onclick="changeExpandedCount(\''+key+'\',-1,true)">−</button><strong>'+value+' ختمة</strong><button type="button" onclick="changeExpandedCount(\''+key+'\',1,true)">+</button></div>';
@@ -694,7 +673,6 @@ function renderExpandedTracker(){
 function toggleExpandedRawatib(id){if(!requireExpandedLogin())return;const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function toggleExpandedPrayer(key,prayer){
   if(!requireExpandedLogin())return;
-  if(!canRecordPrayer(prayer)){alert(prayerUnavailableMessage(prayer));return;}
   const record=expandedDay();if(!record[key]||typeof record[key]!=='object')record[key]={};record[key][prayer]=!record[key][prayer];
   if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently();
 }
@@ -886,10 +864,11 @@ function prayerAwardForRecord(record){
 }
 function prayerPointsForDay(d){return prayers.reduce((sum,p)=>sum+prayerAwardForRecord(d?.prayers?.[p]),0)}
 function renderPrayers(){
-  const d=day();
+  const d=day(),signedIn=!!window.__hasibSignedIn;
+  if($('prayerLoginNotice'))$('prayerLoginNotice').style.display=signedIn?'none':'block';
   $('prayerList').innerHTML=prayers.map(p=>{
-    const record=d.prayers[p]||{},award=prayerAwardForRecord(record);
-    return `<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${record.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${record.done?award+' نقاط':'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${record.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${record.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${record.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${record.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(record.mode||'').trim().toLowerCase())?'selected':''}>جماعة</option><option value="alone" ${record.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`;
+    const record=d.prayers[p]||{},award=prayerAwardForRecord(record),locked=signedIn?'':'disabled';
+    return `<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${record.done?'checked':''} ${locked} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${record.done?award+' نقاط':'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select ${locked} style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${record.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${record.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${record.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${record.place==='أخرى'?'selected':''}>مكان آخر</option></select><select ${locked} style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(record.mode||'').trim().toLowerCase())?'selected':''}>جماعة</option><option value="alone" ${record.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`;
   }).join('');
   const n=prayers.filter(p=>d.prayers[p]?.done).length,pts=prayerPointsForDay(d);
   if($('prayerProgress'))$('prayerProgress').style.width=(n*20)+'%';
@@ -899,9 +878,10 @@ function renderPrayers(){
   const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);
   if($('prayerEncouragement'))$('prayerEncouragement').textContent=modes.some(m=>['alone'].includes(m))?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.some(m=>['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(m||'').trim().toLowerCase()))?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.';
 }
-function markPrayer(p,v){const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}
-function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}
-function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
+function requirePrayerLogin(){if(window.__hasibSignedIn)return true;requireAccountForFeature('متابعة الصلوات وتسجيل إنجازها','prayers');return false}
+function markPrayer(p,v){if(!requirePrayerLogin())return;const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}
+function setPlace(p,v){if(!requirePrayerLogin())return;day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}
+function setPrayerMode(p,v){if(!requirePrayerLogin())return;day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
 function changePages(n){
   const d=day(),before=Math.max(0,Number(d.pages)||0),requested=Number(n)||0;
   const after=Math.max(0,before+requested),delta=after-before;
@@ -2118,7 +2098,7 @@ function importData(e){
 window.__hasibSignedIn=false;setAuthMode('login');renderPathChoice();renderExpandedTracker();initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
 function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
-bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);setInterval(()=>{if($('expanded')?.classList.contains('active'))renderExpandedTracker()},60000);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
+bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
