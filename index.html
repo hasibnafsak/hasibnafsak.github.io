@@ -131,7 +131,7 @@ header{position:relative;padding-top:76px!important}
 <p style="color:#e8dfc8;line-height:1.9">أعن نفسك على طاعة الله، واجعل لكل يوم وقفة، ولكل عمل أثرًا.</p>
 <div style="margin-top:22px">
   <h2 style="color:#f3dfad;margin:0 0 8px">اختر مسارك</h2>
-  <p style="color:#e8dfc8;font-size:13px;line-height:1.8;margin:0 0 14px">اختر الطريقة التي تناسبك للمتابعة، وتقدر تغيّر اختيارك لاحقًا.</p>
+  <p style="color:#e8dfc8;font-size:13px;line-height:1.8;margin:0 0 14px">اختر الطريقة التي تناسبك للمتابعة. المسار الموسّع يتطلب تسجيل الدخول، ويبقى مدخله داخل قسم العبادات.</p>
   <div style="display:grid;grid-template-columns:1fr;gap:10px">
     <button type="button" onclick="enterApp('simple')">🕌 المسار المبسّط</button>
     <button type="button" class="secondary" style="background:#f5edda;color:#174334" onclick="enterApp('expanded')">📚 المسار الموسّع</button>
@@ -267,11 +267,12 @@ header{position:relative;padding-top:76px!important}
     <button type="button" class="worship-card" onclick="go('quran')"><span style="font-size:27px">📖</span><strong>القرآن الكريم</strong><small>قراءة وبحث وورد يومي</small></button>
     <button type="button" class="worship-card" onclick="go('adhkar')"><span style="font-size:27px">🌿</span><strong>الأذكار</strong><small>أذكار الصباح والمساء وغيرها</small></button>
     <button type="button" class="worship-card" onclick="go('tasbeeh')"><span style="font-size:27px">📿</span><strong>المسبحة</strong><small>تسبيح إلكتروني ويدوي</small></button>
+    <button type="button" class="worship-card" id="expandedPathEntry" onclick="openExpandedPath()" style="grid-column:1/-1"><span style="font-size:27px">📚</span><strong>المسار الموسّع</strong><small>سجل تفصيلي للعبادات والإنجازات اليومية</small></button>
   </div>
 </div>
 </section>
 <section id="expanded" class="view">
-  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('home')">← رجوع</button></div>
+  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
   <div class="panel">
     <div class="challenge-kicker">📚 المسار الموسّع</div>
     <h2 style="margin-top:7px">سجل المتابعة التفصيلي</h2>
@@ -344,7 +345,7 @@ header{position:relative;padding-top:76px!important}
 <h3 style="margin-top:18px">أصدقائي</h3>
 <div id="friendsList" class="muted">سجّل الدخول لعرض قائمة أصدقائك.</div>
 </div></div></section>
-<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>تابع إنجازاتك وشارك في الإحصائيات 🌿</h2><p>إذا كنت تريد المشاركة في الإحصائيات، عليك بتسجيل الدخول.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول / إنشاء حساب</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div></div>
+<section id="stats" class="view"><div id="statsLoginNotice" class="panel notice" style="display:none;text-align:center;padding:24px"><h2>تابع إنجازاتك وشارك في الإحصائيات 🌿</h2><p>إذا كنت تريد المشاركة في الإحصائيات، عليك بتسجيل الدخول.</p><button type="button" class="gold" onclick="go('account')">تسجيل الدخول / إنشاء حساب</button></div><div id="statsPrivateContent"><div class="panel"><h2>إحصائيات اليوم</h2><p class="muted">تعرض فقط الأعمال التي سجلتها اليوم في التطبيق.</p><div class="grid"><div class="tile">إجمالي النقاط<strong id="sTotalPoints">0</strong></div><div class="tile">نقاط اليوم<strong id="sTodayPoints">0</strong></div><div class="tile">صلوات اليوم<strong id="sPrayerToday">0 / 5</strong></div><div class="tile">صفحات اليوم<strong id="sPagesToday">0</strong></div><div class="tile">التسبيحات اليوم<strong id="sTasbeeh">0</strong></div><div class="tile">الأذكار المكتملة اليوم<strong id="sDhikr">0</strong></div><div class="tile">الأهداف المكتملة اليوم<strong id="sGoals">0</strong></div><div class="tile">تحدي اليوم<strong id="sChallengeDone">0</strong></div><div class="tile">إجمالي صفحات الختمة<strong id="sPagesTotal">0</strong></div></div><div class="panel" style="margin-top:14px;background:#fbf8ef"><h3 style="margin-top:0">📚 المسار الموسّع</h3><div class="grid"><div class="tile">نقاط المسار الموسّع اليوم<strong id="sExpandedToday">0</strong></div><div class="tile">إجمالي نقاط المسار الموسّع<strong id="sExpandedTotal">0</strong></div></div><div id="expandedHistory" class="muted" style="margin-top:12px;line-height:1.9">ستظهر إنجازات الأيام هنا بعد تسجيلها.</div><button type="button" class="secondary" onclick="go('worship');setTimeout(()=>go('expanded'),0)" style="margin-top:10px">فتح سجل المسار الموسّع</button></div></div>
 <div class="panel"><h2>ملخص آخر 7 أيام</h2><div id="weeklyStats" class="muted">سيظهر ملخص الأسبوع بعد اكتمال أول 7 أيام من استخدامك للتطبيق.</div></div><div class="panel"><h2>ملخص الشهر</h2><div id="monthlyStats" class="muted">سيظهر ملخص الشهر بعد اكتمال الشهر الأول.</div></div></div><div class="panel" id="publicLeaderboardEntry"><h2>🏆 لوحة الصدارة والإحصائيات العامة</h2><p class="muted">شاهد أفضل المشاركين وترتيبهم. يمكنك الاطلاع دون حساب، أما إضافة إنجازاتك ونقاطك إلى الإحصائيات فتتطلب تسجيل الدخول.</p><button type="button" class="gold" onclick="go('leaderboard')">عرض لوحة الصدارة 🏆</button></div></section>
 <section id="leaderboard" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('stats')">← رجوع إلى إنجازاتي</button></div>
 <div class="panel">
@@ -496,9 +497,10 @@ header{position:relative;padding-top:76px!important}
   <div class="panel"><h3>5. سؤال اليوم والمسابقة</h3><p style="line-height:2">افتح تبويب «السؤال»، اقرأ سؤال اليوم واختر إجابتك. تتجدد المسابقة يوميًا، وتظهر نتيجة إجابتك ونقاط المسابقة في نفس القسم.</p></div>
   <div class="panel"><h3>6. تحدي الأصدقاء</h3><ol style="line-height:2"><li>سجّل الدخول أولًا.</li><li>اضغط «إنشاء رمز دعوة» وشارك الرمز مع صديقك.</li><li>يدخل صديقك الرمز في خانة «عندك رمز من صديق؟» ثم يضغط «انضمام».</li><li>استخدم «تحديث الأصدقاء» لمشاهدة القائمة.</li></ol></div>
   <div class="panel"><h3>7. الإنجازات ولوحة الصدارة</h3><p style="line-height:2">من «إنجازاتي» راجع إحصائياتك اليومية والأسبوعية والشهرية. ويمكنك فتح لوحة الصدارة للاطلاع على ترتيب المشاركين. الاشتراك في الصدارة يتطلب تسجيل الدخول والاتصال بالإنترنت.</p></div>
-  <div class="panel"><h3>8. النسخة الاحتياطية وتصدير البيانات</h3><p style="line-height:2">من قسم الحساب اختر «تصدير بياناتي» لحفظ نسخة من بياناتك على جهازك. ولإرجاع نسخة محفوظة، اختر «استيراد نسخة» وحدد ملف النسخة الاحتياطية الصحيح. احتفظ بالملف في مكان آمن.</p></div>
-  <div class="panel"><h3>9. إضافة الموقع إلى شاشة الآيفون الرئيسية</h3><ol style="line-height:2"><li>افتح الموقع من متصفح Safari.</li><li>اضغط زر المشاركة أسفل الشاشة.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». ستظهر أيقونة حاسب نفسك على الشاشة.</li></ol><p class="notice">للاستخدام دون اتصال، افتح الموقع أول مرة بالإنترنت وانتظر تحميله. بعض الخدمات مثل تسجيل الدخول والمزامنة والصدارة تحتاج اتصالًا.</p></div>
-  <div class="panel"><h3>10. التواصل والدعم</h3><p style="line-height:2">للتواصل مع المبدع أبو سعد أو إرسال اقتراح، ارجع إلى قسم الحساب واستخدم زر واتساب أو نموذج التعليقات والاقتراحات.</p><a href="https://whatsapp.com/channel/0029VbEIFVB5q08mEOf9a00G" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#16865b;color:white;text-decoration:none;font-weight:800">تابع قناة حاسب نفسك على واتساب</a></div>
+  <div class="panel"><h3>8. المساران المبسّط والموسّع</h3><p style="line-height:2">عند فتح الموقع اختر المسار الذي يناسبك. المسار المبسّط يتيح استخدام الأدوات اليومية المعتادة بواجهة سهلة. أما المسار الموسّع فيتطلب تسجيل الدخول، وبعد اختياره يبقى مدخله ثابتًا داخل قسم «العبادات» باسم «المسار الموسّع»، ويعرض سجلًا تفصيليًا للمعايير والإنجازات. اضغط على خيارات الصلوات والسنن أو بطاقات الإنجاز لتسجيل ما أتممته؛ لا تحتاج إلى كتابة درجات يدويًا.</p><p style="line-height:2">تُحفظ إنجازات المسار الموسّع بتاريخ كل يوم، وتظهر نقاطه في «إنجازاتي» داخل مربع مستقل باسم «المسار الموسّع»، كما تدخل هذه النقاط ضمن مجموع نقاطك العام. ويمكنك الرجوع إلى ملخص الأيام السابقة من الإحصائيات.</p></div>
+  <div class="panel"><h3>9. النسخة الاحتياطية وتصدير البيانات</h3><p style="line-height:2">من قسم الحساب اختر «تصدير بياناتي» لحفظ نسخة من بياناتك على جهازك. ولإرجاع نسخة محفوظة، اختر «استيراد نسخة» وحدد ملف النسخة الاحتياطية الصحيح. احتفظ بالملف في مكان آمن.</p></div>
+  <div class="panel"><h3>10. إضافة الموقع إلى شاشة الآيفون الرئيسية</h3><ol style="line-height:2"><li>افتح الموقع من متصفح Safari.</li><li>اضغط زر المشاركة أسفل الشاشة.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». ستظهر أيقونة حاسب نفسك على الشاشة.</li></ol><p class="notice">للاستخدام دون اتصال، افتح الموقع أول مرة بالإنترنت وانتظر تحميله. بعض الخدمات مثل تسجيل الدخول والمزامنة والصدارة تحتاج اتصالًا.</p></div>
+  <div class="panel"><h3>11. التواصل والدعم</h3><p style="line-height:2">للتواصل مع المبدع أبو سعد أو إرسال اقتراح، ارجع إلى قسم الحساب واستخدم زر واتساب أو نموذج التعليقات والاقتراحات.</p><a href="https://whatsapp.com/channel/0029VbEIFVB5q08mEOf9a00G" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;padding:12px;border-radius:12px;background:#16865b;color:white;text-decoration:none;font-weight:800">تابع قناة حاسب نفسك على واتساب</a></div>
   <div class="panel"><p class="muted" style="line-height:1.9">نسأل الله أن يجعل هذا العمل نافعًا، وأن يعيننا وإياكم على ذكره وشكره وحسن عبادته 🤍</p><button type="button" class="gold" onclick="go('account')" style="width:100%">العودة إلى الحساب</button></div>
 </section>
 </main>
@@ -577,7 +579,7 @@ let pendingAccountNotice='';
 let pendingAccountReturnView='';
 let pendingAccountAction='';
 let lastCreatedFriendCode='';
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh','expanded'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
+function go(id){if(id==='expanded'&&!window.__hasibSignedIn){requireAccountForFeature('المسار الموسّع', 'expanded');return;}const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh','expanded'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
 function requireAccountForFeature(feature,returnView=''){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';pendingAccountReturnView=returnView;go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
@@ -672,20 +674,20 @@ function renderExpandedTracker(){
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function toggleExpandedRawatib(id){const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();syncUserDataSilently()}
+function toggleExpandedRawatib(id){const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function toggleExpandedPrayer(key,prayer){
   const record=expandedDay();if(!record[key]||typeof record[key]!=='object')record[key]={};record[key][prayer]=!record[key][prayer];
-  if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();syncUserDataSilently();
+  if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently();
 }
-function toggleExpandedItem(key,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();syncUserDataSilently()}
-function changeExpandedCount(key,delta,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();syncUserDataSilently()}
+function toggleExpandedItem(key,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function changeExpandedCount(key,delta,seasonal=false){const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function updateExpandedSummary(){
   const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0,done=0;
   criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;let value=0;if(['takbeer','fardMosque','afterPrayer'].includes(key)){const picked=expandedValue(record,key);value=Object.keys(picked).filter(k=>picked[k]).length*(max/5)}else if(key==='rawatib'){const picked=expandedValue(record,key);const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};value=Object.keys(picked).reduce((sum,k)=>sum+(picked[k]?(weights[k]||0):0),0)}else if(key==='ramadanKhatmah'){value=(Number(record[key])||0)>0?max:0}else if(key==='ramadanExtraKhatmah'){value=(Number(record[key])||0)*max}else{value=record[key]?max:0}earned+=value;total+=max;if(value>0)done++;}));
   if($('expandedDoneCount'))$('expandedDoneCount').textContent=earned+' من '+total+' درجة';
   if($('expandedScore'))$('expandedScore').textContent=done+' من '+count+' معيارًا تم إنجازه';
 }
-function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل اليوم للمجموعة المحددة.';syncUserDataSilently()}
+function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ إنجازات المسار الموسّع لهذا اليوم.';if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
 function resetExpandedToday(){
   if(!confirm('هل تريد مسح سجل اليوم للمجموعة المحددة فقط؟'))return;
   const course=selectedExpandedCourse();if(db.expandedDays?.[todayKey])delete db.expandedDays[todayKey][course];
@@ -1168,6 +1170,9 @@ function renderStats(){
   if($('sChallengeDone'))$('sChallengeDone').textContent=d.challengeDone?1:0;
   if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();
   if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();
+  if($('sExpandedToday'))$('sExpandedToday').textContent=expandedPointsForDate(todayKey);
+  if($('sExpandedTotal'))$('sExpandedTotal').textContent=expandedTotalPoints();
+  renderExpandedHistory();
 
   const parseKey=key=>{const [y,m,dayNum]=String(key).split('-').map(Number);return new Date(y,m-1,dayNum,12,0,0)};
   const dateKey=dt=>[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');
@@ -1222,14 +1227,30 @@ function renderStats(){
 }
 
 const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
-function enterApp(path='simple'){setUserPath(path);$('welcomeSplash').style.display='none';if(path==='expanded'){go('expanded');renderExpandedTracker()}else{go('home')}}
+async function enterApp(path='simple'){
+  if(path==='expanded'){
+    const user=await currentUser();
+    if(!user){pendingAccountReturnView='worship';requireAccountForFeature('اختيار المسار الموسّع','worship');return;}
+  }
+  setUserPath(path);$('welcomeSplash').style.display='none';
+  if(path==='expanded'){go('worship');}else{go('home');}
+}
+function openExpandedPath(){
+  if(!window.__hasibSignedIn){requireAccountForFeature('المسار الموسّع','expanded');return;}
+  go('expanded');renderExpandedTracker();
+}
 function initWelcome(){const previous=localStorage.getItem('hasibWelcomePhrase');let choices=welcomePhrases.filter(x=>x!==previous);const phrase=choices[Math.floor(Math.random()*choices.length)];$('welcomePhrase').textContent='“'+phrase+'”';localStorage.setItem('hasibWelcomePhrase',phrase);}
 function setQuranGoal(v){if(v==='custom'){$('quranGoalCustom').style.display='block';$('quranGoalCustom').focus();return}let n=Math.max(1,Math.min(604,+v||5));day().quranGoal=n;persist();$('quranGoal').value=[3,5,10,20].includes(n)?String(n):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(n)?'none':'block';$('quranGoalCustom').value=n;renderDashboard()}
 function setTasbeehMode(mode){if(mode==='manual')renderRealTasbeeh();$('digitalTasbeeh').style.display=mode==='digital'?'block':'none';$('manualTasbeeh').style.display=mode==='manual'?'block':'none';$('digitalMode').classList.toggle('active',mode==='digital');$('digitalMode').classList.toggle('secondary',mode!=='digital');$('manualMode').classList.toggle('active',mode==='manual');$('manualMode').classList.toggle('secondary',mode!=='manual')}
 function createFriendInvite(){const invite='HN-'+Math.random().toString(36).slice(2,8).toUpperCase();$('friendInvite').textContent='رمز الدعوة: '+invite+' — شاركه مع صديقك.';if(navigator.clipboard?.writeText)navigator.clipboard.writeText('انضم لتحدي سؤال اليوم في حاسب نفسك. رمز الدعوة: '+invite).catch(()=>{});}
+function expandedRecordForDate(key){const raw=db.expandedDays?.[key]||{};return raw.fiqh1||raw.fiqh2?{...(raw.fiqh2||{}),...(raw.fiqh1||{})}:raw}
+function expandedPointsForRecord(record){if(!record)return 0;let score=0;for(const k of ['takbeer','fardMosque','afterPrayer']){const chosen=record[k]&&typeof record[k]==='object'?record[k]:{};const n=Object.values(chosen).filter(Boolean).length;score+=n*(k==='fardMosque'?2:1)}const raw=record.rawatib&&typeof record.rawatib==='object'?record.rawatib:{};const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};score+=Object.keys(weights).reduce((a,k)=>a+(raw[k]?weights[k]:0),0);if(record.duha)score+=2;if(record.shafWitr)score+=4;return score}
+function expandedPointsForDate(key){return expandedPointsForRecord(expandedRecordForDate(key))}
+function expandedTotalPoints(){return Object.keys(db.expandedDays||{}).reduce((sum,key)=>sum+expandedPointsForDate(key),0)}
+function renderExpandedHistory(){const el=$('expandedHistory');if(!el)return;const keys=Object.keys(db.expandedDays||{}).filter(k=>expandedPointsForDate(k)>0).sort().reverse().slice(0,7);el.innerHTML=keys.length?keys.map(k=>'<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e8e1d2;padding:7px 0"><span>'+new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'short'}).format(new Date(k+'T12:00:00'))+'</span><strong>'+expandedPointsForDate(k)+' نقطة</strong></div>').join(''):'ستظهر إنجازات الأيام هنا بعد تسجيلها.'}
 function pointsForDay(d,key){return prayerPointsForDay(d||{})+adhkarPointsForDay(d||{})+(Number(db.quizPointsByDate?.[key])||0)}
-function totalPoints(){let total=0;for(const [key,d] of Object.entries(db.days||{}))total+=pointsForDay(d,key);const quizOnly=Object.entries(db.quizPointsByDate||{}).reduce((a,[key,value])=>a+(!db.days?.[key]?(Number(value)||0):0),0);return total+quizOnly+(Number(db.points)||0)}
-function todayPoints(){return pointsForDay(day(),todayKey)}
+function totalPoints(){let total=0;for(const [key,d] of Object.entries(db.days||{}))total+=pointsForDay(d,key);const quizOnly=Object.entries(db.quizPointsByDate||{}).reduce((a,[key,value])=>a+(!db.days?.[key]?(Number(value)||0):0),0);return total+quizOnly+(Number(db.points)||0)+expandedTotalPoints()}
+function todayPoints(){return pointsForDay(day(),todayKey)+expandedPointsForDate(todayKey)}
 function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const prayer=prayers.filter(p=>d.prayers?.[p]?.done).length/5;const quran=Math.min(1,(+d.pages||0)/goal);const allDhikr=Object.keys(dhikr).reduce((a,k)=>a+dhikr[k].length,0);let doneDhikr=0;Object.keys(dhikr).forEach(k=>dhikr[k].forEach((x,i)=>{if((+d.adhkar?.[k]?.[i]||0)>=+x[1])doneDhikr++}));const dh=doneDhikr/allDhikr;const tas=Math.min(1,(+d.tasbeeh||0)/100);const ref=d.challengeDone?1:0;const vals={prayer:prayer*30,quran:quran*25,dhikr:dh*20,tasbeeh:tas*10,reflection:ref*15};const total=Object.values(vals).reduce((a,b)=>a+b,0);$('dailyPercent').textContent=Math.round(total)+'%';$('dailyProgress').style.width=total+'%';$('weightPrayer').textContent=Math.round(vals.prayer)+' / 30';$('weightQuran').textContent=Math.round(vals.quran)+' / 25';$('weightDhikr').textContent=Math.round(vals.dhikr)+' / 20';$('weightTasbeeh').textContent=Math.round(vals.tasbeeh)+' / 10';$('weightReflection').textContent=Math.round(vals.reflection)+' / 15';if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();if($('quranGoal')){$('quranGoal').value=[3,5,10,20].includes(goal)?String(goal):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(goal)?'none':'block';$('quranGoalCustom').value=goal}if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${d.pages||0} من ${goal} صفحة اليوم.`}
 
 function renderAll(){
@@ -1921,7 +1942,7 @@ async function signIn(){
     await finishAccountLogin(data.user);
     await updateAccount(data.user);
     msg('تم تسجيل الدخول بنجاح، أهلًا بعودتك.');
-    if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);}
+    if(pendingAccountReturnView){const target=pendingAccountReturnView;pendingAccountReturnView='';go(target);if(target==='expanded')renderExpandedTracker();}
     await resumePendingAccountAction();
   }catch(error){console.error('Sign in:',error);msg('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.')}
   finally{button.disabled=false;button.textContent='تسجيل الدخول'}
