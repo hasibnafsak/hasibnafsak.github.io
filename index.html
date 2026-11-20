@@ -135,6 +135,15 @@ header{position:relative;padding-top:76px!important}
 <main>
 <section id="home" class="view active">
 <div hidden aria-hidden="true"><span id="welcomeVerse"></span><span id="verseSource"></span><span id="welcomePhrase"></span><span id="dailyPercent"></span><span id="dailyProgress"></span><span id="weightPrayer"></span><span id="weightQuran"></span><span id="weightDhikr"></span><span id="weightTasbeeh"></span><span id="weightReflection"></span><span id="legacy_quranGoal"></span><span id="legacy_quranGoalCustom"></span><span id="legacy_quranGoalProgress"></span></div>
+<div class="panel" id="pathChoicePanel">
+  <div class="row between"><h2 style="margin:0">اختر مسارك</h2><span class="pill" id="currentPathLabel">المسار المبسّط</span></div>
+  <p class="muted">اختر مستوى المتابعة الذي يناسبك. تقدر تغيّره في أي وقت.</p>
+  <div class="grid">
+    <button type="button" id="simplePathButton" class="gold" onclick="setUserPath('simple')">🕌 المسار المبسّط</button>
+    <button type="button" id="expandedPathButton" class="secondary" onclick="setUserPath('expanded')">📚 المسار الموسّع</button>
+  </div>
+  <p class="muted" id="pathChoiceHint" style="margin-bottom:0">المسار المبسّط يعرض الأدوات الأساسية بدون تفاصيل إضافية.</p>
+</div>
 <div class="hero">
   <div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div>
   <h2>ابدأ يومك بخطوة 🌿</h2>
@@ -244,7 +253,27 @@ header{position:relative;padding-top:76px!important}
     <button type="button" class="worship-card" onclick="go('adhkar')"><span style="font-size:27px">🌿</span><strong>الأذكار</strong><small>أذكار الصباح والمساء وغيرها</small></button>
     <button type="button" class="worship-card" onclick="go('tasbeeh')"><span style="font-size:27px">📿</span><strong>المسبحة</strong><small>تسبيح إلكتروني ويدوي</small></button>
   </div>
+  <div id="expandedPathEntry" class="panel" style="display:none;margin-top:14px;background:#f8f3e7">
+    <h3>📚 سجل العبادات الموسّع</h3>
+    <p class="muted">متابعة يومية تفصيلية للعبادات والمعايير الواردة في ملفي فقه الصلاة.</p>
+    <button type="button" class="gold" onclick="go('expanded')">فتح سجل الإنجاز الموسّع</button>
+  </div>
 </div>
+</section>
+<section id="expanded" class="view">
+  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
+  <div class="panel">
+    <div class="challenge-kicker">📚 المسار الموسّع</div>
+    <h2 style="margin-top:7px">سجل إنجازاتي التعبدي</h2>
+    <p class="muted">علّم ما أنجزته اليوم. هذا سجل متابعة ذاتي، وليس مقياسًا لقبول العبادة.</p>
+    <div class="tile"><div class="muted">إنجازات اليوم</div><strong id="expandedDoneCount">0</strong><div class="muted" id="expandedScore">0 نقطة متابعة</div></div>
+    <div id="expandedTrackerList"></div>
+    <div class="row between" style="margin-top:12px">
+      <button type="button" class="secondary" onclick="resetExpandedToday()">إعادة ضبط سجل اليوم</button>
+      <button type="button" class="gold" onclick="saveExpandedToday()">حفظ إنجازات اليوم</button>
+    </div>
+    <p id="expandedSaveStatus" class="muted" role="status"></p>
+  </div>
 </section>
 <section id="quran" class="view"><div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
 <div class="panel"><h2>المصحف الشريف</h2><div class="notice">النص بالرسم العثماني من خدمة القرآن الكريم. المصدر: <a href="https://tanzil.net" target="_blank" rel="noopener">مشروع تنزيل Tanzil</a>، وتُستخدم خدمة AlQuran Cloud لجلب النص. عند فتح السورة تُحفظ نسخة منها على جهازك.</div>
@@ -536,7 +565,7 @@ let pendingAccountNotice='';
 let pendingAccountReturnView='';
 let pendingAccountAction='';
 let lastCreatedFriendCode='';
-function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
+function go(id){const target=$(id);if(!target)return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));const parentTab=['quran','adhkar','tasbeeh','expanded'].includes(id)?'worship':(id==='leaderboard'?'stats':(id==='guide'?'account':id));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===parentTab));window.scrollTo(0,0);if(id==='stats'||id==='leaderboard')renderStats();if(id==='quran')initQuran();if(id==='leaderboard')renderLeaderboard();if(id==='quiz'){renderQuiz();loadFriends();}if(id==='account')updateAccount()}
 function requireAccountForFeature(feature,returnView=''){pendingAccountNotice='🔐 '+feature+'؛ سجّل الدخول أو أنشئ حسابًا للمتابعة.';pendingAccountReturnView=returnView;go('account');updateAccount();setTimeout(()=>{const area=$('loggedOutArea');if(area)area.scrollIntoView({behavior:'smooth',block:'center'});},120);return false;}
 // Direct click handlers for each navigation button (more reliable on iOS Safari).
 document.querySelectorAll('#tabs button[data-view]').forEach(b=>{
@@ -549,6 +578,73 @@ const verses=[['إِنَّ مَعَ الْعُسْرِ يُسْرًا','سورة
 const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textContent=v[0];$('verseSource').textContent=v[1];
 $('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
+
+const expandedCriteria = [
+  {group:'معايير فقه الصلاة (1)',items:[
+    ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
+    ['fardMosque','أداء الصلوات المفروضة جماعة في المسجد',10],
+    ['rawatib','السنن الرواتب (12 ركعة)',12],
+    ['duha','صلاة الضحى',2],['witr','صلاة الوتر',2],
+    ['afterPrayer','أذكار ما بعد الصلاة',5],['adhan','الأذان والإقامة',10],
+    ['imamah','الإمامة',10],['khutbah','الخطبة',20]
+  ]},
+  {group:'معايير فقه الصلاة (2)',items:[
+    ['jumuahEarly','التبكير لصلاة الجمعة',3],['kahf','قراءة سورة الكهف يوم الجمعة',2],
+    ['jumuahDhikr','أذكار ما بعد صلاة الجمعة',7],['shaf','صلاة الشفع',4],
+    ['tarawih','صلاة التراويح',12],['quranRamadan','ختم القرآن في رمضان',20],
+    ['eidClothes','لبس أجمل الثياب للعيد',3],['eidEarly','التبكير لصلاة العيد',2],
+    ['eidPrayer','صلاة العيد',5],['visitSick','عيادة مريض',5],
+    ['condolence','تعزية أهل الميت',10],['washDead','المساهمة في غسل الميت',20],
+    ['funeralPrayer','المساهمة في صلاة الجنازة',20],['burial','حضور دفن الجنازة',10]
+  ]}
+];
+function selectedPath(){return db.settings?.userPath==='expanded'?'expanded':'simple'}
+function setUserPath(path){
+  if(!db.settings)db.settings={};
+  db.settings.userPath=path==='expanded'?'expanded':'simple';
+  persist();renderPathChoice();
+  const hint=$('pathChoiceHint');
+  if(hint)hint.textContent=path==='expanded'?'تم اختيار المسار الموسّع. ستجد سجل العبادات التفصيلي في قسم العبادات.':'تم اختيار المسار المبسّط. ستبقى الأدوات الأساسية كما هي.';
+  if(path==='expanded')renderExpandedTracker();
+}
+function renderPathChoice(){
+  const path=selectedPath(),label=$('currentPathLabel'),simple=$('simplePathButton'),expanded=$('expandedPathButton'),entry=$('expandedPathEntry');
+  if(label)label.textContent=path==='expanded'?'المسار الموسّع':'المسار المبسّط';
+  if(simple)simple.className=path==='simple'?'gold':'secondary';
+  if(expanded)expanded.className=path==='expanded'?'gold':'secondary';
+  if(entry)entry.style.display=path==='expanded'?'block':'none';
+}
+function expandedDay(){
+  if(!db.expandedDays)db.expandedDays={};
+  if(!db.expandedDays[todayKey])db.expandedDays[todayKey]={};
+  return db.expandedDays[todayKey];
+}
+function renderExpandedTracker(){
+  const root=$('expandedTrackerList');if(!root)return;
+  const record=expandedDay();let html='';
+  expandedCriteria.forEach(group=>{
+    html+='<div class="panel" style="margin-top:12px"><h3>'+group.group+'</h3>';
+    group.items.forEach(([key,label,score])=>{
+      html+='<label class="prayer" style="justify-content:flex-start"><input class="check" type="checkbox" data-expanded-key="'+key+'" '+(record[key]?'checked':'')+' onchange="updateExpandedItem(this)" style="width:20px;margin:0"><span style="flex:1">'+label+'</span><span class="pill">'+score+'</span></label>';
+    });
+    html+='</div>';
+  });
+  root.innerHTML=html;updateExpandedSummary();
+}
+function updateExpandedItem(input){expandedDay()[input.dataset.expandedKey]=input.checked;persist();updateExpandedSummary()}
+function updateExpandedSummary(){
+  const record=expandedDay();let total=0,done=0;
+  expandedCriteria.forEach(g=>g.items.forEach(([key,label,score])=>{if(record[key]){done++;total+=score}}));
+  if($('expandedDoneCount'))$('expandedDoneCount').textContent=done+' من '+expandedCriteria.reduce((n,g)=>n+g.items.length,0);
+  if($('expandedScore'))$('expandedScore').textContent=total+' نقطة متابعة';
+}
+function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل إنجازات اليوم على جهازك.';syncUserDataSilently()}
+function resetExpandedToday(){
+  if(!confirm('هل تريد مسح سجل المسار الموسّع لهذا اليوم فقط؟'))return;
+  if(db.expandedDays)delete db.expandedDays[todayKey];
+  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم.';
+}
+
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
 function save(){persist();try{renderAll()}catch(error){console.error('واجهة العرض تعثرت بعد الحفظ؛ البيانات محفوظة محليًا:',error)}if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
 async function syncUserDataSilently(){try{if(!sb)return;const user=await currentUser();if(!user)return;const {error}=await sb.from('user_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Automatic account sync:',error.message)}catch(error){console.warn('Automatic account sync failed:',error)}}
@@ -1934,7 +2030,7 @@ function importData(e){
   };
   r.onerror=()=>alert('تعذر قراءة الملف.');r.readAsText(f);
 }
-window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
+window.__hasibSignedIn=false;setAuthMode('login');renderPathChoice();renderExpandedTracker();initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
 function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
 bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
