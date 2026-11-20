@@ -134,7 +134,7 @@ header{position:relative;padding-top:76px!important}
 </header>
 <main>
 <section id="home" class="view active">
-<div hidden aria-hidden="true"><span id="welcomeVerse"></span><span id="verseSource"></span><span id="welcomePhrase"></span><span id="dailyPercent"></span><span id="dailyProgress"></span><span id="weightPrayer"></span><span id="weightQuran"></span><span id="weightDhikr"></span><span id="weightTasbeeh"></span><span id="weightReflection"></span><span id="quranGoal"></span><span id="quranGoalCustom"></span><span id="quranGoalProgress"></span></div>
+<div hidden aria-hidden="true"><span id="welcomeVerse"></span><span id="verseSource"></span><span id="welcomePhrase"></span><span id="dailyPercent"></span><span id="dailyProgress"></span><span id="weightPrayer"></span><span id="weightQuran"></span><span id="weightDhikr"></span><span id="weightTasbeeh"></span><span id="weightReflection"></span><span id="legacy_quranGoal"></span><span id="legacy_quranGoalCustom"></span><span id="legacy_quranGoalProgress"></span></div>
 <div class="hero">
   <div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div>
   <h2>ابدأ يومك بخطوة 🌿</h2>
@@ -219,7 +219,7 @@ header{position:relative;padding-top:76px!important}
   <h2>🧭 اتجاه القبلة</h2>
   <p class="muted">حدد موقعك لمعرفة اتجاه الكعبة المشرفة، ثم وجّه الهاتف حسب البوصلة.</p>
   <div class="qibla-compass" aria-label="بوصلة اتجاه القبلة">
-    <div id="qiblaNeedle" class="qibla-needle">➤</div>
+    <div id="qiblaNeedle" class="qibla-needle">↑</div>
     <div class="qibla-kaaba">🕋</div>
   </div>
   <div class="tile">
@@ -529,7 +529,9 @@ async function shareApp(){
 function safeLoad(){try{const v=JSON.parse(localStorage.getItem('hasibNafsakData')||'null');return v&&typeof v==='object'?v:null}catch(e){console.warn('Local data could not be read',e);return null}}
 const blank=()=>({days:{},goals:[],quranTotal:0,currentPage:1,tasbeeh:0,phrase:'سبحان الله',points:0,answers:{},reflections:{}});
 let db=Object.assign(blank(),safeLoad()||{});
-const todayKey=(()=>{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v={};parts.forEach(x=>v[x.type]=x.value);return v.year+'-'+v.month+'-'+v.day})();
+function getSaudiTodayKey(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Riyadh',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v={};parts.forEach(x=>v[x.type]=x.value);return v.year+'-'+v.month+'-'+v.day}
+let todayKey=getSaudiTodayKey();
+function refreshSaudiDay(){const fresh=getSaudiTodayKey();if(fresh!==todayKey){todayKey=fresh;ensureDailyChallenge?.();renderAll();}}
 function day(key=todayKey){if(!db.days[key])db.days[key]={prayers:{},pages:0,adhkar:{}};return db.days[key]}
 let pendingAccountNotice='';
 let pendingAccountReturnView='';
@@ -549,7 +551,7 @@ const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textCo
 $('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
-function save(){persist();renderAll();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
+function save(){persist();try{renderAll()}catch(error){console.error('واجهة العرض تعثرت بعد الحفظ؛ البيانات محفوظة محليًا:',error)}if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
 async function syncUserDataSilently(){try{if(!sb)return;const user=await currentUser();if(!user)return;const {error}=await sb.from('user_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Automatic account sync:',error.message)}catch(error){console.warn('Automatic account sync failed:',error)}}
 
 const prayerCityNames={Dammam:'الدمام','Al Khobar':'الخبر',Dhahran:'الظهران',Jubail:'الجبيل',Hofuf:'الهفوف والأحساء','Hafar Al Batin':'حفر الباطن',Riyadh:'الرياض','Al Kharj':'الخرج',"Al Majma'ah":'المجمعة','Wadi Al Dawasir':'وادي الدواسر',Makkah:'مكة المكرمة',Jeddah:'جدة',Taif:'الطائف',Rabigh:'رابغ',Madinah:'المدينة المنورة',Yanbu:'ينبع',Tabuk:'تبوك',Hail:'حائل',Buraydah:'بريدة',Abha:'أبها','Khamis Mushait':'خميس مشيط',Jazan:'جازان',Najran:'نجران',Arar:'عرعر',Sakaka:'سكاكا'};
@@ -727,14 +729,24 @@ function renderPrayers(){
     return `<div class="prayer" style="display:block"><div class="row between"><label><input class="check" type="checkbox" ${record.done?'checked':''} onchange="markPrayer('${p}',this.checked)"> ${p}</label><span class="pill">${record.done?award+' نقاط':'لم تُسجّل بعد'}</span></div><div class="row" style="margin-top:6px"><select style="flex:1;margin:0" aria-label="مكان الصلاة ${p}" onchange="setPlace('${p}',this.value)"><option value="">مكان الصلاة</option><option value="المسجد" ${record.place==='المسجد'?'selected':''}>المسجد</option><option value="البيت" ${record.place==='البيت'?'selected':''}>البيت</option><option value="العمل" ${record.place==='العمل'?'selected':''}>العمل</option><option value="أخرى" ${record.place==='أخرى'?'selected':''}>مكان آخر</option></select><select style="flex:1;margin:0" aria-label="طريقة أداء صلاة ${p}" onchange="setPrayerMode('${p}',this.value)"><option value="">طريقة الصلاة</option><option value="group" ${['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(record.mode||'').trim().toLowerCase())?'selected':''}>جماعة</option><option value="alone" ${record.mode==='alone'?'selected':''}>منفردًا</option></select></div></div>`;
   }).join('');
   const n=prayers.filter(p=>d.prayers[p]?.done).length,pts=prayerPointsForDay(d);
-  $('prayerProgress').style.width=(n*20)+'%';$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;$('prayerStat').textContent=n+' / 5';$('prayerPoints').textContent=pts+' / 50';
+  if($('prayerProgress'))$('prayerProgress').style.width=(n*20)+'%';
+  if($('prayerProgressText'))$('prayerProgressText').textContent=`أنجزت ${n} من 5 صلوات`;
+  if($('prayerStat'))$('prayerStat').textContent=n+' / 5';
+  if($('prayerPoints'))$('prayerPoints').textContent=pts+' / 50';
   const modes=prayers.filter(p=>d.prayers[p]?.done).map(p=>d.prayers[p]?.mode);
-  $('prayerEncouragement').textContent=modes.some(m=>['alone'].includes(m))?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.some(m=>['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(m||'').trim().toLowerCase()))?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.';
+  if($('prayerEncouragement'))$('prayerEncouragement').textContent=modes.some(m=>['alone'].includes(m))?'تقبّل الله صلاتك. النقاط للتشجيع فقط، واحرص على الجماعة متى تيسّر لك.':modes.some(m=>['group','jamaah','jamah','congregation','جماعة','بالجماعة'].includes(String(m||'').trim().toLowerCase()))?'ما شاء الله! الجماعة 5 نقاط، والجماعة في المسجد 10 نقاط إجمالًا.':'سجّل طريقة أداء الصلاة بعد أدائها لاحتساب النقاط التحفيزية.';
 }
 function markPrayer(p,v){const wasDone=!!day().prayers[p]?.done;day().prayers[p]={...(day().prayers[p]||{}),done:v};if(v&&!wasDone)trackAppEvent('prayer_completed');save()}
 function setPlace(p,v){day().prayers[p]={...(day().prayers[p]||{}),place:v};save()}
 function setPrayerMode(p,v){day().prayers[p]={...(day().prayers[p]||{}),mode:v};save()}
-function changePages(n){day().pages=Math.max(0,day().pages+n);db.quranTotal=Math.max(0,(+db.quranTotal||0)+n);if(n>0)for(let i=0;i<n;i++)trackAppEvent('quran_page_added');save()}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
+function changePages(n){
+  const d=day(),before=Math.max(0,Number(d.pages)||0),requested=Number(n)||0;
+  const after=Math.max(0,before+requested),delta=after-before;
+  if(!delta)return;
+  d.pages=after;db.quranTotal=Math.max(0,(Number(db.quranTotal)||0)+delta);
+  if(delta>0)for(let i=0;i<delta;i++)trackAppEvent('quran_page_added');
+  save();
+}function saveCurrentPage(){db.currentPage=Math.min(604,Math.max(1,+$('currentPage').value||1));save()}
 const QURAN_APIS=['https://api.alquran.cloud/v1','https://alquran.api.islamic.network/v1'];
 let surahIndex=[],activeSurah=0,quranIndexLoaded=false,quranLoading=false;
 function cachedSurah(n){try{return JSON.parse(localStorage.getItem('hasibQuranSurah'+n)||'null')}catch(e){return null}}
@@ -766,7 +778,7 @@ function changeSurah(delta){loadSurah(Math.min(114,Math.max(1,activeSurah+delta)
 function saveQuranBookmark(show=true){if(!activeSurah)return;db.quranBookmark={surah:activeSurah,savedAt:new Date().toISOString()};persist();if(show)$('quranStatus').textContent='تم حفظ آخر سورة وصلت إليها.'}
 function resumeQuran(){loadSurah(+(db.quranBookmark?.surah||1))}
 function resetQuran(){if(confirm('بدء ختمة جديدة؟ سيتم تصفير إجمالي صفحات الختمة.')){db.quranTotal=0;db.currentPage=1;save()}}
-function renderQuran(){$('pagesToday').textContent=day().pages;$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`}
+function renderQuran(){if($('pagesToday'))$('pagesToday').textContent=day().pages||0;if($('quranStat'))$('quranStat').textContent=(day().pages||0)+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`}
 const dhikr={
 morning:[['آية الكرسي','1'],['سورة الإخلاص','3'],['سورة الفلق','3'],['سورة الناس','3'],['أصبحنا وأصبح الملك لله','1'],['اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور','1'],['رضيت بالله ربًا وبالإسلام دينًا وبمحمد ﷺ نبيًا','3'],['سبحان الله وبحمده','100'],['اللهم إني أسألك العفو والعافية في الدنيا والآخرة','1']],
 evening:[['آية الكرسي','1'],['سورة الإخلاص','3'],['سورة الفلق','3'],['سورة الناس','3'],['أمسينا وأمسى الملك لله','1'],['اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير','1'],['رضيت بالله ربًا وبالإسلام دينًا وبمحمد ﷺ نبيًا','3'],['سبحان الله وبحمده','100'],['أعوذ بكلمات الله التامات من شر ما خلق','3']],
@@ -789,7 +801,7 @@ const dhikrFullText={
 'evening:2':'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ',
 'evening:3':'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ'
 };
-function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);$('dhikrTitle').textContent=dhikrNames[dhikrType];$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;$('dhikrProgress').style.width=(completed/list.length*100)+'%';$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} style="flex:1;min-height:48px" onclick="incrementDhikr(${i})">${done?'اكتمل الذكر ✓':`اضغط بعد القراءة (${c}/${x[1]})`}</button><button class="secondary" onclick="resetDhikrItem(${i})">إعادة</button></div></div>`}).join('');$('dhikrStat').textContent=countDhikrToday()}
+function renderDhikr(){const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};const counts=d.adhkar[dhikrType];const list=dhikr[dhikrType];const completed=list.filter((x,i)=>(+counts[i]||0)>=+x[1]).length;const pts=completed*2+(completed===list.length?5:0);if($('dhikrTitle'))$('dhikrTitle').textContent=dhikrNames[dhikrType];if($('dhikrScore'))$('dhikrScore').textContent=pts+' نقطة • '+completed+'/'+list.length;if($('dhikrProgress'))$('dhikrProgress').style.width=(completed/list.length*100)+'%';if($('dhikrItems'))$('dhikrItems').innerHTML=list.map((x,i)=>{const c=Math.min(+x[1],+counts[i]||0),done=c>=+x[1];const full=dhikrFullText[dhikrType+':'+i]||x[0];return `<div class="dhikr-card"><div class="dhikr-text">${full}</div><div class="row between" style="margin-top:9px"><span class="muted">العدد المطلوب: ${x[1]}${+x[1]>1?' مرات':' مرة'}</span><span class="dhikr-count">${done?'✓ تمت القراءة':'لم تتم القراءة'}</span></div><div class="dhikr-actions"><button ${done?'disabled':''} style="flex:1;min-height:48px" onclick="incrementDhikr(${i})">${done?'اكتمل الذكر ✓':`اضغط بعد القراءة (${c}/${x[1]})`}</button><button class="secondary" onclick="resetDhikrItem(${i})">إعادة</button></div></div>`}).join('');if($('dhikrStat'))$('dhikrStat').textContent=countDhikrToday()}
 function incrementDhikr(i){
   const d=day();d.adhkar??={};d.adhkar[dhikrType]??={};
   const target=+dhikr[dhikrType][i][1],before=+d.adhkar[dhikrType][i]||0;
@@ -799,7 +811,14 @@ function incrementDhikr(i){
   save();
 }
 function resetDhikrItem(i){day().adhkar[dhikrType]??={};day().adhkar[dhikrType][i]=0;save()}
-function countDhikrToday(){return Object.values(day().adhkar||{}).reduce((a,o)=>a+Object.values(o||{}).filter(v=>+v>0).length,0)}
+function countDhikrToday(){
+  const d=day();let total=0;
+  for(const [key,counts] of Object.entries(d.adhkar||{})){
+    const list=dhikr[key]||[];
+    list.forEach((item,i)=>{if((Number(counts?.[i])||0)>=Number(item[1]))total++;});
+  }
+  return total;
+}
 function adhkarPointsForDay(d){let total=0;for(const key of Object.keys(d.adhkar||{})){const list=dhikr[key]||[];let completed=0;list.forEach((x,i)=>{if((+d.adhkar[key][i]||0)>=+x[1])completed++});total+=completed*2;if(list.length&&completed===list.length)total+=5}return total}
 
 
@@ -1053,7 +1072,19 @@ function totalPoints(){let total=0;for(const [key,d] of Object.entries(db.days||
 function todayPoints(){return pointsForDay(day(),todayKey)}
 function renderDashboard(){const d=day(),goal=Math.max(1,+d.quranGoal||5);const prayer=prayers.filter(p=>d.prayers?.[p]?.done).length/5;const quran=Math.min(1,(+d.pages||0)/goal);const allDhikr=Object.keys(dhikr).reduce((a,k)=>a+dhikr[k].length,0);let doneDhikr=0;Object.keys(dhikr).forEach(k=>dhikr[k].forEach((x,i)=>{if((+d.adhkar?.[k]?.[i]||0)>=+x[1])doneDhikr++}));const dh=doneDhikr/allDhikr;const tas=Math.min(1,(+d.tasbeeh||0)/100);const ref=d.challengeDone?1:0;const vals={prayer:prayer*30,quran:quran*25,dhikr:dh*20,tasbeeh:tas*10,reflection:ref*15};const total=Object.values(vals).reduce((a,b)=>a+b,0);$('dailyPercent').textContent=Math.round(total)+'%';$('dailyProgress').style.width=total+'%';$('weightPrayer').textContent=Math.round(vals.prayer)+' / 30';$('weightQuran').textContent=Math.round(vals.quran)+' / 25';$('weightDhikr').textContent=Math.round(vals.dhikr)+' / 20';$('weightTasbeeh').textContent=Math.round(vals.tasbeeh)+' / 10';$('weightReflection').textContent=Math.round(vals.reflection)+' / 15';if($('sTodayPoints'))$('sTodayPoints').textContent=todayPoints();if($('sTotalPoints'))$('sTotalPoints').textContent=totalPoints();if($('quranGoal')){$('quranGoal').value=[3,5,10,20].includes(goal)?String(goal):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(goal)?'none':'block';$('quranGoalCustom').value=goal}if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${d.pages||0} من ${goal} صفحة اليوم.`}
 
-function renderAll(){renderRealTasbeeh();renderDailyChallenge();renderPrayers();renderQuran();renderDhikr();$('tasbeehCount').textContent=day().tasbeeh||0;$('tasbeehStat').textContent=day().tasbeeh||0;$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';renderDailyChallenge();$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';$('quranStat').textContent=day().pages+' صفحة';const goal=Math.max(1,+day().quranGoal||5);if($('quranGoalProgress'))$('quranGoalProgress').textContent=`أنجزت ${day().pages||0} من ${goal} صفحة اليوم.`;$('dhikrStat').textContent=countDhikrToday();renderQuiz();renderStats();renderDashboard()}
+function renderAll(){
+  refreshSaudiDay();
+  renderRealTasbeeh();renderDailyChallenge();renderPrayers();renderQuran();renderDhikr();
+  if($('tasbeehCount'))$('tasbeehCount').textContent=day().tasbeeh||0;
+  if($('tasbeehStat'))$('tasbeehStat').textContent=day().tasbeeh||0;
+  if($('tasbeehPhrase'))$('tasbeehPhrase').textContent=db.phrase||'سبحان الله';
+  if($('goals'))$('goals').innerHTML=(db.goals||[]).map((g,i)=>`<div class="prayer"><label><input class="check" type="checkbox" ${g.done?'checked':''} onchange="toggleGoal(${i},this.checked)"> ${String(g.text).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</label><button class="secondary" onclick="removeGoal(${i})">حذف</button></div>`).join('');
+  if($('prayerStat'))$('prayerStat').textContent=prayers.filter(p=>day().prayers[p]?.done).length+' / 5';
+  if($('quranStat'))$('quranStat').textContent=(day().pages||0)+' صفحة';
+  if($('dhikrStat'))$('dhikrStat').textContent=countDhikrToday();
+  renderQuiz();renderStats();renderDashboard();
+}
+
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
 
 // ===== إحصائيات حاسب نفسك =====
@@ -1523,7 +1554,7 @@ function translateTextNode(node,en){
   if(!en){node.nodeValue=original;return;}
   let result=original;
   for(const key of Object.keys(translations).sort((a,b)=>b.length-a.length)){
-    if(result.includes(key))result=result.split(key).join(translations[key]);
+    if(result.trim()===key)result=translations[key];
   }
   node.nodeValue=result;
 }
@@ -1788,7 +1819,6 @@ async function finishAccountLogin(user){
 function clearPrivateViewAfterSignOut(){
   window.__hasibSignedIn=false;
   db=blank();
-  try{localStorage.removeItem('hasibNafsakData')}catch(e){}
   renderAll();
   renderStats();
 }
@@ -1805,16 +1835,15 @@ async function signOut(){
 async function updateAccount(userOverride=null){
   const u=userOverride||await currentUser(),loggedIn=!!u;
   window.__hasibSignedIn=loggedIn;
-  $('accountStatus').style.display=pendingAccountNotice&&!loggedIn?'block':'none';
-  if(pendingAccountNotice&&!loggedIn)$('accountStatus').textContent=pendingAccountNotice;
+  if($('accountStatus')){$('accountStatus').style.display=pendingAccountNotice&&!loggedIn?'block':'none';if(pendingAccountNotice&&!loggedIn)$('accountStatus').textContent=pendingAccountNotice;}
   if(loggedIn)pendingAccountNotice='';
-  $('loggedOutArea').style.display=loggedIn?'none':'block';
-  $('loggedInArea').style.display=loggedIn?'block':'none';
+  if($('loggedOutArea'))$('loggedOutArea').style.display=loggedIn?'none':'block';
+  if($('loggedInArea'))$('loggedInArea').style.display=loggedIn?'block':'none';
   if(loggedIn&&$('accountStatus')){
     $('accountStatus').style.display='block';
     $('accountStatus').textContent='مرحبًا بعودتك، '+(u.user_metadata?.nickname||u.user_metadata?.full_name||u.email||'');
   }
-  $('syncButton').style.display=loggedIn?'inline-flex':'none';
+  if($('syncButton'))$('syncButton').style.display=loggedIn?'inline-flex':'none';
   if($('headerProfile'))$('headerProfile').style.display='flex';
   if($('headerAccountButton'))$('headerAccountButton').style.display=loggedIn?'inline-flex':'none';
   if(loggedIn){
@@ -1828,17 +1857,17 @@ async function updateAccount(userOverride=null){
       }catch(e){console.warn('Could not load saved profile name:',e)}
     }
     const accountLabel=savedName || u.email?.split('@')[0] || 'حسابي';
-    $('headerNickname').textContent=accountLabel;
-    $('nicknameDisplay').textContent=accountLabel;
-    $('profileNickname').value=accountLabel;
+    if($('headerNickname'))$('headerNickname').textContent=accountLabel;
+    if($('nicknameDisplay'))$('nicknameDisplay').textContent=accountLabel;
+    if($('profileNickname'))$('profileNickname').value=accountLabel;
     paintAvatar(u.user_metadata?.avatar_data||'');
     if($('profileEditArea')&&$('editProfileButton')){
       $('profileEditArea').style.display='none';
       $('editProfileButton').style.display='inline-flex';
     }
-    $('nicknameEditArea').style.display='none';
+    if($('nicknameEditArea'))$('nicknameEditArea').style.display='none';
   }else{
-    $('headerNickname').textContent='حسابي';
+    if($('headerNickname'))$('headerNickname').textContent='حسابي';
     paintAvatar('');
   }
   if(typeof renderStats==='function')renderStats();
@@ -1850,11 +1879,26 @@ function exportData(){
   a.href=url;a.download='hasib-nafsak-backup.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{db=Object.assign(blank(),JSON.parse(r.result));save();alert('تم استيراد النسخة')}catch(e){alert('الملف غير صالح')}};r.readAsText(f)}
+function importData(e){
+  const f=e.target.files?.[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const parsed=JSON.parse(r.result);
+      const candidate=(parsed&&parsed.app==='hasib-nafsak'&&parsed.version===1&&parsed.data&&typeof parsed.data==='object')?parsed.data:parsed;
+      if(!candidate||typeof candidate!=='object'||Array.isArray(candidate)||!candidate.days||typeof candidate.days!=='object')throw new Error('صيغة النسخة غير مدعومة');
+      const next=Object.assign(blank(),candidate);
+      if(!next.days||typeof next.days!=='object'||!Array.isArray(next.goals))throw new Error('بيانات النسخة غير مكتملة');
+      db=next;save();alert('تم استيراد النسخة بنجاح');
+    }catch(err){console.error('Backup import failed:',err);alert('الملف غير صالح أو لا يحتوي نسخة متوافقة. لم يتم تغيير بياناتك الحالية.');}
+    finally{e.target.value='';}
+  };
+  r.onerror=()=>alert('تعذر قراءة الملف.');r.readAsText(f);
+}
 window.__hasibSignedIn=false;setAuthMode('login');initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
 function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
-bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
+bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
