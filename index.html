@@ -112,7 +112,14 @@ header{position:relative;padding-top:76px!important}
 <div class="splash-mark">☾ ✦</div><h1>حاسب نفسك</h1><div class="tag">حاسب نفسك قبل أن تحاسب</div>
 <div class="splash-phrase" id="welcomePhrase"></div>
 <p style="color:#e8dfc8;line-height:1.9">أعن نفسك على طاعة الله، واجعل لكل يوم وقفة، ولكل عمل أثرًا.</p>
-<button type="button" onclick="enterApp()">ابدأ رحلتك</button>
+<div style="margin-top:22px">
+  <h2 style="color:#f3dfad;margin:0 0 8px">اختر مسارك</h2>
+  <p style="color:#e8dfc8;font-size:13px;line-height:1.8;margin:0 0 14px">اختر الطريقة التي تناسبك للمتابعة، وتقدر تغيّر اختيارك لاحقًا.</p>
+  <div style="display:grid;grid-template-columns:1fr;gap:10px">
+    <button type="button" onclick="enterApp('simple')">🕌 المسار المبسّط</button>
+    <button type="button" class="secondary" style="background:#f5edda;color:#174334" onclick="enterApp('expanded')">📚 المسار الموسّع</button>
+  </div>
+</div>
 </div></div>
 
 <header>
@@ -135,15 +142,6 @@ header{position:relative;padding-top:76px!important}
 <main>
 <section id="home" class="view active">
 <div hidden aria-hidden="true"><span id="welcomeVerse"></span><span id="verseSource"></span><span id="welcomePhrase"></span><span id="dailyPercent"></span><span id="dailyProgress"></span><span id="weightPrayer"></span><span id="weightQuran"></span><span id="weightDhikr"></span><span id="weightTasbeeh"></span><span id="weightReflection"></span><span id="legacy_quranGoal"></span><span id="legacy_quranGoalCustom"></span><span id="legacy_quranGoalProgress"></span></div>
-<div class="panel" id="pathChoicePanel">
-  <div class="row between"><h2 style="margin:0">اختر مسارك</h2><span class="pill" id="currentPathLabel">المسار المبسّط</span></div>
-  <p class="muted">اختر مستوى المتابعة الذي يناسبك. تقدر تغيّره في أي وقت.</p>
-  <div class="grid">
-    <button type="button" id="simplePathButton" class="gold" onclick="setUserPath('simple')">🕌 المسار المبسّط</button>
-    <button type="button" id="expandedPathButton" class="secondary" onclick="setUserPath('expanded')">📚 المسار الموسّع</button>
-  </div>
-  <p class="muted" id="pathChoiceHint" style="margin-bottom:0">المسار المبسّط يعرض الأدوات الأساسية بدون تفاصيل إضافية.</p>
-</div>
 <div class="hero">
   <div class="pill" style="background:#ffffff22;color:#fff">رحلتك الإيمانية</div>
   <h2>ابدأ يومك بخطوة 🌿</h2>
@@ -253,20 +251,20 @@ header{position:relative;padding-top:76px!important}
     <button type="button" class="worship-card" onclick="go('adhkar')"><span style="font-size:27px">🌿</span><strong>الأذكار</strong><small>أذكار الصباح والمساء وغيرها</small></button>
     <button type="button" class="worship-card" onclick="go('tasbeeh')"><span style="font-size:27px">📿</span><strong>المسبحة</strong><small>تسبيح إلكتروني ويدوي</small></button>
   </div>
-  <div id="expandedPathEntry" class="panel" style="display:none;margin-top:14px;background:#f8f3e7">
-    <h3>📚 سجل العبادات الموسّع</h3>
-    <p class="muted">متابعة يومية تفصيلية للعبادات والمعايير الواردة في ملفي فقه الصلاة.</p>
-    <button type="button" class="gold" onclick="go('expanded')">فتح سجل الإنجاز الموسّع</button>
-  </div>
 </div>
 </section>
 <section id="expanded" class="view">
-  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('worship')">← رجوع إلى العبادات</button></div>
+  <div class="row" style="margin-bottom:10px"><button type="button" class="secondary" onclick="go('home')">← رجوع</button></div>
   <div class="panel">
     <div class="challenge-kicker">📚 المسار الموسّع</div>
     <h2 style="margin-top:7px">سجل إنجازاتي التعبدي</h2>
     <p class="muted">علّم ما أنجزته اليوم. هذا سجل متابعة ذاتي، وليس مقياسًا لقبول العبادة.</p>
-    <div class="tile"><div class="muted">إنجازات اليوم</div><strong id="expandedDoneCount">0</strong><div class="muted" id="expandedScore">0 نقطة متابعة</div></div>
+    <div class="row" style="gap:8px;margin:12px 0">
+      <button type="button" id="fiqh1Button" class="gold" onclick="setExpandedCourse('fiqh1')">المجموعة الأولى</button>
+      <button type="button" id="fiqh2Button" class="secondary" onclick="setExpandedCourse('fiqh2')">المجموعة الثانية</button>
+    </div>
+    <p class="muted" id="expandedCourseDescription">المجموعة الأولى من معايير المتابعة اليومية.</p>
+    <div class="tile"><div class="muted">إنجازات اليوم في المجموعة المحددة</div><strong id="expandedDoneCount">0</strong><div class="muted" id="expandedScore">0 نقطة</div></div>
     <div id="expandedTrackerList"></div>
     <div class="row between" style="margin-top:12px">
       <button type="button" class="secondary" onclick="resetExpandedToday()">إعادة ضبط سجل اليوم</button>
@@ -579,25 +577,50 @@ const v=verses[Math.floor(Math.random()*verses.length)];$('welcomeVerse').textCo
 $('today').textContent=new Intl.DateTimeFormat('ar-SA',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
 
-const expandedCriteria = [
-  {group:'معايير فقه الصلاة (1)',items:[
-    ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
-    ['fardMosque','أداء الصلوات المفروضة جماعة في المسجد',10],
-    ['rawatib','السنن الرواتب (12 ركعة)',12],
-    ['duha','صلاة الضحى',2],['witr','صلاة الوتر',2],
-    ['afterPrayer','أذكار ما بعد الصلاة',5],['adhan','الأذان والإقامة',10],
-    ['imamah','الإمامة',10],['khutbah','الخطبة',20]
-  ]},
-  {group:'معايير فقه الصلاة (2)',items:[
-    ['jumuahEarly','التبكير لصلاة الجمعة',3],['kahf','قراءة سورة الكهف يوم الجمعة',2],
-    ['jumuahDhikr','أذكار ما بعد صلاة الجمعة',7],['shaf','صلاة الشفع',4],
-    ['tarawih','صلاة التراويح',12],['quranRamadan','ختم القرآن في رمضان',20],
-    ['eidClothes','لبس أجمل الثياب للعيد',3],['eidEarly','التبكير لصلاة العيد',2],
-    ['eidPrayer','صلاة العيد',5],['visitSick','عيادة مريض',5],
-    ['condolence','تعزية أهل الميت',10],['washDead','المساهمة في غسل الميت',20],
-    ['funeralPrayer','المساهمة في صلاة الجنازة',20],['burial','حضور دفن الجنازة',10]
-  ]}
-];
+const expandedCriteriaByCourse = {
+  fiqh1: [
+    {group:'معايير المتابعة الأساسية',items:[
+      ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
+      ['fardMosque','الصلوات المفروضة جماعة في المسجد',10],
+      ['rawatib','السنن الرواتب (12 ركعة)',12],
+      ['duha','صلاة الضحى',2],
+      ['witr','صلاة الوتر',2],
+      ['afterPrayer','أذكار ما بعد الصلاة',5]
+    ]},
+    {group:'معايير المتابعة الإضافية',items:[
+      ['adhan','الأذان والإقامة',10],
+      ['imamah','الإمامة',10],
+      ['khutbah','الخطبة',20]
+    ]}
+  ],
+  fiqh2: [
+    {group:'معايير المتابعة الأساسية',items:[
+      ['takbeer','إدراك تكبيرة الإحرام للصلوات الخمس',5],
+      ['fardMosque','الصلوات المفروضة جماعة في المسجد',10],
+      ['rawatib','السنن الرواتب (12 ركعة)',12],
+      ['duha','صلاة الضحى',2],
+      ['tarawih','صلاة التراويح',2],
+      ['shafWitr','الشفع والوتر (كل تسليمة أو ما يعادلها بدرجة)',4],
+      ['jumuahPrayer','صلاة الجمعة',5],
+      ['jumuahDhikr','أذكار ما بعد صلاة الجمعة',3],
+      ['jumuahEarly','التبكير لصلاة الجمعة',7],
+      ['kahf','قراءة سورة الكهف يوم الجمعة',2]
+    ]},
+    {group:'معايير المتابعة الإضافية',items:[
+      ['adhan','الأذان والإقامة في المسجد',10],
+      ['imamah','الإمامة',20],
+      ['khutbah','تولي خطبة الجمعة',10],
+      ['visitSick','عيادة مريض',5],
+      ['washDead','المساهمة في غسل الميت',20],
+      ['condolence','تعزية أهل الميت',10],
+      ['funeralPrayer','صلاة الجنازة',10],
+      ['burial','حضور محل الجنازة ودفنها',10]
+    ]}
+  ]
+};
+function selectedExpandedCourse(){return db.settings?.expandedCourse==='fiqh2'?'fiqh2':'fiqh1'}
+function setExpandedCourse(course){if(!db.settings)db.settings={};db.settings.expandedCourse=course==='fiqh2'?'fiqh2':'fiqh1';persist();renderExpandedTracker()}
+function currentExpandedCriteria(){return expandedCriteriaByCourse[selectedExpandedCourse()]}
 function selectedPath(){return db.settings?.userPath==='expanded'?'expanded':'simple'}
 function setUserPath(path){
   if(!db.settings)db.settings={};
@@ -608,41 +631,42 @@ function setUserPath(path){
   if(path==='expanded')renderExpandedTracker();
 }
 function renderPathChoice(){
-  const path=selectedPath(),label=$('currentPathLabel'),simple=$('simplePathButton'),expanded=$('expandedPathButton'),entry=$('expandedPathEntry');
-  if(label)label.textContent=path==='expanded'?'المسار الموسّع':'المسار المبسّط';
-  if(simple)simple.className=path==='simple'?'gold':'secondary';
-  if(expanded)expanded.className=path==='expanded'?'gold':'secondary';
-  if(entry)entry.style.display=path==='expanded'?'block':'none';
+  return selectedPath();
 }
 function expandedDay(){
   if(!db.expandedDays)db.expandedDays={};
+  const course=selectedExpandedCourse();
   if(!db.expandedDays[todayKey])db.expandedDays[todayKey]={};
-  return db.expandedDays[todayKey];
+  if(!db.expandedDays[todayKey][course])db.expandedDays[todayKey][course]={};
+  return db.expandedDays[todayKey][course];
 }
 function renderExpandedTracker(){
   const root=$('expandedTrackerList');if(!root)return;
-  const record=expandedDay();let html='';
-  expandedCriteria.forEach(group=>{
+  const course=selectedExpandedCourse(),criteria=currentExpandedCriteria(),record=expandedDay();let html='';
+  const b1=$('fiqh1Button'),b2=$('fiqh2Button');
+  if(b1)b1.className=course==='fiqh1'?'gold':'secondary';if(b2)b2.className=course==='fiqh2'?'gold':'secondary';
+  const desc=$('expandedCourseDescription');if(desc)desc.textContent=course==='fiqh1'?'المجموعة الأولى من معايير المتابعة اليومية.':'المجموعة الثانية من معايير المتابعة اليومية.';
+  criteria.forEach(group=>{
     html+='<div class="panel" style="margin-top:12px"><h3>'+group.group+'</h3>';
     group.items.forEach(([key,label,score])=>{
-      html+='<label class="prayer" style="justify-content:flex-start"><input class="check" type="checkbox" data-expanded-key="'+key+'" '+(record[key]?'checked':'')+' onchange="updateExpandedItem(this)" style="width:20px;margin:0"><span style="flex:1">'+label+'</span><span class="pill">'+score+'</span></label>';
+      html+='<label class="prayer" style="justify-content:flex-start"><input class="check" type="checkbox" data-expanded-key="'+key+'" '+(record[key]?'checked':'')+' onchange="updateExpandedItem(this)" style="width:20px;margin:0"><span style="flex:1">'+label+'</span><span class="pill">'+score+' درجات</span></label>';
     });
     html+='</div>';
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function updateExpandedItem(input){expandedDay()[input.dataset.expandedKey]=input.checked;persist();updateExpandedSummary()}
+function updateExpandedItem(input){expandedDay()[input.dataset.expandedKey]=input.checked;persist();updateExpandedSummary();syncUserDataSilently()}
 function updateExpandedSummary(){
-  const record=expandedDay();let total=0,done=0;
-  expandedCriteria.forEach(g=>g.items.forEach(([key,label,score])=>{if(record[key]){done++;total+=score}}));
-  if($('expandedDoneCount'))$('expandedDoneCount').textContent=done+' من '+expandedCriteria.reduce((n,g)=>n+g.items.length,0);
+  const record=expandedDay(),criteria=currentExpandedCriteria();let total=0,done=0,count=0;
+  criteria.forEach(g=>g.items.forEach(([key,label,score])=>{count++;if(record[key]){done++;total+=score}}));
+  if($('expandedDoneCount'))$('expandedDoneCount').textContent=done+' من '+count;
   if($('expandedScore'))$('expandedScore').textContent=total+' نقطة متابعة';
 }
-function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل إنجازات اليوم على جهازك.';syncUserDataSilently()}
+function saveExpandedToday(){persist();$('expandedSaveStatus').textContent='تم حفظ سجل اليوم للمقرر المحدد.';syncUserDataSilently()}
 function resetExpandedToday(){
-  if(!confirm('هل تريد مسح سجل المسار الموسّع لهذا اليوم فقط؟'))return;
-  if(db.expandedDays)delete db.expandedDays[todayKey];
-  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم.';
+  if(!confirm('هل تريد مسح سجل اليوم للمقرر المحدد فقط؟'))return;
+  const course=selectedExpandedCourse();if(db.expandedDays?.[todayKey])delete db.expandedDays[todayKey][course];
+  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم لهذا المقرر فقط.';
 }
 
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
@@ -1175,7 +1199,7 @@ function renderStats(){
 }
 
 const welcomePhrases=['أعن نفسك على طاعة الله، فكل يوم فرصة جديدة.','لا تنتظر الكمال؛ ابدأ بخطوة صادقة واستعن بالله.','حاسب نفسك برفق، وأصلح ما استطعت، وجدّد نيتك.','ربّ عمل صغير تعظّمه النية، فابدأ اليوم ولا تؤجل الخير.','اجعل بينك وبين الله خبيئة من عمل صالح.','كل صباح صفحة جديدة، فاملأها بما يرضي الله.'];
-function enterApp(){$('welcomeSplash').style.display='none';}
+function enterApp(path='simple'){setUserPath(path);$('welcomeSplash').style.display='none';if(path==='expanded'){go('expanded');renderExpandedTracker()}else{go('home')}}
 function initWelcome(){const previous=localStorage.getItem('hasibWelcomePhrase');let choices=welcomePhrases.filter(x=>x!==previous);const phrase=choices[Math.floor(Math.random()*choices.length)];$('welcomePhrase').textContent='“'+phrase+'”';localStorage.setItem('hasibWelcomePhrase',phrase);}
 function setQuranGoal(v){if(v==='custom'){$('quranGoalCustom').style.display='block';$('quranGoalCustom').focus();return}let n=Math.max(1,Math.min(604,+v||5));day().quranGoal=n;persist();$('quranGoal').value=[3,5,10,20].includes(n)?String(n):'custom';$('quranGoalCustom').style.display=[3,5,10,20].includes(n)?'none':'block';$('quranGoalCustom').value=n;renderDashboard()}
 function setTasbeehMode(mode){if(mode==='manual')renderRealTasbeeh();$('digitalTasbeeh').style.display=mode==='digital'?'block':'none';$('manualTasbeeh').style.display=mode==='manual'?'block':'none';$('digitalMode').classList.toggle('active',mode==='digital');$('digitalMode').classList.toggle('secondary',mode!=='digital');$('manualMode').classList.toggle('active',mode==='manual');$('manualMode').classList.toggle('secondary',mode!=='manual')}
