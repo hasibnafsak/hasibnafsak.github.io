@@ -123,6 +123,15 @@ header{position:relative;padding-top:76px!important}
 .expanded-total{background:linear-gradient(135deg,#f3ead5,#edf3e9);border:1px solid #e1d2ad;border-radius:15px;padding:14px;margin:12px 0;text-align:center}
 @media(max-width:380px){.expanded-prayer-options{gap:4px}.expanded-prayer-option{font-size:11px!important;padding:8px 1px!important}}
 
+
+.reminder-bell{width:38px;height:38px;min-width:38px;padding:0;border-radius:50%;display:inline-grid;place-items:center;background:#ffffffed;color:var(--g);border:1px solid #ffffff88;font-size:17px;box-shadow:0 3px 12px #0002}
+.reminder-bell.is-active{background:#e4f2e8;color:#14583c;border-color:#a8cfb3}
+.reminder-modal{position:fixed;inset:0;z-index:31000;background:#071d18b8;display:flex;align-items:center;justify-content:center;padding:18px}
+.reminder-modal[hidden]{display:none}
+.reminder-card{width:min(430px,100%);max-height:85vh;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:19px;box-shadow:0 20px 70px #0005}
+.reminder-card h2{margin-bottom:8px}
+.reminder-card .row{margin-top:12px}
+
 </style></head>
 <body>
 
@@ -152,8 +161,19 @@ header{position:relative;padding-top:76px!important}
     <span id="headerNickname">حسابي</span>
   </button>
   <button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج" style="display:none">خروج</button>
+  <button type="button" id="reminderBell" class="reminder-bell" onclick="openReminderSettings()" aria-label="إعدادات التذكيرات" title="التذكيرات">🔔</button>
 </div>
 </header>
+<div id="reminderModal" class="reminder-modal" hidden role="dialog" aria-modal="true" aria-labelledby="reminderModalTitle" onclick="if(event.target===this)closeReminderSettings()">
+  <div class="reminder-card">
+    <div class="row between" style="align-items:center;margin-top:0"><h2 id="reminderModalTitle">🔔 تذكيرات حاسب نفسك</h2><button type="button" class="secondary" onclick="closeReminderSettings()" aria-label="إغلاق">✕</button></div>
+    <p class="muted" style="line-height:1.9">فعّل الإشعارات لتصلك تذكيرات العبادات. ستُضبط المواعيد اليومية بعد ربط خدمة الإرسال.</p>
+    <div class="notice">على الآيفون: أضف الموقع إلى الشاشة الرئيسية، ثم افتحه من الأيقونة وفعّل الإشعارات من هنا.</div>
+    <button type="button" id="enablePushBtn" onclick="enablePushNotifications()" style="width:100%;margin-top:12px">تفعيل التذكيرات</button>
+    <p id="pushStatus" class="muted" role="status" aria-live="polite"></p>
+    <button type="button" class="secondary" onclick="closeReminderSettings()" style="width:100%">إغلاق</button>
+  </div>
+</div>
 <main>
 <section id="home" class="view active">
 <div hidden aria-hidden="true"><span id="welcomeVerse"></span><span id="verseSource"></span><span id="welcomePhrase"></span><span id="dailyPercent"></span><span id="dailyProgress"></span><span id="weightPrayer"></span><span id="weightQuran"></span><span id="weightDhikr"></span><span id="weightTasbeeh"></span><span id="weightReflection"></span><span id="legacy_quranGoal"></span><span id="legacy_quranGoalCustom"></span><span id="legacy_quranGoalProgress"></span></div>
@@ -163,14 +183,7 @@ header{position:relative;padding-top:76px!important}
   <p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p>
 </div>
 
-<div class="panel" id="pushNotificationPanel" style="text-align:center">
-  <h3>🔔 تذكيرات حاسب نفسك</h3>
-  <p class="muted">فعّل التذكيرات لتصلك التنبيهات.</p>
-  <button type="button" id="enablePushBtn" onclick="enablePushNotifications()">
-    تفعيل التذكيرات
-  </button>
-  <p id="pushStatus" class="muted"></p>
-</div><div class="panel next-prayer-home" role="button" tabindex="0"
+<div class="panel next-prayer-home" role="button" tabindex="0"
      onclick="go('prayers')"
      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
   <div class="row between" style="align-items:center;gap:12px">
@@ -2166,96 +2179,54 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
+function openReminderSettings(){
+  const modal=$('reminderModal');if(modal)modal.hidden=false;
+  const active=localStorage.getItem('hasibPushEnabled')==='true';
+  if($('enablePushBtn'))$('enablePushBtn').textContent=active?'التذكيرات مفعّلة ✓':'تفعيل التذكيرات';
+  if($('pushStatus')&&!active)$('pushStatus').textContent='';
+}
+function closeReminderSettings(){const modal=$('reminderModal');if(modal)modal.hidden=true}
+function updateReminderBell(active){
+  const bell=$('reminderBell');if(!bell)return;
+  bell.classList.toggle('is-active',!!active);
+  bell.textContent=active?'🔔':'♧';
+  bell.setAttribute('aria-label',active?'التذكيرات مفعّلة':'تفعيل التذكيرات');
+}
+updateReminderBell(localStorage.getItem('hasibPushEnabled')==='true');
+
 async function enablePushNotifications() {
   const btn = $('enablePushBtn');
   const status = $('pushStatus');
-  const panel = $('pushNotificationPanel');
-
   try {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      throw new Error('المتصفح لا يدعم التذكيرات.');
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      const iosHomeScreen = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !('standalone' in navigator && navigator.standalone) && !window.matchMedia('(display-mode: standalone)').matches;
+      throw new Error(iosHomeScreen ? 'على الآيفون: أضف الموقع إلى الشاشة الرئيسية وافتحه من الأيقونة، ثم جرّب التفعيل.' : 'هذا المتصفح لا يتيح إشعارات الويب. جرّب Safari بعد تثبيت الموقع على الآيفون أو Chrome على أندرويد.');
     }
-
     const user = await currentUser();
-    if (!user) {
-      status.textContent = 'سجّل الدخول أولاً.';
-      return;
-    }
-
-    btn.disabled = true;
-    status.textContent = 'جارٍ التفعيل...';
-
+    if (!user) { status.textContent = 'سجّل الدخول أولًا لتفعيل التذكيرات.'; return; }
+    btn.disabled = true;status.textContent = 'جارٍ تفعيل الإشعارات...';
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      throw new Error('لم تسمح بالإشعارات.');
-    }
-
-    // سجّل عامل الخدمة وانتظر حتى يصبح نشطًا قبل إنشاء الاشتراك.
-    await navigator.serviceWorker.register('./sw.js');
+    if (permission !== 'granted') throw new Error('لم يتم السماح بالإشعارات. فعّلها من إعدادات الجهاز ثم حاول مرة أخرى.');
+    await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
     const registration = await navigator.serviceWorker.ready;
-
-    if (!registration || !registration.active) {
-      throw new Error('تعذر تشغيل خدمة الإشعارات. أغلق التطبيق وافتحه ثم حاول مرة أخرى.');
-    }
-
     let subscription = await registration.pushManager.getSubscription();
-
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+      subscription = await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
     }
-
     const data = subscription.toJSON();
-    if (!data.keys?.p256dh || !data.keys?.auth) {
-      throw new Error('تعذر قراءة بيانات الاشتراك. حاول مرة أخرى.');
-    }
-
     const { error } = await sb.from('push_subscriptions').upsert({
-      user_id: user.id,
-      endpoint: data.endpoint,
-      p256dh: data.keys.p256dh,
-      auth: data.keys.auth,
-      enabled: true,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'endpoint' });
-
+      user_id:user.id,endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,enabled:true,updated_at:new Date().toISOString()
+    }, { onConflict:'endpoint' });
     if (error) throw error;
-
-    // احفظ حالة التفعيل وأخفِ البطاقة نهائيًا على هذا الجهاز.
-    localStorage.setItem('hasibPushEnabled', 'true');
-    if (panel) panel.style.display = 'none';
-
+    localStorage.setItem('hasibPushEnabled','true');
+    updateReminderBell(true);
+    btn.textContent = 'التذكيرات مفعّلة ✓';
+    status.textContent = 'تم الاشتراك في الإشعارات بنجاح. مواعيد الإرسال اليومية تحتاج إكمال ربط خدمة الجدولة.';
   } catch (error) {
-    status.textContent = error.message || 'تعذر التفعيل.';
+    status.textContent = error.message || 'تعذر تفعيل التذكيرات.';
     btn.disabled = false;
+  } finally {
+    if(btn)btn.disabled=false;
   }
 }
-
-// إخفاء بطاقة التفعيل إذا سبق الاشتراك بنجاح على هذا الجهاز.
-function restorePushCardState() {
-  const panel = $('pushNotificationPanel');
-  if (!panel) return;
-
-  if (localStorage.getItem('hasibPushEnabled') === 'true') {
-    panel.style.display = 'none';
-    return;
-  }
-
-  if ('serviceWorker' in navigator && 'Notification' in window &&
-      Notification.permission === 'granted') {
-    navigator.serviceWorker.ready
-      .then(registration => registration.pushManager.getSubscription())
-      .then(subscription => {
-        if (subscription) {
-          localStorage.setItem('hasibPushEnabled', 'true');
-          panel.style.display = 'none';
-        }
-      })
-      .catch(error => console.warn('Push subscription check:', error));
-  }
-}
-
-restorePushCardState();
 </script></body></html>
