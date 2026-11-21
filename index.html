@@ -2151,4 +2151,66 @@ if(sb){
     if(data?.session?.user){window.__hasibSignedIn=true;await finishAccountLogin(data.session.user);await updateAccount(data.session.user);loadFriends();renderLeaderboard();loadSupportComments();const city=getSavedPrayerCity();if($('prayerCity'))$('prayerCity').value=city;loadPrayerTimes(false)}else{await updateAccount(null)}
   });
 }
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function enablePushNotifications() {
+  const btn = $('enablePushBtn');
+  const status = $('pushStatus');
+
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      throw new Error('المتصفح لا يدعم التذكيرات.');
+    }
+
+    const user = await currentUser();
+    if (!user) {
+      status.textContent = 'سجّل الدخول أولاً.';
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'جارٍ التفعيل...';
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error('لم تسمح بالإشعارات.');
+    }
+
+    const registration = await navigator.serviceWorker.register('./sw.js');
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const data = subscription.toJSON();
+
+    const { error } = await sb.from('push_subscriptions').upsert({
+      user_id: user.id,
+      endpoint: data.endpoint,
+      p256dh: data.keys.p256dh,
+      auth: data.keys.auth,
+      enabled: true,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'endpoint' });
+
+    if (error) throw error;
+
+    btn.textContent = 'تم تفعيل التذكيرات ✓';
+    status.textContent = 'تم الاشتراك بنجاح 🌿';
+
+  } catch (error) {
+    status.textContent = error.message || 'تعذر التفعيل.';
+    btn.disabled = false;
+  }
+}
 </script></body></html>
