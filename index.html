@@ -163,7 +163,14 @@ header{position:relative;padding-top:76px!important}
   <p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p>
 </div>
 
-<div class="panel next-prayer-home" role="button" tabindex="0"
+<div class="panel" style="text-align:center">
+  <h3>🔔 تذكيرات حاسب نفسك</h3>
+  <p class="muted">فعّل التذكيرات لتصلك التنبيهات.</p>
+  <button type="button" id="enablePushBtn" onclick="enablePushNotifications()">
+    تفعيل التذكيرات
+  </button>
+  <p id="pushStatus" class="muted"></p>
+</div><div class="panel next-prayer-home" role="button" tabindex="0"
      onclick="go('prayers')"
      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('prayers')}">
   <div class="row between" style="align-items:center;gap:12px">
