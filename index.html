@@ -67,7 +67,7 @@ header{position:relative;padding-top:76px!important}
 .language-switch button.active{background:#fff;color:var(--g)}
 .profile-preview{cursor:pointer}
 .profile-preview img{width:76px;height:76px;border-radius:50%;object-fit:cover}
-[dir="ltr"] .header-profile{left:auto;right:12px}
+[dir="ltr"] .header-profile{left:auto;right:12px;align-items:flex-end}
 [dir="ltr"] .language-switch{right:auto;left:14px}
 [dir="ltr"] .header-account{left:auto;right:12px}
 
@@ -86,7 +86,7 @@ header{position:relative;padding-top:76px!important}
 .auth-actions button{flex:1;min-width:0}
 .auth-actions button:disabled{opacity:.6;cursor:wait}
 
-.header-profile{position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:7px;z-index:5}
+.header-profile{position:absolute;left:12px;top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;z-index:5}
 .profile-open{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 9px 5px 7px;font-size:12px;font-weight:800;cursor:pointer;max-width:170px}
 .profile-open img,.profile-open .avatar-fallback{width:31px;height:31px;border-radius:50%;object-fit:cover}
 .profile-open span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -124,8 +124,8 @@ header{position:relative;padding-top:76px!important}
 @media(max-width:380px){.expanded-prayer-options{gap:4px}.expanded-prayer-option{font-size:11px!important;padding:8px 1px!important}}
 
 
-.reminder-bell{width:38px;height:38px;min-width:38px;padding:0;border-radius:50%;display:inline-grid;place-items:center;background:#ffffffed;color:var(--g);border:1px solid #ffffff88;font-size:17px;box-shadow:0 3px 12px #0002}
-.reminder-bell.is-active{background:#e4f2e8;color:#14583c;border-color:#a8cfb3}
+.reminder-trigger{min-height:40px;padding:9px 13px;border-radius:12px;border:1px solid #ffffffa8;background:#ffffffed;color:var(--g);font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 3px 12px #0002;cursor:pointer}
+.reminder-trigger.is-active{background:#e4f2e8;color:#14583c;border-color:#a8cfb3}
 .reminder-modal{position:fixed;inset:0;z-index:31000;background:#071d18b8;display:flex;align-items:center;justify-content:center;padding:18px}
 .reminder-modal[hidden]{display:none}
 .reminder-card{width:min(430px,100%);max-height:85vh;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:19px;box-shadow:0 20px 70px #0005}
@@ -161,14 +161,14 @@ header{position:relative;padding-top:76px!important}
     <span id="headerNickname">حسابي</span>
   </button>
   <button type="button" id="headerAccountButton" class="header-account" onclick="signOut()" aria-label="تسجيل الخروج" style="display:none">خروج</button>
-  <button type="button" id="reminderBell" class="reminder-bell" onclick="openReminderSettings()" aria-label="إعدادات التذكيرات" title="التذكيرات">🔔</button>
+  <button type="button" id="reminderBell" class="reminder-trigger" onclick="openReminderSettings()"><span aria-hidden="true">🔔</span><span>تفعيل التذكيرات</span></button>
 </div>
 </header>
 <div id="reminderModal" class="reminder-modal" hidden role="dialog" aria-modal="true" aria-labelledby="reminderModalTitle" onclick="if(event.target===this)closeReminderSettings()">
   <div class="reminder-card">
-    <div class="row between" style="align-items:center;margin-top:0"><h2 id="reminderModalTitle">🔔 تذكيرات حاسب نفسك</h2><button type="button" class="secondary" onclick="closeReminderSettings()" aria-label="إغلاق">✕</button></div>
-    <p class="muted" style="line-height:1.9">فعّل الإشعارات لتصلك تذكيرات العبادات. ستُضبط المواعيد اليومية بعد ربط خدمة الإرسال.</p>
-    <div class="notice">على الآيفون: أضف الموقع إلى الشاشة الرئيسية، ثم افتحه من الأيقونة وفعّل الإشعارات من هنا.</div>
+    <div class="row between" style="align-items:center;margin-top:0"><h2 id="reminderModalTitle">تفعيل التذكيرات</h2><button type="button" class="secondary" onclick="closeReminderSettings()" aria-label="إغلاق">✕</button></div>
+    <p class="muted" style="line-height:1.9">فعّل الإشعارات لتصلك التذكيرات اليومية ومواقيت الصلاة.</p>
+    <div class="notice">لإضافة أو تشغيل تفعيل التذكيرات: أضف الموقع إلى الشاشة الرئيسية، ثم افتحه من الأيقونة وفعّل الإشعارات من هنا.</div>
     <button type="button" id="enablePushBtn" onclick="enablePushNotifications()" style="width:100%;margin-top:12px">تفعيل التذكيرات</button>
     <p id="pushStatus" class="muted" role="status" aria-live="polite"></p>
     <button type="button" class="secondary" onclick="closeReminderSettings()" style="width:100%">إغلاق</button>
@@ -2189,7 +2189,7 @@ function closeReminderSettings(){const modal=$('reminderModal');if(modal)modal.h
 function updateReminderBell(active){
   const bell=$('reminderBell');if(!bell)return;
   bell.classList.toggle('is-active',!!active);
-  bell.textContent=active?'🔔':'♧';
+  bell.innerHTML='<span aria-hidden="true">🔔</span><span>'+(active?'التذكيرات مفعّلة ✓':'تفعيل التذكيرات')+'</span>'; 
   bell.setAttribute('aria-label',active?'التذكيرات مفعّلة':'تفعيل التذكيرات');
 }
 updateReminderBell(localStorage.getItem('hasibPushEnabled')==='true');
