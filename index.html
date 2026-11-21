@@ -163,7 +163,7 @@ header{position:relative;padding-top:76px!important}
   <p>القليل الدائم خير من الكثير المنقطع. اختر عملًا صالحًا، واستعن بالله، وابدأ من جديد.</p>
 </div>
 
-<div class="panel" style="text-align:center">
+<div class="panel" id="pushNotificationPanel" style="text-align:center">
   <h3>🔔 تذكيرات حاسب نفسك</h3>
   <p class="muted">فعّل التذكيرات لتصلك التنبيهات.</p>
   <button type="button" id="enablePushBtn" onclick="enablePushNotifications()">
@@ -2169,6 +2169,7 @@ function urlBase64ToUint8Array(base64String) {
 async function enablePushNotifications() {
   const btn = $('enablePushBtn');
   const status = $('pushStatus');
+  const panel = $('pushNotificationPanel');
 
   try {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -2189,7 +2190,14 @@ async function enablePushNotifications() {
       throw new Error('لم تسمح بالإشعارات.');
     }
 
-    const registration = await navigator.serviceWorker.register('./sw.js');
+    // سجّل عامل الخدمة وانتظر حتى يصبح نشطًا قبل إنشاء الاشتراك.
+    await navigator.serviceWorker.register('./sw.js');
+    const registration = await navigator.serviceWorker.ready;
+
+    if (!registration || !registration.active) {
+      throw new Error('تعذر تشغيل خدمة الإشعارات. أغلق التطبيق وافتحه ثم حاول مرة أخرى.');
+    }
+
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
@@ -2200,6 +2208,9 @@ async function enablePushNotifications() {
     }
 
     const data = subscription.toJSON();
+    if (!data.keys?.p256dh || !data.keys?.auth) {
+      throw new Error('تعذر قراءة بيانات الاشتراك. حاول مرة أخرى.');
+    }
 
     const { error } = await sb.from('push_subscriptions').upsert({
       user_id: user.id,
@@ -2212,12 +2223,39 @@ async function enablePushNotifications() {
 
     if (error) throw error;
 
-    btn.textContent = 'تم تفعيل التذكيرات ✓';
-    status.textContent = 'تم الاشتراك بنجاح 🌿';
+    // احفظ حالة التفعيل وأخفِ البطاقة نهائيًا على هذا الجهاز.
+    localStorage.setItem('hasibPushEnabled', 'true');
+    if (panel) panel.style.display = 'none';
 
   } catch (error) {
     status.textContent = error.message || 'تعذر التفعيل.';
     btn.disabled = false;
   }
 }
+
+// إخفاء بطاقة التفعيل إذا سبق الاشتراك بنجاح على هذا الجهاز.
+function restorePushCardState() {
+  const panel = $('pushNotificationPanel');
+  if (!panel) return;
+
+  if (localStorage.getItem('hasibPushEnabled') === 'true') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  if ('serviceWorker' in navigator && 'Notification' in window &&
+      Notification.permission === 'granted') {
+    navigator.serviceWorker.ready
+      .then(registration => registration.pushManager.getSubscription())
+      .then(subscription => {
+        if (subscription) {
+          localStorage.setItem('hasibPushEnabled', 'true');
+          panel.style.display = 'none';
+        }
+      })
+      .catch(error => console.warn('Push subscription check:', error));
+  }
+}
+
+restorePushCardState();
 </script></body></html>
