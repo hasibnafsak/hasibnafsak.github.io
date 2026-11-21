@@ -99,3 +99,48 @@ self.addEventListener('fetch', event => {
     })());
   }
 });
+
+self.addEventListener('push', event => {
+  let data = {
+    title: 'حاسب نفسك',
+    body: 'عندك تذكير جديد 🌿',
+    url: 'https://hasibnafsak.github.io'
+  };
+
+  if (event.data) {
+    try {
+      data = { ...data, ...event.data.json() };
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: './icon.svg',
+      badge: './icon.svg',
+      data: { url: data.url }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  const url = event.notification.data?.url ||
+    'https://hasibnafsak.github.io';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(windowClients => {
+        for (const client of windowClients) {
+          if ('focus' in client) {
+            client.navigate(url);
+            return client.focus();
+          }
+        }
+        return clients.openWindow(url);
+      })
+  );
+});
