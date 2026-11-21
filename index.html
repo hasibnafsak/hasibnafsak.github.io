@@ -1305,9 +1305,8 @@ function renderAll(){
   if($('dhikrStat'))$('dhikrStat').textContent=countDhikrToday();
   renderQuiz();renderStats();renderDashboard();
 }
-
+const VAPID_PUBLIC_KEY = 'BNUx5UBHMLAnQ3KESTQUIqd-q_oUyv7Md2WWO3HfLH6LPo9JkvECivC1EvV3NlSVudBjJto3LZk0-gsszv4qOQk';
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
-const VAPID_PUBLIC_KEY = 'BG8uqL33SbGi0iaUSpIp9Yg89oCYMZU2h48oeg8n5U4DhCZRUcFVqcVsGZmAQjzbhQRSC-yrvXS0mbSF6k1Jaks';
 // ===== إحصائيات حاسب نفسك =====
 function getAnalyticsId(key){
   try{
