@@ -1307,7 +1307,7 @@ function renderAll(){
 }
 
 const SUPABASE_URL='https://ortwtoqnpkllpvszjsyv.supabase.co',SUPABASE_KEY='sb_publishable_3wuzMgErod9FR7tiqS2fOw_cEzLRcdy';let sb=null;try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){console.warn(e)}
-const VAPID_PUBLIC_KEY = iBHRUjRa0K15wiG8VahDr3lvAe1P_aEhBjeiT-Ij4bR4KEZkml2U6Eo0qmPOgaKrcnRtArcZTJNcSSM2hGEnueZI",
+const VAPID_PUBLIC_KEY = 'BG8uqL33SbGi0iaUSpIp9Yg89oCYMZU2h48oeg8n5U4DhCZRUcFVqcVsGZmAQjzbhQRSC-yrvXS0mbSF6k1Jaks';
 // ===== إحصائيات حاسب نفسك =====
 function getAnalyticsId(key){
   try{
@@ -2210,25 +2210,18 @@ async function enablePushNotifications() {
     await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
     const registration = await navigator.serviceWorker.ready;
     let subscription = await registration.pushManager.getSubscription();
-
-if (subscription) {
-  const oldEndpoint = subscription.endpoint;
-
-  const { error: disableError } = await sb
-    .from('push_subscriptions')
-    .update({ enabled: false, updated_at: new Date().toISOString() })
-    .eq('endpoint', oldEndpoint)
-    .eq('user_id', user.id);
-
-  if (disableError) throw disableError;
-
-  await subscription.unsubscribe();
-}
-
-subscription = await registration.pushManager.subscribe({
-  userVisibleOnly: true,
-  applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-});
+    if (subscription) {
+      const oldEndpoint = subscription.endpoint;
+      const { error: disableError } = await sb.from('push_subscriptions')
+        .update({ enabled:false, updated_at:new Date().toISOString() })
+        .eq('endpoint', oldEndpoint);
+      if (disableError) throw disableError;
+      await subscription.unsubscribe();
+    }
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
     const data = subscription.toJSON();
     const { error } = await sb.from('push_subscriptions').upsert({
       user_id:user.id,endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,enabled:true,updated_at:new Date().toISOString()
