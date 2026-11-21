@@ -2210,9 +2210,25 @@ async function enablePushNotifications() {
     await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
     const registration = await navigator.serviceWorker.ready;
     let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
-    }
+
+if (subscription) {
+  const oldEndpoint = subscription.endpoint;
+
+  const { error: disableError } = await sb
+    .from('push_subscriptions')
+    .update({ enabled: false, updated_at: new Date().toISOString() })
+    .eq('endpoint', oldEndpoint)
+    .eq('user_id', user.id);
+
+  if (disableError) throw disableError;
+
+  await subscription.unsubscribe();
+}
+
+subscription = await registration.pushManager.subscribe({
+  userVisibleOnly: true,
+  applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+});
     const data = subscription.toJSON();
     const { error } = await sb.from('push_subscriptions').upsert({
       user_id:user.id,endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,enabled:true,updated_at:new Date().toISOString()
