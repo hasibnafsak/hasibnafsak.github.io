@@ -713,25 +713,25 @@ function renderExpandedTracker(){
   });
   root.innerHTML=html;updateExpandedSummary();
 }
-function toggleExpandedRawatib(id){if(!requireExpandedLogin())return;const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function toggleExpandedRawatib(id){if(!requireExpandedLogin())return;const record=expandedDay();if(!record.rawatib||typeof record.rawatib!=='object')record.rawatib={};record.rawatib[id]=!record.rawatib[id];if(!record.rawatib[id])delete record.rawatib[id];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
 function toggleExpandedPrayer(key,prayer){
   if(!requireExpandedLogin())return;
   const record=expandedDay();if(!record[key]||typeof record[key]!=='object')record[key]={};record[key][prayer]=!record[key][prayer];
-  if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently();
+  if(!record[key][prayer])delete record[key][prayer];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently();
 }
-function toggleExpandedItem(key,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
-function changeExpandedCount(key,delta,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function toggleExpandedItem(key,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=!record[key];persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
+function changeExpandedCount(key,delta,seasonal=false){if(!requireExpandedLogin())return;const record=seasonal?expandedSeasonal():expandedDay();record[key]=Math.max(0,(Number(record[key])||0)+delta);persist();renderExpandedTracker();if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
 function updateExpandedSummary(){
   const record={...expandedDay(),...expandedSeasonal()},criteria=currentExpandedCriteria();let total=0,earned=0,count=0,done=0;
   criteria.forEach(g=>g.items.forEach(([key,label,max])=>{count++;let value=0;if(['takbeer','afterPrayer'].includes(key)){const picked=expandedValue(record,key);value=Object.keys(picked).filter(k=>picked[k]).length*(max/5)}else if(key==='rawatib'){const picked=expandedValue(record,key);const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};value=Object.keys(picked).reduce((sum,k)=>sum+(picked[k]?(weights[k]||0):0),0)}else if(key==='ramadanKhatmah'){value=(Number(record[key])||0)>0?max:0}else if(key==='ramadanExtraKhatmah'){value=(Number(record[key])||0)*max}else{value=record[key]?max:0}earned+=value;total+=max;if(value>0)done++;}));
   if($('expandedDoneCount'))$('expandedDoneCount').textContent=earned+' من '+total+' درجة';
   if($('expandedScore'))$('expandedScore').textContent=done+' من '+count+' معيارًا تم إنجازه';
 }
-function saveExpandedToday(){if(!requireExpandedLogin())return;persist();$('expandedSaveStatus').textContent='تم حفظ إنجازات المسار الموسّع لهذا اليوم.';if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();syncUserDataSilently()}
+function saveExpandedToday(){if(!requireExpandedLogin())return;persist();$('expandedSaveStatus').textContent='تم حفظ إنجازات المسار الموسّع لهذا اليوم.';if(typeof renderStats==='function')renderStats();if(typeof renderDashboard==='function')renderDashboard();if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently()}
 function resetExpandedToday(){
   if(!confirm('هل تريد مسح سجل اليوم للمجموعة المحددة فقط؟'))return;
   const course=selectedExpandedCourse();if(db.expandedDays?.[todayKey])delete db.expandedDays[todayKey][course];
-  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم لهذه المجموعة فقط.';
+  persist();renderExpandedTracker();if($('expandedSaveStatus'))$('expandedSaveStatus').textContent='تمت إعادة ضبط سجل اليوم لهذه المجموعة فقط.';if(localStorage.getItem('hasibLeaderboardJoined')==='yes')syncLeaderboard();syncUserDataSilently();
 }
 
 function persist(){try{localStorage.setItem('hasibNafsakData',JSON.stringify(db))}catch(e){console.error(e)}}
@@ -1284,7 +1284,28 @@ function setQuranGoal(v){if(v==='custom'){$('quranGoalCustom').style.display='bl
 function setTasbeehMode(mode){if(mode==='manual')renderRealTasbeeh();$('digitalTasbeeh').style.display=mode==='digital'?'block':'none';$('manualTasbeeh').style.display=mode==='manual'?'block':'none';$('digitalMode').classList.toggle('active',mode==='digital');$('digitalMode').classList.toggle('secondary',mode!=='digital');$('manualMode').classList.toggle('active',mode==='manual');$('manualMode').classList.toggle('secondary',mode!=='manual')}
 function createFriendInvite(){const invite='HN-'+Math.random().toString(36).slice(2,8).toUpperCase();$('friendInvite').textContent='رمز الدعوة: '+invite+' — شاركه مع صديقك.';if(navigator.clipboard?.writeText)navigator.clipboard.writeText('انضم لتحدي سؤال اليوم في حاسب نفسك. رمز الدعوة: '+invite).catch(()=>{});}
 function expandedRecordForDate(key){const raw=db.expandedDays?.[key]||{};return raw.fiqh1||raw.fiqh2?{...(raw.fiqh2||{}),...(raw.fiqh1||{})}:raw}
-function expandedPointsForRecord(record){if(!record)return 0;let score=0;for(const k of ['takbeer','afterPrayer']){const chosen=record[k]&&typeof record[k]==='object'?record[k]:{};const n=Object.values(chosen).filter(Boolean).length;score+=n*(k==='fardMosque'?2:1)}const raw=record.rawatib&&typeof record.rawatib==='object'?record.rawatib:{};const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};score+=Object.keys(weights).reduce((a,k)=>a+(raw[k]?weights[k]:0),0);if(record.duha)score+=2;if(record.shafWitr)score+=4;return score}
+function expandedPointsForRecord(record){
+  if(!record)return 0;
+  let score=0;
+  const criteria=expandedCriteriaByCourse[selectedExpandedCourse()]||[];
+  const weights={fajr:2,beforeDhuhr:4,afterDhuhr:2,afterMaghrib:2,afterIsha:2};
+  criteria.forEach(group=>group.items.forEach(([key,label,max])=>{
+    if(key==='takbeer'||key==='afterPrayer'){
+      const chosen=record[key]&&typeof record[key]==='object'?record[key]:{};
+      score+=Object.values(chosen).filter(Boolean).length*(max/5);
+    }else if(key==='rawatib'){
+      const raw=record.rawatib&&typeof record.rawatib==='object'?record.rawatib:{};
+      score+=Object.keys(weights).reduce((sum,k)=>sum+(raw[k]?weights[k]:0),0);
+    }else if(key==='ramadanKhatmah'){
+      score+=(Number(record[key])||0)>0?max:0;
+    }else if(key==='ramadanExtraKhatmah'){
+      score+=(Number(record[key])||0)*max;
+    }else{
+      score+=record[key]?max:0;
+    }
+  }));
+  return score;
+}
 function expandedPointsForDate(key){return expandedPointsForRecord(expandedRecordForDate(key))}
 function expandedTotalPoints(){return Object.keys(db.expandedDays||{}).reduce((sum,key)=>sum+expandedPointsForDate(key),0)}
 function renderExpandedHistory(){const el=$('expandedHistory');if(!el)return;const keys=Object.keys(db.expandedDays||{}).filter(k=>expandedPointsForDate(k)>0).sort().reverse().slice(0,7);el.innerHTML=keys.length?keys.map(k=>'<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e8e1d2;padding:7px 0"><span>'+new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'short'}).format(new Date(k+'T12:00:00'))+'</span><strong>'+expandedPointsForDate(k)+' نقطة</strong></div>').join(''):'ستظهر إنجازات الأيام هنا بعد تسجيلها.'}
@@ -1352,6 +1373,7 @@ async function renderLeaderboard(){
   const signedUser=await currentUser();
   if(!signedUser){$('leaderboardStatus').textContent='يمكنك مشاهدة ترتيب المشاركين دون تسجيل الدخول. سجّل الدخول فقط إذا رغبت بالاشتراك وإضافة نقاطك.';const join=$('joinLeaderboardBtn');if(join)join.textContent='سجّل الدخول للاشتراك';}
   if(!sb){box.textContent='تعذر الاتصال بالخدمة.';return}
+  if(signedUser&&localStorage.getItem('hasibLeaderboardJoined')==='yes')await syncLeaderboard();
   box.textContent='جارٍ تحميل القائمة...';
   try{
     const {data,error}=await sb.from('leaderboard').select('user_id,nickname,total_points').order('total_points',{ascending:false}).limit(20);
@@ -1367,14 +1389,20 @@ async function joinLeaderboard(){
   const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
   if(error){$('leaderboardStatus').textContent='تعذر تفعيل المشاركة بسبب صلاحيات جدول الصدارة في Supabase. شغّل ملف إعداد قاعدة البيانات المرفق مرة واحدة. ('+error.message+')';return}
   localStorage.setItem('hasibLeaderboardJoined','yes');
+  await syncLeaderboard();
   $('leaderboardStatus').textContent='تم تفعيل مشاركتك! سيتم تحديث نقاطك مع أنشطتك القادمة.';
   renderLeaderboard();
 }
-async function syncLeaderboard(){
-  const u=await currentUser();if(!u)return;
-  const nickname=$('nickname')?.value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
-  const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:totalPoints(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error)console.warn('Leaderboard sync failed:',error.message);
+let leaderboardSyncQueue=Promise.resolve();
+function syncLeaderboard(){
+  leaderboardSyncQueue=leaderboardSyncQueue.then(async()=>{
+    const u=await currentUser();if(!u||!sb)return;
+    const nickname=$('nickname')?.value.trim()||u.user_metadata?.nickname||u.email?.split('@')[0]||'مشارك';
+    const points=Math.max(0,Math.round(Number(totalPoints())||0));
+    const {error}=await sb.from('leaderboard').upsert({user_id:u.id,nickname,total_points:points,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(error)console.warn('Leaderboard sync failed:',error.message);
+  }).catch(error=>console.warn('Leaderboard sync failed:',error));
+  return leaderboardSyncQueue;
 }
 async function currentUser(){if(!sb)return null;const {data}=await sb.auth.getUser();return data.user}
 function msg(t){$('authMessage').textContent=t}
@@ -2229,22 +2257,7 @@ async function enablePushNotifications() {
     localStorage.setItem('hasibPushEnabled','true');
     updateReminderBell(true);
     btn.textContent = 'التذكيرات مفعّلة ✓';
-
-    // إظهار إشعار نظام الهاتف بعد نجاح حفظ الاشتراك في Supabase فقط.
-    // فشل عرض إشعار الترحيب لا يلغي تفعيل الاشتراك نفسه.
-    try {
-      await registration.showNotification('تم تفعيل الإشعارات بنجاح 🎉', {
-        body: 'أبشر، بتوصلك تذكيراتك من حاسب نفسك بإذن الله.',
-        tag: 'hasib-push-enabled',
-        dir: 'rtl',
-        lang: 'ar',
-        renotify: false
-      });
-    } catch (notificationError) {
-      console.warn('Welcome notification could not be displayed:', notificationError);
-    }
-
-    status.textContent = 'تم تفعيل الإشعارات بنجاح 🎉';
+    status.textContent = 'تم الاشتراك في الإشعارات بنجاح. مواعيد الإرسال اليومية تحتاج إكمال ربط خدمة الجدولة.';
   } catch (error) {
     status.textContent = error.message || 'تعذر تفعيل التذكيرات.';
     btn.disabled = false;
