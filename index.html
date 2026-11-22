@@ -2257,7 +2257,22 @@ async function enablePushNotifications() {
     localStorage.setItem('hasibPushEnabled','true');
     updateReminderBell(true);
     btn.textContent = 'التذكيرات مفعّلة ✓';
-    status.textContent = 'تم الاشتراك في الإشعارات بنجاح. مواعيد الإرسال اليومية تحتاج إكمال ربط خدمة الجدولة.';
+    
+    // إظهار إشعار نظام الهاتف بعد نجاح حفظ الاشتراك في Supabase فقط.
+    // فشل عرض إشعار الترحيب لا يلغي تفعيل الاشتراك نفسه.
+    try {
+      await registration.showNotification('تم تفعيل الإشعارات بنجاح 🎉', {
+        body: 'أبشر، بتوصلك تذكيراتك من حاسب نفسك بإذن الله.',
+        tag: 'hasib-push-enabled',
+        dir: 'rtl',
+        lang: 'ar',
+        renotify: false
+      });
+    } catch (notificationError) {
+      console.warn('Welcome notification could not be displayed:', notificationError);
+    }
+
+    status.textContent = 'تم تفعيل الإشعارات بنجاح 🎉';
   } catch (error) {
     status.textContent = error.message || 'تعذر تفعيل التذكيرات.';
     btn.disabled = false;
