@@ -1,9 +1,10 @@
-const CACHE_NAME = 'hasib-nafsak-pwa-v4';
+const CACHE_NAME = 'hasib-nafsak-pwa-v6';
 const CORE_FILES = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './adhan.m4a'
 ];
 const CDN_FILES = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
@@ -55,7 +56,13 @@ self.addEventListener('push', event => {
     body: data.body || 'تذكير بذكر الله',
     icon: './icon.svg', badge: './icon.svg',
     data: { url: data.url || './' },
-    dir: 'rtl', lang: 'ar'
+    dir: 'rtl', lang: 'ar',
+    // Best-effort: let iOS/browser use its normal notification alert behavior.
+    // The Web Notifications API does not expose a custom audio-file option.
+    silent: false,
+    vibrate: [250, 150, 250],
+    requireInteraction: true,
+    tag: data.tag || 'hasib-nafsak-reminder'
   }));
 });
 

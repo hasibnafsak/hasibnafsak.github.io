@@ -258,8 +258,10 @@ header{position:relative;padding-top:76px!important}
     <strong style="display:block;margin-bottom:6px">🔊 تجربة صوت الأذان</strong>
     <p class="muted" style="font-size:12px;margin:0 0 10px">اضغط لتشغيل المقطع وسماع الصوت داخل التطبيق.</p>
     <button type="button" id="testAdhanAudioBtn" onclick="testAdhanAudio()" style="width:100%">▶️ جرّب صوت الأذان</button>
-    <audio id="adhanAudio" preload="metadata" src="./adhan.m4a"></audio>
+    <button type="button" id="autoAdhanBtn" class="secondary" onclick="toggleAutoAdhan()" style="width:100%;margin-top:8px">تفعيل الأذان التلقائي أثناء فتح التطبيق</button>
+    <audio id="adhanAudio" preload="auto" playsinline src="./adhan.m4a"></audio>
     <div id="adhanAudioStatus" class="muted" role="status" aria-live="polite" style="font-size:12px;margin-top:8px"></div>
+    <p class="muted" style="font-size:11px;margin:6px 0 0">يعمل التشغيل التلقائي عندما تكون صفحة التطبيق نشطة؛ لا يمكن ضمان تشغيل الصوت المخصص من الخلفية أو عند قفل الآيفون.</p>
   </div>
   <p class="muted" style="font-size:11px;margin:10px 0 0">المصدر: AlAdhan API — طريقة أم القرى (مكة). قد تختلف بعض الدقائق عن تقويم المسجد المحلي؛ اعتمد تقويم الجهة الرسمية أو مسجدك عند الاختلاف.</p>
 </div>
@@ -895,6 +897,58 @@ async function testAdhanAudio(){
     if(btn)btn.disabled=false;
   }
 }
+
+const AUTO_ADHAN_KEY='hasibAutoAdhanEnabled';
+const LAST_AUTO_ADHAN_KEY='hasibLastAutoAdhan';
+function autoAdhanEnabled(){
+  try{return localStorage.getItem(AUTO_ADHAN_KEY)==='true'}catch(e){return false}
+}
+function updateAutoAdhanButton(){
+  const btn=$('autoAdhanBtn');
+  if(!btn)return;
+  const enabled=autoAdhanEnabled();
+  btn.textContent=enabled?'الأذان التلقائي مفعّل ✓':'تفعيل الأذان التلقائي أثناء فتح التطبيق';
+  btn.classList.toggle('gold',enabled);
+  btn.classList.toggle('secondary',!enabled);
+}
+function toggleAutoAdhan(){
+  const enabled=!autoAdhanEnabled();
+  try{localStorage.setItem(AUTO_ADHAN_KEY,enabled?'true':'false')}catch(e){}
+  updateAutoAdhanButton();
+  const status=$('adhanAudioStatus');
+  if(status)status.textContent=enabled
+    ?'تم تفعيل محاولة تشغيل الأذان تلقائيًا عند دخول وقت الصلاة أثناء بقاء التطبيق مفتوحًا.'
+    :'تم إيقاف التشغيل التلقائي. يمكنك تشغيله مجددًا من الزر.';
+}
+function checkAutoAdhan(){
+  if(!autoAdhanEnabled()||document.visibilityState!=='visible'||!prayerTimesData?.timings)return;
+  const now=Date.now(),parts=saudiDateParts(),city=prayerTimesData.city||getSavedPrayerCity();
+  for(const [key,label] of salahKeys){
+    const mins=timeMinutes(prayerTimesData.timings[key]);
+    if(mins===null)continue;
+    const at=saudiDateTime(parts,mins).getTime();
+    if(now<at||now>=at+120000)continue;
+    const dateKey=parts.year+'-'+String(parts.month).padStart(2,'0')+'-'+String(parts.day).padStart(2,'0');
+    const marker=[dateKey,city,key].join('|');
+    let last='';
+    try{last=localStorage.getItem(LAST_AUTO_ADHAN_KEY)||''}catch(e){}
+    if(last===marker)return;
+    // سجّل المحاولة أولًا لمنع تكرار الصوت كل ثانية إذا رفض المتصفح التشغيل.
+    try{localStorage.setItem(LAST_AUTO_ADHAN_KEY,marker)}catch(e){}
+    const audio=$('adhanAudio'),status=$('adhanAudioStatus');
+    if(!audio)return;
+    audio.pause();
+    audio.currentTime=0;
+    audio.play().then(()=>{
+      if(status)status.textContent='بدأ الأذان تلقائيًا لصلاة '+label+'.';
+    }).catch(error=>{
+      console.warn('Automatic adhan playback was blocked:',error);
+      if(status)status.textContent='وصل وقت الصلاة، لكن الآيفون منع التشغيل التلقائي. افتح التطبيق واضغط تجربة الصوت.';
+    });
+    return;
+  }
+}
+updateAutoAdhanButton();
 
 function renderPrayerTimes(){
   if(!prayerTimesData?.timings)return;
@@ -2165,7 +2219,7 @@ function importData(e){
 window.__hasibSignedIn=false;setAuthMode('login');renderPathChoice();renderExpandedTracker();initWelcome();renderAll();renderQuiz();requestAnimationFrame(()=>renderQuiz());setTimeout(()=>renderQuiz(),250);updateAccount();loadSupportComments();setLanguage(localStorage.getItem('hasibLanguage')||'ar');new MutationObserver(()=>{if(localStorage.getItem('hasibLanguage')==='en')applyCurrentLanguage()}).observe(document.body,{childList:true,subtree:true});trackVisit();
 // تهيئة مواقيت الصلاة فور فتح الصفحة: الدمام افتراضيًا، مع عرض فوري لا ينتظر اختيار المدينة أو الشبكة.
 function bootPrayerWidget(){try{const initialPrayerCity=getSavedPrayerCity();if($('homePrayerCitySelect'))$('homePrayerCitySelect').value=initialPrayerCity;if($('prayerCity'))$('prayerCity').value=initialPrayerCity;const parts=saudiDateParts();const key='hasibPrayerTimes:'+initialPrayerCity+':'+apiDate(parts);let cached=null;try{cached=JSON.parse(localStorage.getItem(key)||'null');if(!cached?.timings||cached?.calculatedLocally)cached=JSON.parse(localStorage.getItem('hasibPrayerTimesLatest:'+initialPrayerCity)||'null');if(cached?.calculatedLocally)cached=null}catch(e){}prayerTimesData=cached?.timings?{...cached,city:initialPrayerCity,date:apiDate(parts)}:localPrayerTimesForCity(initialPrayerCity,parts);renderPrayerTimes();loadPrayerTimes(false)}catch(e){console.error('Prayer widget initialization failed:',e)}}
-bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
+bootPrayerWidget();if(prayerCountdownTimer)clearInterval(prayerCountdownTimer);updateNextPrayer();checkAutoAdhan();let prayerDateCheck=todayKey;prayerCountdownTimer=setInterval(()=>{refreshSaudiDay();updateNextPrayer();checkAutoAdhan();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}},1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshSaudiDay();updateNextPrayer();checkAutoAdhan();const p=saudiDateParts();const k=p.year+'-'+String(p.month).padStart(2,'0')+'-'+String(p.day).padStart(2,'0');if(k!==prayerDateCheck){prayerDateCheck=k;bootPrayerWidget()}else{loadPrayerTimes(false)}}});window.addEventListener('pageshow',()=>{bootPrayerWidget();updateNextPrayer()});
 if(sb){
   sb.auth.onAuthStateChange((event,session)=>{
     // لا نستدعي getUser أو أي عملية Auth متزامنة داخل callback الخاص بـ Supabase.
