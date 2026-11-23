@@ -255,9 +255,6 @@ header{position:relative;padding-top:76px!important}
     <div class="tile">العصر<strong>—</strong></div><div class="tile">المغرب<strong>—</strong></div><div class="tile">العشاء<strong>—</strong></div>
   </div>
   <div class="tile" id="adhanAudioPanel" style="margin-top:12px;text-align:center">
-    <strong style="display:block;margin-bottom:6px">🔊 تجربة صوت الأذان</strong>
-    <p class="muted" style="font-size:12px;margin:0 0 10px">اضغط لتشغيل المقطع وسماع الصوت داخل التطبيق.</p>
-    <button type="button" id="testAdhanAudioBtn" onclick="testAdhanAudio()" style="width:100%">▶️ جرّب صوت الأذان</button>
     <button type="button" id="autoAdhanBtn" class="secondary" onclick="toggleAutoAdhan()" style="width:100%;margin-top:8px">تفعيل الأذان التلقائي أثناء فتح التطبيق</button>
     <audio id="adhanAudio" preload="auto" playsinline src="./adhan.m4a"></audio>
     <div id="adhanAudioStatus" class="muted" role="status" aria-live="polite" style="font-size:12px;margin-top:8px"></div>
@@ -880,23 +877,7 @@ async function loadPrayerTimes(force=false){
     if(homeSelect)homeSelect.value=saved;
   }
 }
-async function testAdhanAudio(){
-  const audio=$('adhanAudio'),status=$('adhanAudioStatus'),btn=$('testAdhanAudioBtn');
-  if(!audio){if(status)status.textContent='تعذر العثور على ملف الصوت.';return;}
-  try{
-    audio.pause();
-    audio.currentTime=0;
-    if(status)status.textContent='جارٍ تشغيل صوت الأذان...';
-    if(btn)btn.disabled=true;
-    await audio.play();
-    audio.onended=()=>{if(status)status.textContent='انتهى تشغيل المقطع.';if(btn)btn.disabled=false;};
-    audio.onerror=()=>{if(status)status.textContent='تعذر تحميل الصوت. تأكد من رفع ملف adhan.m4a بجانب index.html.';if(btn)btn.disabled=false;};
-  }catch(error){
-    console.error('Adhan audio playback failed:',error);
-    if(status)status.textContent='ما اشتغل الصوت. تأكد من رفع ملف adhan.m4a ثم جرّب مرة ثانية.';
-    if(btn)btn.disabled=false;
-  }
-}
+
 
 const AUTO_ADHAN_KEY='hasibAutoAdhanEnabled';
 const LAST_AUTO_ADHAN_KEY='hasibLastAutoAdhan';
@@ -2272,6 +2253,25 @@ function updateReminderBell(active){
 }
 updateReminderBell(localStorage.getItem('hasibPushEnabled')==='true');
 
+
+function showPushEnabledSuccess(registration) {
+  const status = $('pushStatus');
+  if (status) {
+    status.textContent = 'تم تفعيل الإشعارات لديك بنجاح 🎉 وستصلك التذكيرات حسب إعداداتك.';
+    status.style.color = 'var(--success, #16803c)';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+  }
+  if (registration && Notification.permission === 'granted' &&
+      typeof registration.showNotification === 'function') {
+    registration.showNotification('تم تفعيل الإشعارات لديك 🎉', {
+      body: 'تم ربط جهازك بنجاح. ستصلك التذكيرات عند مواعيدها.',
+      tag: 'hasib-push-enabled',
+      dir: 'rtl', lang: 'ar', renotify: false
+    }).catch(err => console.warn('Welcome notification unavailable:', err));
+  }
+}
+
 async function enablePushNotifications() {
   const btn = $('enablePushBtn');
   const status = $('pushStatus');
@@ -2288,18 +2288,13 @@ async function enablePushNotifications() {
     await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
     const registration = await navigator.serviceWorker.ready;
     let subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      const oldEndpoint = subscription.endpoint;
-      const { error: disableError } = await sb.from('push_subscriptions')
-        .update({ enabled:false, updated_at:new Date().toISOString() })
-        .eq('endpoint', oldEndpoint);
-      if (disableError) throw disableError;
-      await subscription.unsubscribe();
+    // Reuse an existing subscription; don't delete it before the replacement is ready.
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
     }
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
     const data = subscription.toJSON();
     const { error } = await sb.from('push_subscriptions').upsert({
       user_id:user.id,endpoint:data.endpoint,p256dh:data.keys.p256dh,auth:data.keys.auth,enabled:true,updated_at:new Date().toISOString()
@@ -2308,7 +2303,7 @@ async function enablePushNotifications() {
     localStorage.setItem('hasibPushEnabled','true');
     updateReminderBell(true);
     btn.textContent = 'التذكيرات مفعّلة ✓';
-    status.textContent = 'تم الاشتراك في الإشعارات بنجاح. مواعيد الإرسال اليومية تحتاج إكمال ربط خدمة الجدولة.';
+    showPushEnabledSuccess(registration);
   } catch (error) {
     status.textContent = error.message || 'تعذر تفعيل التذكيرات.';
     btn.disabled = false;
